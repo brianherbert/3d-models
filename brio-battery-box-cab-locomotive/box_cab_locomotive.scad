@@ -386,9 +386,10 @@ module hatch() {
             translate([btn_x, 0, top_z - 5]) cylinder(d = pbs_hole, h = 20);
             translate([btn_x, 0, top_z - 3]) cylinder(d = pbs_nut + 1.5, h = 3);
         }
-        // countersunk M3 screw hole over the rear wall
+        // M3 screw hole over the rear wall, counterbored for a socket cap head
+        // (5.5 mm head sits ~1.8 mm proud); a flat head also fits
         translate([screw_x, 0, top_z - 5]) cylinder(d = 3.4, h = 20);
-        translate([screw_x, 0, top_z + hatch_t - 1.6]) cylinder(d1 = 3.4, d2 = 6.6, h = 1.61);
+        translate([screw_x, 0, top_z + hatch_t - 1.2]) cylinder(d = 6.2, h = 1.21);
         // engraved roof panel lines
         for (x = [tray_x0 + 6, tray_x1 - 10]) translate([x, -out_w/2 + 3, top_z + hatch_t - 0.5]) cube([0.8, out_w - 6, 1]);
     }
