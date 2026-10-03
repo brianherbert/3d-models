@@ -21,7 +21,7 @@ slot wall when the mouth is shut.*
 
 ## What it is
 
-- **Size:** __SIZE__.
+- **Size:** 164 mm tall, on an 88 × 158 mm oval plinth.
 - **Sculpt:** an original parametric sculpt, not a downloaded model. It has a
   realistic, calm head carried low on an arched neck, with:
   - cupped, leaf-shaped ears;
@@ -30,7 +30,7 @@ slot wall when the mouth is shut.*
   - comma-shaped nostrils;
   - separate upper and lower lips and a chin;
   - a forelock and a mane of draped locks falling to the right.
-- **Compartment:** about __CAV__ cm³. The jaw is a hollow scoop with 2.2 mm
+- **Compartment:** about 16 cm³. The jaw is a hollow scoop with 2.2 mm
   walls, and it lines up with a chamber in the face above it. It holds a ring,
   a few coins, a USB stick, a folded note or a key. The mouth opens 20°,
   which leaves a gap of about 25 mm at the lips.
@@ -76,7 +76,11 @@ slot wall when the mouth is shut.*
 
 ### Estimated print time
 
-__TIME__
+Sliced with an A1-like PrusaSlicer profile: **about 6 h 50 min and 200 g of PLA**,
+plus the A1's start-up routine. That used Bambu PLA Basic speeds, 0.2 mm layers,
+3 walls and 15 % gyroid infill. Bambu Studio's own estimate is usually a
+little shorter. Most of the time goes into the solid neck and plinth, so 10 %
+infill saves about half an hour with no visible difference.
 
 ## After printing
 

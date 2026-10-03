@@ -315,7 +315,7 @@ def ear_sdf(Ph, s, inner=False):
     w = q @ e; f = q @ o
     if inner:
         ai, bi = np.maximum(a - EAR_WALL, 0.05), np.maximum(b - EAR_WALL, 0.05)
-        shift = EAR_WALL + bi - b + 0.25 * b
+        shift = 0.5 * b + EAR_WALL                  # inner front pokes 0.5 b past the outer: the cup is open
         r = np.sqrt((w / ai) ** 2 + ((f - shift) / bi) ** 2)
         return np.maximum.reduce([(r - 1.0) * np.minimum(ai, bi), 0.14 * EAR_LEN - tl, tl - 0.88 * EAR_LEN])
     r = np.sqrt((w / a) ** 2 + (f / b) ** 2)

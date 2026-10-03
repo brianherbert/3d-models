@@ -236,6 +236,13 @@ def mesh_of(F, xs, ys, zs, min_vol=5.0):
     m.fix_normals()
     return m
 
+def simplify(m, tol=0.02):
+    import manifold3d as mf
+    X = mf.Manifold(mf.Mesh(np.asarray(m.vertices, np.float32), np.asarray(m.faces, np.uint32)))
+    Y = X.simplify(tol).to_mesh()
+    out = trimesh.Trimesh(np.asarray(Y.vert_properties)[:, :3], np.asarray(Y.tri_verts))
+    return out if out.is_watertight else m
+
 def lowest_point(F, xs, ys, zs, keep):
     """lowest solid sample (world) among those where keep(P) holds"""
     idx = np.argwhere(F < 0)
@@ -265,6 +272,10 @@ def build(res):
     Bf = narrowband(body_fn, xs, ys, zs)
     body = mesh_of(Bf, xs, ys, zs)
     print(f"body: watertight={body.is_watertight}  {body.volume / 1000:.1f} cm3  ({time.time() - t0:.0f} s)")
+    # merge coplanar-ish triangles (0.02 mm tolerance, far below print resolution)
+    # so the STLs stay small enough to share
+    body, jaw = simplify(body), simplify(jaw)
+    print(f"simplified: body {len(body.faces)} faces watertight={body.is_watertight}, jaw {len(jaw.faces)} faces watertight={jaw.is_watertight}")
     body.export("stl/preview_body.stl"); jaw.export("stl/preview_jaw.stl")
     both = trimesh.util.concatenate([body, jaw])
     both.export("stl/horse_head.stl")
