@@ -37,9 +37,9 @@
 //    "body"         main body / chassis (exported upside down - print as is)
 //    "hatch"        roof hatch          (exported upside down - print as is)
 //    "button"       roof push button (inline switch variant only)
-//    "wheel"        plain wheel - print 4 (or 2 + 2 drive wheels)
+//    "wheel"        plain front wheel - print 2
 //    "wheel_drive"  drive wheel with a groove for a TPU tyre - print 2 (optional)
-//    "wheel_drive_oring"  drive wheel grooved for a 22 x 2.5 mm O-ring - print 2 (optional)
+//    "wheel_drive_oring"  drive wheel grooved for a 22 x 2.5 mm O-ring - print 2 (default)
 //    "tyre"         TPU tyre ring for the drive wheel - print 2 (optional)
 //    "axle"         front axle (lies on its flat)
 //    "shim"         2 mm spacer under the click switch, only if needed

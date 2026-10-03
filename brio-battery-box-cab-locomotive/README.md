@@ -37,7 +37,7 @@ driving the rear wheels. Cables coil in the bunker behind the drive wheels.*
 | 1 | M3 × 10 mm screw (countersunk or button head) | Any hardware store / Bambu Maker's Supply | Holds the roof hatch closed. It self-taps into the plastic. |
 | 2 | AAA batteries | — | Alkaline (fastest, ~1.5–2 h running) or NiMH (a little slower). |
 | — | PLA filament, ~40 g | Bambu Lab | Body, hatch, wheels, button. Three colours look great. |
-| 2 | *Optional:* nitrile O-rings, 22 mm ID × 2.5 mm section | Hardware store / assortment box, cents each | Traction tyres for the drive wheels; use `wheel_drive_oring.stl`. |
+| 2 | *Optional:* nitrile O-rings, 22 mm ID × 2.5 mm section | Hardware store / assortment box, cents each | Traction tyres; the drive wheels are grooved for them, so they can go on any time. |
 | — | *Optional:* TPU 95A HF filament, ~1 g | Bambu Lab | Printed tyres instead of O-rings, if you have TPU anyway. |
 
 ### Cost and cheaper alternatives
@@ -87,10 +87,9 @@ you'd order from regardless.
 | `hatch.stl` | 1 | As exported (upside down) | |
 | `stl/12mm-switch-variant/` | — | — | Body and hatch for a 12 mm PBS-11A button instead of the 16 mm one |
 | `stl/inline-switch-variant/` | — | — | Body, hatch, button and shim for the no-solder Adafruit #3064 variant |
-| `wheel.stl` | 4 (or 2) | As exported | Plain wheel |
-| `wheel_drive_oring.stl` | 0 or 2 | As exported | Drive wheel grooved for a **22 × 2.5 mm nitrile O-ring** (hardware-store assortment). The cheap traction option. |
-| `wheel_drive.stl` | 0 or 2 | As exported | Drive wheel grooved for a printed TPU tyre |
-| `tyre.stl` | 0 or 2 | As exported | **TPU**, fits `wheel_drive` |
+| `wheel.stl` | 2 | As exported | Front wheels |
+| `wheel_drive_oring.stl` | 2 | As exported | Drive wheels, grooved for a **22 × 2.5 mm nitrile O-ring**. Runs fine bare on its tread lands; add the O-rings later if you want more grip. |
+| `wheel_drive.stl` + `tyre.stl` | optional | As exported | Drive wheel and printed **TPU** tyre, if you have TPU instead of O-rings |
 
 Wheels are 26 mm (Brio's are 22–24 mm) so the motor body clears the track by
 4 mm; the lowest printed point is 2.6 mm above the rails.
@@ -116,7 +115,7 @@ accelerations, settings as above). Add the A1's ~5–6 min start routine per pla
 |---|---|---|
 | Body (20 % infill, brim) | ~47 min | 22 g |
 | Hatch | ~11 min | 6 g |
-| 4 wheels + axle (100 % infill) | ~22 min | 9 g |
+| 2 front wheels + 2 drive wheels + axle (100 % infill) | ~22 min | 9 g |
 | 2 TPU tyres (optional) | ~3 min | 1 g |
 | **Total** | **~1 h 25 min** (~1.5 h with start-up and the magnet pause) | **~40 g** |
 
@@ -158,18 +157,16 @@ OpenSCAD preview is drawn from the same numbers.
 
 ## Assembly (about 10 minutes, a screwdriver is the only tool)
 
-1. **Tyres (optional):** stretch an O-ring into the groove of each
-   `wheel_drive_oring` wheel (or a TPU tyre onto `wheel_drive`). It should sit
-   about 0.7 mm proud of the tread.
+1. **Tyres (optional, can be done later):** stretch an O-ring into the groove
+   of each drive wheel. It should sit about 0.7 mm proud of the tread.
 2. **Motor:** with the body the right way up and the battery bay empty, hold
    the motor with its shaft across the body and the can pointing toward the
    **front** (button end). Lower it through the opening in the battery floor:
    the shaft ends drop down the two narrow slots into the round bearings, the
    can nose lands in the saddle, and the gearbox end sits just in front of the
    cross bar. The solder tabs and lead end up near the front of the opening.
-3. **Drive wheels:** press a wheel onto each end of the motor shaft (the
-   grooved ones if you printed tyres), matching the flat in the bore to the flat
-   on the shaft. Squeeze both wheels on together between your thumbs so the
+3. **Drive wheels:** press a grooved wheel onto each end of the motor shaft,
+   matching the flat in the bore to the flat on the shaft. Squeeze both wheels on together between your thumbs so the
    shaft is in compression and nothing is pushed through the gearbox. Stop when
    each wheel's spacer ring is **a hair (≈0.3 mm, a sheet of paper) from the
    frame**: the wheels must spin without rubbing. The 7 mm hubs now fill the
