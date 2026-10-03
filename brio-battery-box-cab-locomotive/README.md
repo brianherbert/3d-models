@@ -176,15 +176,17 @@ OpenSCAD preview is drawn from the same numbers.
 5. **Switch:** push the 16 mm button through the hole in the roof hatch from
    the top and tighten its nut underneath. Push a #1152 quick-connect lead
    onto the switch's **NO** tab and another onto its **C** tab (the LED tabs
-   stay empty). Cut the battery holder's **red** wire about 60 mm from the
+   stay empty), and trim both leads to about 40 mm; the switch sits right next
+   to the holder. Cut the battery holder's **red** wire about 60 mm from the
    holder, strip both ends, and join each to one of the quick-connect leads:
    solder and heat-shrink, or a crimped butt splice. Those two joints are the
    only ones in the build. The switch body hangs into a closed well in the
    front cab, and the roof can be unplugged from the switch for service.
 6. **Wiring:** plug battery holder → Bambu conversion wire → motor. Each plug
-   only fits one way. Feed the conversion wire down through the front of the
-   floor opening to the motor's lead; the spare motor lead lies on top of the
-   motor. Keep wire out of the open underside in front of the motor.
+   only fits one way. Feed the holder's lead down through the front of the
+   floor opening; the conversion wire, both plug pairs and the spare lengths
+   of holder and motor lead all coil flat on top of the motor, under the
+   battery. Keep wire out of the open underside in front of the motor.
 7. **Batteries:** put 2×AAA in the holder and slide its own switch to **ON**.
    Lay it in the battery bay with the lead toward the **front**; the switch
    wires reach the hatch over the low fence.
