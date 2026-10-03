@@ -1,5 +1,5 @@
 // =====================================================================
-//  Battery Box-Cab Locomotive  -  Brio-compatible, self-propelled
+//  Battery Box-Cab Locomotive  -  Brio-compatible, self-propelled  (v2)
 // =====================================================================
 //  A small electric "box-cab" engine that drives itself along any
 //  Brio-style wooden track.  The motor's dual output shaft IS the drive
@@ -8,36 +8,45 @@
 //
 //    2xAAA holder (Adafruit #4191, JST-PH)  -> its own switch left ON
 //      -> click on/off cable (Adafruit #3064, JST-PH) under the big
-//         roof button
+//         roof button at the front
 //      -> 50 mm PH2.0-to-SH1.0 wire (Bambu XC004)
 //      -> N20 dual-shaft worm gear motor 3 V 130 rpm (Bambu LA009)
+//
+//  Layout (front = button end, X increases toward the rear):
+//
+//      front coupler | switch cab | battery bay ............ | rear coupler
+//                        ^ front axle (printed)     ^ drive axle = motor shaft
+//                               motor can points forward under the battery
+//
+//  The axles sit close to the ends, like a real Brio engine, so the
+//  couplers stay near the track centreline on curves.  About two thirds
+//  of the weight rests on the driven axle.
 //
 //  Toddler safety: batteries sit under a roof hatch held by one M3
 //  screw; the coupler magnets are sealed inside the print
 //  (pause-at-height); the roof button is captive; no wires or moving
 //  parts other than the wheels can be reached.
 //
-//  A box-cab looks right running either way, so it does not matter
-//  which way the motor happens to turn.
-//
 //  Axles are held in "keyhole" bearings: a 3.4 mm slot from below lets
 //  the 3 mm shaft in, then the 7 mm wheel hubs are pressed on from the
-//  outside and can never come back out through the slot.  Nothing has
-//  to snap or flex, and it does not depend on the exact motor size.
+//  outside and can never come back out through the slot.  A cage around
+//  the gearbox stops the motor body turning under load.
 //
 //  Parts (select with `part`):
-//    "body"      main body / chassis   (exported upside down - print as is)
-//    "hatch"     roof hatch            (exported upside down - print as is)
-//    "button"    roof push button
-//    "wheel"     wheel  - print 4
-//    "axle"      front axle            (lies on its flat)
-//    "shim"      2 mm spacer under the click switch, only if needed
-//    "assembly"  everything in place, with dummy motor/battery/switch
-//    "cutaway", "underside"  preview views
+//    "body"         main body / chassis (exported upside down - print as is)
+//    "hatch"        roof hatch          (exported upside down - print as is)
+//    "button"       roof push button
+//    "wheel"        plain wheel - print 4 (or 2 + 2 drive wheels)
+//    "wheel_drive"  drive wheel with a groove for a TPU tyre - print 2 (optional)
+//    "tyre"         TPU tyre ring for the drive wheel - print 2 (optional)
+//    "axle"         front axle (lies on its flat)
+//    "shim"         2 mm spacer under the click switch, only if needed
+//    "assembly"     everything in place, with dummy motor/battery/switch
+//    "cutaway", "underside"   preview views
 //
 //  Coordinates: X along the loco (drive axle at X=0, front axle at
-//  X=-34), Y across, Z=0 is the TOP of the track (wheels drop 3 mm into
-//  the grooves).
+//  X=-wheelbase), Y across, Z=0 is the TOP of the track (wheels drop
+//  3 mm into the grooves).
 // =====================================================================
 
 part = "assembly";
@@ -52,7 +61,7 @@ wheel_d    = 22;
 wheel_w    = 4.0;
 wheel_y0   = 10.9;      // inner face of the tread (|Y|)
 axle_z     = wheel_d/2 - groove_d;   // 8
-wheelbase  = 34;
+wheelbase  = 45;
 front_x    = -wheelbase;
 hub_d      = 7;         // hub that runs in the frame bearing
 hub_y0     = 8.6;       // inner end of the hub
@@ -61,7 +70,13 @@ frame_y0   = 8.8;       // frame bearing wall, inner face
 frame_y1   = 10.5;      //                    outer face
 bearing_d  = hub_d + 0.35;
 slot_w     = 3.4;       // lets the 3 mm shaft in, never the 7 mm hub
-brg_hx     = 6;         // half-length of a bearing wall
+brg_hx     = 6;         // half-length of a plain bearing wall
+dish_depth = 2.4;       // recess in the wheel face (hides a long shaft end)
+
+// optional traction tyre (TPU) on the drive wheels
+groove_w   = 2.6;  groove_dp = 1.2;
+tyre_t     = 1.7;  tyre_w    = groove_w - 0.2;
+tyre_id    = wheel_d - 2*groove_dp - 0.4;        // slight stretch
 
 // D-shaft (N20 output shaft and printed front axle)
 shaft_d    = 3.0;
@@ -72,54 +87,65 @@ bore_flat  = 2.55;
 // ---------------- battery holder (Adafruit #4191) ----------------
 batt_l = 62.5; batt_w = 25.3; batt_h = 15.4;
 batt_clear = 0.4;
-batt_z0  = 22;          // underside of the holder (clears the motor gearbox)
-batt_xc  = -11;         // holder centre: ~2/3 of its weight on the drive axle
+batt_z0  = 22.5;        // underside of the holder (clears the motor gearbox)
+batt_xc  = -14;         // holder centre: ~2/3 of its weight on the drive axle
+
+// ---------------- assumed motor geometry (Bambu LA009) ----------------
+// Bambu does not publish a drawing; these are typical N20 worm-gear
+// values.  MEASURE YOUR MOTOR and set these before printing the body:
+// the gearbox cage and the can clearance are built from them.
+m_gb_x0 = -6;  m_gb_x1 = 12;     // gearbox extent along X, relative to the shaft
+m_gb_w  = 12;                    // gearbox width (Y)
+m_gb_z0 = -5;  m_gb_z1 = 13;     // gearbox extent in Z, relative to the shaft
+m_can_d = 12;  m_can_l = 15;     // motor can
+m_can_off = 7;                   // can axis above the shaft axis
+m_plug_l  = 3;                   // connector stub beyond the can
+m_shaft_tip = 15.5;              // |Y| of each shaft tip
+// the motor is installed mirrored: the can points FORWARD (-X)
+gb_x0 = -m_gb_x1;  gb_x1 = -m_gb_x0;              // -12 .. 6
+can_x0 = gb_x0 - m_can_l - m_plug_l;              // -30
+
+// ---------------- switch (Adafruit #3064 inline click switch) ----------------
+sw_len_x = 12;  sw_len_y = 24;  sw_h_nom = 9;     // assumed housing size
+cab_len  = sw_len_x + 4;                          // switch cab interior length
 
 // ---------------- body ----------------
 wall      = 1.6;
-fwall     = 6.4;        // thick front wall carries the hatch screw
+rwall     = 6.4;        // thick rear wall carries the hatch screw
 in_w      = batt_w + 2*batt_clear;                 // 26.1 interior width
 out_w     = in_w + 2*wall;                         // 29.3 body width
-tray_x0   = batt_xc - (batt_l + 2*batt_clear)/2;   // interior front
-tray_x1   = batt_xc + (batt_l + 2*batt_clear)/2;   // rear of battery bay
-cab_x1    = 44.4;                                  // interior rear of the cab
-body_x0   = tray_x0 - fwall;                       // outer front
-body_x1   = cab_x1 + wall;                         // outer rear
-floor_z0  = batt_z0 - 2;                           // battery floor underside (above the wheels)
-top_z     = batt_z0 + batt_h + 2.0;                // top of the walls
+tray_x0   = batt_xc - (batt_l + 2*batt_clear)/2;   // battery bay front
+tray_x1   = batt_xc + (batt_l + 2*batt_clear)/2;   // battery bay rear
+cab_x1    = tray_x0 - 0.4;                         // switch cab rear (fence)
+cab_x0    = cab_x1 - cab_len;                      // switch cab front (wall face)
+body_x0   = cab_x0 - wall;                         // outer front
+body_x1   = tray_x1 + rwall;                       // outer rear
+floor_z0  = batt_z0 - 2;                           // battery floor underside
+top_z     = batt_z0 + batt_h + 2.5;                // top of the walls
 hatch_t   = 2.0;
-cab_floor_z0 = 6;                                  // motor can rests on this
-cab_floor_t  = 1.5;
 brg_z0    = 2.9;                                   // bottom of the bearing walls
+bunk_z0   = 6;  bunk_t = 1.5;                      // cable bunker floor
 
-// motor bay opening in the battery floor
-bay_x0 = -7; bay_x1 = tray_x1 + 0.4; bay_hw = frame_y0 - 0.2;
+// gearbox cage: bearing walls extended fore and aft with cross bars
+cage_gap  = 0.5;
+cage_x0   = gb_x0 - cage_gap - 1.2;  cage_x1 = gb_x1 + cage_gap + 1.2;
+// opening in the battery floor over the motor (can tip .. bunker)
+bay_x0    = can_x0 - 1;  bay_x1 = tray_x1 - 0.01;  bay_hw = frame_y0 - 0.2;
 
-// click switch (Adafruit #3064) shelf + roof button
-shelf_z   = 27.5;       // top of the shelf the click switch lies on
-shelf_x0  = 26.5;
-btn_x     = 34;
-btn_d     = 15;
-btn_hole  = 16;
-sw_h_nom  = 9;          // nominal height of the switch body
-foot_x    = 12; foot_y = 18;
+// switch shelf + roof button (front)
+shelf_z   = batt_z0 + 4;                           // shelf top; 4 mm cable slot beneath
+btn_x     = (cab_x0 + cab_x1)/2;
+btn_d     = 12;
+btn_hole  = 13;
+foot_x    = sw_len_x; foot_y = 18;
 
-// hatch screw: M3 x 10 into a 2.5 mm pilot hole in the front wall
-screw_x   = tray_x0 - fwall/2;
+// hatch screw: M3 x 10 into a 2.5 mm pilot hole in the rear wall
+screw_x   = tray_x1 + rwall/2;
 
 // couplers: 2 x Bambu D6x2 magnets stacked (6 x 4 mm), sealed in
 mag_d = 6.3; mag_t = 4.2; mag_z = 10;              // magnet centre height above track top
 cpl_len = 5.8;  cpl_hw = 6; cpl_z0 = 6; cpl_z1 = 20;
 skin = 0.8;                                         // plastic over the magnet face
-
-// ---------------- assumed motor geometry (Bambu LA009) ----------------
-// Bambu does not publish a drawing; these are typical N20 worm-gear
-// values, used only for the preview and clearance check.  The frame
-// relies on: 3 mm D shaft, gearbox narrower than 17 mm, gearbox no more
-// than 5 mm below / 13 mm above the shaft, shaft tips beyond |Y| = 10.
-m_gb_x0 = -6; m_gb_x1 = 12;  m_gb_w = 12;  m_gb_z0 = -5; m_gb_z1 = 13;
-m_can_d = 12; m_can_l = 15;  m_can_off = 7;     // can axis above the shaft
-m_shaft_tip = 15.5;                              // |Y| of each shaft tip
 
 // =====================================================================
 //  helpers
@@ -137,9 +163,9 @@ module rounded_box(p0, p1, r) {
 }
 
 // =====================================================================
-//  wheel
+//  wheels
 // =====================================================================
-module wheel_flat() {
+module wheel_flat(drive = false) {
     // printed lying down: outer face on the bed, hub pointing up
     difference() {
         union() {
@@ -151,17 +177,29 @@ module wheel_flat() {
             cylinder(d = hub_d,  h = wheel_w + (wheel_y0 - hub_y0));
         }
         translate([0, 0, -1]) linear_extrude(30) dshape(bore_d, bore_flat);
-        // shallow dish on the outer face
+        // recessed outer face: a long shaft end stays below the rim
         translate([0, 0, -0.01]) difference() {
-            cylinder(d = wheel_d - 5, h = 0.8);
-            cylinder(d = ring_d + 1, h = 1);
+            cylinder(d = wheel_d - 7, h = dish_depth);
+            cylinder(d = ring_d + 1.5, h = dish_depth + 1);
         }
+        if (drive)
+            translate([0, 0, (wheel_w - groove_w)/2]) difference() {
+                cylinder(d = wheel_d + 2, h = groove_w);
+                translate([0, 0, -1]) cylinder(d = wheel_d - 2*groove_dp, h = groove_w + 2);
+            }
     }
 }
 
-module wheel_at(x, side) {
+module tyre() {
+    difference() {
+        cylinder(d = tyre_id + 2*tyre_t, h = tyre_w);
+        translate([0, 0, -1]) cylinder(d = tyre_id, h = tyre_w + 2);
+    }
+}
+
+module wheel_at(x, side, drive = false) {
     translate([x, side * (wheel_y0 + wheel_w), axle_z])
-        rotate([side > 0 ? 90 : -90, 0, 0]) wheel_flat();
+        rotate([side > 0 ? 90 : -90, 0, 0]) wheel_flat(drive);
 }
 
 // =====================================================================
@@ -180,15 +218,19 @@ module axle_at() {
 // =====================================================================
 //  body
 // =====================================================================
-module bearing_walls(xc) {
-    // a pair of frame walls with keyhole bearings (slot opens downward)
-    mirror_y() difference() {
-        translate([xc - brg_hx, frame_y0, brg_z0]) cube([2*brg_hx, frame_y1 - frame_y0, floor_z0 - brg_z0 + 0.01]);
-        translate([xc, 0, axle_z]) rotate([-90, 0, 0]) cylinder(d = bearing_d, h = 20);
-        translate([xc - slot_w/2, frame_y0 - 1, brg_z0 - 1]) cube([slot_w, 5, axle_z - brg_z0 + 1]);
-        // lead-in chamfer at the slot mouth
-        translate([xc, frame_y0 - 1, brg_z0]) rotate([-90, 0, 0])
-            linear_extrude(5) polygon([[-slot_w/2 - 1, 0.01], [slot_w/2 + 1, 0.01], [slot_w/2, -1], [-slot_w/2, -1]]);
+module keyhole(xc) {
+    translate([xc, 0, axle_z]) rotate([-90, 0, 0]) cylinder(d = bearing_d, h = 40, center = true);
+    translate([xc - slot_w/2, -20, brg_z0 - 1]) cube([slot_w, 40, axle_z - brg_z0 + 1]);
+    // lead-in chamfer at the slot mouth
+    translate([xc, -20, brg_z0]) rotate([-90, 0, 0])
+        linear_extrude(40) polygon([[-slot_w/2 - 1, 0.01], [slot_w/2 + 1, 0.01], [slot_w/2, -1], [-slot_w/2, -1]]);
+}
+
+module bearing_walls(x0, x1, xc) {
+    // a pair of frame walls from x0 to x1 with a keyhole bearing at xc
+    difference() {
+        mirror_y() translate([x0, frame_y0, brg_z0]) cube([x1 - x0, frame_y1 - frame_y0, floor_z0 - brg_z0 + 0.01]);
+        keyhole(xc);
     }
 }
 
@@ -196,10 +238,9 @@ module coupler_block(front) {
     // buffer-beam block; the top is bevelled 45 deg so it prints
     // without supports when the body is upside down
     xa = front ? body_x0 : body_x1;
-    dir = front ? -1 : 1;
     hull() {
         translate([front ? xa - cpl_len : xa - 0.01, -cpl_hw, cpl_z0]) cube([cpl_len + 0.01, 2*cpl_hw, cpl_z1 - cpl_len - cpl_z0]);
-        translate([front ? xa - 0.01 : xa - 0.01, -cpl_hw, cpl_z0]) cube([0.02, 2*cpl_hw, cpl_z1 - cpl_z0]);
+        translate([xa - 0.01, -cpl_hw, cpl_z0]) cube([0.02, 2*cpl_hw, cpl_z1 - cpl_z0]);
     }
 }
 
@@ -211,53 +252,59 @@ module magnet_pocket(front) {
 }
 
 module body_solid() {
-    // battery bay + cab shell
+    // upper shell: switch cab + battery bay, open on top
     difference() {
         rounded_box([body_x0, -out_w/2, floor_z0], [body_x1, out_w/2, top_z], 2);
-        translate([tray_x0, -in_w/2, batt_z0]) cube([cab_x1 - tray_x0, in_w, 50]);
+        translate([cab_x0, -in_w/2, batt_z0]) cube([tray_x1 - cab_x0, in_w, 50]);
     }
-    // cab (rear) section: walls down to the cab floor, behind the drive wheels
-    cab_x0 = bay_x1;
+    // cable bunker behind the drive wheels: walls down to a closed floor
+    bunk_x0 = wheel_d/2 + 0.8;
     difference() {
-        rounded_box([cab_x0, -out_w/2, cab_floor_z0], [body_x1, out_w/2, floor_z0 + 0.01], 2);
-        translate([cab_x0 - 1, -in_w/2, cab_floor_z0 + cab_floor_t]) cube([cab_x1 - cab_x0 + 1, in_w, 40]);
+        rounded_box([bunk_x0, -out_w/2, bunk_z0], [body_x1, out_w/2, floor_z0 + 0.01], 2);
+        translate([bunk_x0 - 1, -in_w/2, bunk_z0 + bunk_t]) cube([tray_x1 - bunk_x0 + 1, in_w, 40]);
     }
     // front pilot plate between the front wheels, carries the coupler
     translate([body_x0, -frame_y1, cpl_z0]) cube([wall, 2*frame_y1, floor_z0 - cpl_z0 + 0.01]);
-    // axle bearings
-    bearing_walls(0);
-    bearing_walls(front_x);
+    // drive-axle bearing walls, extended into a cage around the gearbox
+    bearing_walls(cage_x0, cage_x1, 0);
+    // cage cross bars (fore and aft of the gearbox), bridged between the
+    // walls; the fore bar has an arch for the motor can to pass through
+    difference() {
+        for (x = [cage_x0, cage_x1 - 1.2])
+            translate([x, -frame_y0 - 0.01, brg_z0]) cube([1.2, 2*frame_y0 + 0.02, floor_z0 - brg_z0 + 0.01]);
+        translate([cage_x0 - 1, 0, axle_z + m_can_off]) rotate([0, 90, 0]) cylinder(d = m_can_d + 1.2, h = 4);
+        translate([cage_x0 - 1, -(m_can_d + 1.2)/2, axle_z + m_can_off]) cube([4, m_can_d + 1.2, 30]);
+    }
+    // front axle bearing walls
+    bearing_walls(front_x - brg_hx, front_x + brg_hx, front_x);
     // stiffeners from the front bearings to the pilot plate
     mirror_y() translate([body_x0, frame_y0, 12]) cube([front_x - brg_hx - body_x0 + 0.01, frame_y1 - frame_y0, floor_z0 - 12 + 0.01]);
     // couplers
     coupler_block(true);
     coupler_block(false);
-    // click-switch shelf with a low front fence
-    translate([shelf_x0, -in_w/2, shelf_z - 1.5]) cube([cab_x1 - shelf_x0 + 0.01, in_w, 1.5]);
-    translate([shelf_x0, -in_w/2 + 4, shelf_z - 0.01]) cube([1.2, in_w - 8, 2]);
-    // stops that keep the battery holder out of the cab
-    mirror_y() translate([tray_x1, in_w/2 - 3, batt_z0 - 0.01]) cube([1.2, 3.01, 6]);
+    // switch shelf across the front cab, with a full-width fence at its
+    // rear edge (both bridge wall to wall, so they print upside down)
+    translate([cab_x0 - 0.01, -in_w/2 - 0.01, shelf_z - 1.5]) cube([cab_len + 0.02, in_w + 0.02, 1.5]);
+    translate([cab_x1 - 1.2, -in_w/2 - 0.01, shelf_z - 0.01]) cube([1.2, in_w + 0.02, 2]);
 }
 
 module body_cuts() {
-    // motor bay opening in the battery floor
+    // opening in the battery floor over the motor and the bunker
     translate([bay_x0, -bay_hw, floor_z0 - 1]) cube([bay_x1 - bay_x0, 2*bay_hw, 5]);
-    // cab interior (no battery floor behind the battery bay)
-    translate([bay_x1 - 0.01, -in_w/2, cab_floor_z0 + cab_floor_t]) cube([cab_x1 - bay_x1 + 0.01, in_w, shelf_z - 1.5 - cab_floor_z0 - cab_floor_t]);
-    // hatch screw pilot hole in the front wall
+    // cable slot under the switch shelf (open to the battery bay)
+    translate([cab_x0 - 0.01, -in_w/2, batt_z0 - 0.01]) cube([cab_len + 0.5, in_w, shelf_z - 1.5 - batt_z0]);
+    // hatch screw pilot hole in the rear wall
     translate([screw_x, 0, top_z - 12]) cylinder(d = 2.5, h = 13);
-    // hatch tongue slot in the rear wall
-    translate([cab_x1 - 0.5, -8, top_z - 2.2]) cube([wall, 16, 1.4]);
-    // cable notch at the front of the battery bay (holder may face either way)
-    translate([tray_x0 - 0.01, -5, top_z - 4]) cube([1.2, 10, 5]);
+    // hatch tongue slot through the front wall
+    translate([body_x0 - 1, -8, top_z - 2.4]) cube([wall + 2, 16, 1.2]);
     // magnet pockets
     magnet_pocket(true);
     magnet_pocket(false);
     // decoration: recessed windows at both ends of each side
     for (x = [body_x0 + 4, body_x1 - 4 - 9]) mirror_y()
         translate([x, out_w/2 - 0.6, top_z - 12]) cube([9, 1, 8]);
-    // engraved door outlines on each side
-    mirror_y() translate([0, out_w/2 - 0.5, 0]) difference() {
+    // engraved door outline, middle of each side
+    mirror_y() translate([batt_xc, out_w/2 - 0.5, 0]) difference() {
         translate([-6, 0, floor_z0 + 2]) cube([12, 1, top_z - floor_z0 - 6]);
         translate([-5.4, -0.1, floor_z0 + 2.6]) cube([10.8, 1.2, top_z - floor_z0 - 7.2]);
     }
@@ -273,27 +320,30 @@ module body() { difference() { body_solid(); body_cuts(); } }
 // =====================================================================
 module hatch() {
     lip_gap = 0.3;
+    lip_x0  = cab_x0 + 2.5;            // lip stops short of the tongue end
     difference() {
         union() {
             rounded_box([body_x0, -out_w/2, top_z], [body_x1, out_w/2, top_z + hatch_t], 2);
             // locating lip just inside the walls
             difference() {
-                translate([tray_x0 + lip_gap, -in_w/2 + lip_gap, top_z - 2]) cube([cab_x1 - tray_x0 - 2*lip_gap, in_w - 2*lip_gap, 2.01]);
-                translate([tray_x0 + lip_gap + 1.2, -in_w/2 + lip_gap + 1.2, top_z - 3]) cube([cab_x1 - tray_x0 - 2*lip_gap - 2.4, in_w - 2*lip_gap - 2.4, 4]);
+                translate([lip_x0, -in_w/2 + lip_gap, top_z - 2]) cube([tray_x1 - lip_gap - lip_x0, in_w - 2*lip_gap, 2.01]);
+                translate([lip_x0 - 1, -in_w/2 + lip_gap + 1.2, top_z - 3]) cube([tray_x1 - lip_gap - lip_x0 - 0.2, in_w - 2*lip_gap - 2.4, 4]);
             }
-            // tongue that hooks under the rear wall
-            translate([cab_x1 - 1.0, -7.5, top_z - 2.0]) cube([1.4, 15, 1.0]);
+            // tongue that passes through the front wall, hung from the
+            // roof by a web just inside the wall
+            translate([body_x0, -7.5, top_z - 2.2]) cube([cab_x0 + 0.3 - body_x0 + 0.01, 15, 1.0]);
+            translate([cab_x0 + 0.3, -7.5, top_z - 2.2]) cube([lip_x0 - cab_x0 - 0.3 + 0.01, 15, 2.21]);
         }
         // keep the lip clear of the button flange
         translate([btn_x, 0, top_z - 3]) cylinder(d = btn_hole + 4, h = 3);
         // button hole with a soft chamfer
         translate([btn_x, 0, top_z - 5]) cylinder(d = btn_hole, h = 20);
         translate([btn_x, 0, top_z + hatch_t - 0.6]) cylinder(d1 = btn_hole, d2 = btn_hole + 1.2, h = 0.61);
-        // countersunk M3 screw hole over the front wall
+        // countersunk M3 screw hole over the rear wall
         translate([screw_x, 0, top_z - 5]) cylinder(d = 3.4, h = 20);
         translate([screw_x, 0, top_z + hatch_t - 1.6]) cylinder(d1 = 3.4, d2 = 6.6, h = 1.61);
         // engraved roof panel lines
-        for (x = [tray_x0 + 6, btn_x - 13]) translate([x, -out_w/2 + 3, top_z + hatch_t - 0.5]) cube([0.8, out_w - 6, 1]);
+        for (x = [tray_x0 + 6, tray_x1 - 10]) translate([x, -out_w/2 + 3, top_z + hatch_t - 0.5]) cube([0.8, out_w - 6, 1]);
     }
 }
 
@@ -309,22 +359,22 @@ module button() {
         // stem
         translate([0, 0, btn_rest_z]) cylinder(d = btn_d, h = btn_top_z - btn_rest_z - 2);
         // flange under the hatch keeps it captive
-        translate([0, 0, top_z - 2.4]) cylinder(d1 = btn_d, d2 = btn_hole + 2.4, h = 2.4);
+        translate([0, 0, top_z - 2.4]) cylinder(d1 = btn_d, d2 = btn_hole + 1.6, h = 2.4);
         // domed top
-        translate([0, 0, btn_top_z - 2]) scale([1, 1, 0.27]) sphere(d = btn_d);
+        translate([0, 0, btn_top_z - 2]) scale([1, 1, 0.3]) sphere(d = btn_d);
     }
 }
 
-module shim() { cube([12, 20, 2]); }
+module shim() { cube([sw_len_x, 20, 2]); }
 
 // =====================================================================
 //  dummy purchased parts (preview and clearance checks only)
 // =====================================================================
 module dummy_motor() {
     translate([0, 0, axle_z]) {
-        color("Goldenrod") translate([m_gb_x0, -m_gb_w/2, m_gb_z0]) cube([m_gb_x1 - m_gb_x0, m_gb_w, m_gb_z1 - m_gb_z0]);
-        color("Silver") translate([m_gb_x1, 0, m_can_off]) rotate([0, 90, 0]) cylinder(d = m_can_d, h = m_can_l);
-        color("White") translate([m_gb_x1 + m_can_l, -4, m_can_off - 3]) cube([3, 8, 6]);
+        color("Goldenrod") translate([gb_x0, -m_gb_w/2, m_gb_z0]) cube([gb_x1 - gb_x0, m_gb_w, m_gb_z1 - m_gb_z0]);
+        color("Silver") translate([gb_x0 - m_can_l, 0, m_can_off]) rotate([0, 90, 0]) cylinder(d = m_can_d, h = m_can_l);
+        color("White") translate([can_x0, -4, m_can_off - 3]) cube([m_plug_l, 8, 6]);
         color("Silver") rotate([90, 0, 0]) cylinder(d = shaft_d, h = 2*m_shaft_tip, center = true);
     }
 }
@@ -332,12 +382,12 @@ module dummy_battery() {
     color("DimGray") translate([batt_xc - batt_l/2, -batt_w/2, batt_z0]) cube([batt_l, batt_w, batt_h]);
 }
 module dummy_switch() {
-    color("Black") translate([btn_x - 6, -12, shelf_z]) cube([12, 24, sw_h_nom]);
+    color("Black") translate([btn_x - sw_len_x/2, -sw_len_y/2, shelf_z]) cube([sw_len_x, sw_len_y, sw_h_nom]);
 }
 module dummy_track() {
-    color("BurlyWood") translate([-80, -20, -12]) difference() {
-        cube([160, 40, 12]);
-        for (s = [-1, 1]) translate([-1, 20 + s*groove_c - 3, 9]) cube([162, 6, 5]);
+    color("BurlyWood") translate([-90, -20, -12]) difference() {
+        cube([180, 40, 12]);
+        for (s = [-1, 1]) translate([-1, 20 + s*groove_c - 3, 9]) cube([182, 6, 5]);
     }
 }
 
@@ -349,12 +399,18 @@ mag_pause = top_z - (mag_z - mag_d/2);
 echo(str("BODY: add a pause at layer height ", mag_pause, " mm to drop in the magnets"));
 echo(str("Overall: length ", body_x1 + cpl_len - (body_x0 - cpl_len), " mm, width ",
          max(out_w, 2*(wheel_y0 + wheel_w)), " mm, height above table ", btn_top_z + 12, " mm"));
+echo(str("Overhang beyond the axles: front ", front_x - (body_x0 - cpl_len), " mm, rear ", body_x1 + cpl_len, " mm"));
+
+module wheels(drive = false) {
+    for (s = [-1, 1]) { wheel_at(0, s, drive); wheel_at(front_x, s); }
+    axle_at();
+}
 
 module assembly() {
     color("SteelBlue") body();
     color("SteelBlue") hatch();
     color("Red") button();
-    color("Gold") { for (s = [-1, 1]) { wheel_at(0, s); wheel_at(front_x, s); } axle_at(); }
+    color("Gold") wheels();
     dummy_motor();
     dummy_battery();
     dummy_switch();
@@ -364,13 +420,13 @@ module assembly() {
 if (part == "body") translate([0, 0, top_z]) rotate([180, 0, 0]) body();
 else if (part == "hatch") translate([0, 0, top_z + hatch_t]) rotate([180, 0, 0]) hatch();
 else if (part == "button") translate([-btn_x, 0, -btn_rest_z]) button();
-else if (part == "wheel") wheel_flat();
+else if (part == "wheel") wheel_flat(false);
+else if (part == "wheel_drive") wheel_flat(true);
+else if (part == "tyre") tyre();
 else if (part == "axle") axle_flat();
 else if (part == "shim") shim();
 else if (part == "assembly") assembly();
-
-// cut-away preview (front half of the body removed along Y)
-module cutaway() {
+else if (part == "cutaway") {
     difference() {
         union() { color("SteelBlue") body(); color("SteelBlue") hatch(); color("Red") button(); }
         translate([-100, -50, -10]) cube([200, 50, 100]);
@@ -378,9 +434,8 @@ module cutaway() {
     color("Gold") { wheel_at(0, 1); wheel_at(front_x, 1); }
     dummy_motor(); dummy_battery(); dummy_switch();
 }
-if (part == "cutaway") cutaway();
-if (part == "underside") {
+else if (part == "underside") {
     color("SteelBlue") body(); color("SteelBlue") hatch();
-    color("Gold") { for (s = [-1, 1]) { wheel_at(0, s); wheel_at(front_x, s); } axle_at(); }
+    color("Gold") wheels();
     dummy_motor();
 }
