@@ -107,8 +107,11 @@ accelerations, settings as above). Add the A1's ~5–6 min start routine per pla
 
 ## Before you print the body: measure your motor
 
-Bambu doesn't publish a dimensioned drawing of the LA009, so the body is
-modelled around typical N20 worm-gear dimensions. The gearbox cage and the can
+Bambu doesn't publish a dimensioned drawing of the LA009, but every Maker's
+Supply product page has a **"3D Model"** link (scroll down) that downloads a zip
+with the part's STL, no purchase needed. Open it in Bambu Studio or any mesh
+viewer and read the dimensions off it. The body here is modelled around
+typical N20 worm-gear dimensions. The gearbox cage and the can
 clearance are built from the `m_*` values at the top of
 `box_cab_locomotive.scad`. Measure your motor and check:
 
@@ -195,6 +198,38 @@ switch or a lumpy joint, and a lighter, slower train helps there too.
 3. A speed knob: Bambu's Potentiometer Board plugs into their Power
    Distribution Board (IA005), but the PDB is 53 mm long and would need a longer
    body. Not worth it for a toddler's engine.
+
+## Pulling power
+
+Wheel grip is the weakest link, which is the failure mode you want: with too
+many wagons the wheels simply spin, the motor keeps turning unloaded, and
+nothing is stressed. Estimated limits, weakest first:
+
+| Link | Limit | Basis |
+|---|---|---|
+| Wheel grip, bare PLA | ~20 g of pull | ~57 g on the driven axle × μ ≈ 0.35 on lacquered beech |
+| Wheel grip, TPU tyres | ~45 g | same × μ ≈ 0.8 |
+| Coupler magnet | ~150 g or more | 2 × D6×2 N35 through a 0.8 mm skin; Brio's own magnets set the real figure |
+| Motor, continuous | ~130–250 g at the rim | 140–280 g·cm rated torque ÷ 1.1 cm wheel radius |
+| Motor, stall | ~320 g | 350 g·cm ÷ 1.1 cm |
+
+The magnet has ~3× margin over the hardest pull the wheels can transmit, and
+the motor runs at a fraction of its rating even with tyres and a full train.
+
+Rough wagon counts (Brio wagon ≈ 40–60 g, ~3–5 g drag each on the flat):
+
+| | Flat track | Through curves | Brio ramp (~15 %) |
+|---|---|---|---|
+| Bare PLA wheels | ~5 | ~3–4 | loco alone just climbs; slips with wagons |
+| TPU tyres | ~10 | ~6–8 | ~3 |
+
+It slows noticeably well before those counts. Expect ±30 %: PLA-on-beech
+friction, Brio magnet strength and wagon drag all vary.
+
+The one way to stress the motor is a true stall off the track: button on,
+wheels held still by hand. The worm gear can't be back-driven, so the motor
+draws ~0.8 A (~2.4 W). Fine for seconds, bad for minutes. On the track the
+wheels slip first, so it can't happen there.
 
 ## Brio compatibility
 
