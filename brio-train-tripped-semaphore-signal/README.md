@@ -61,6 +61,21 @@ Bambu Studio, generic PLA, 0.4 mm nozzle:
 * **Small parts (rod, see-saw, blade):** 100 % infill or 4+ walls. They are tiny,
   so this costs almost nothing and makes them stiff.
 
+### Estimated print time (A1)
+
+Times come from slicing these STLs with an A1-like profile (Bambu PLA Basic
+speeds and accelerations, 0.16 mm layers, settings as above). They don't include
+the A1's ~5–6 min start routine on each plate.
+
+| Plate | Time | Filament |
+|---|---|---|
+| Base (4 walls, 20 % infill) | ~1 h 35 min | 46 g |
+| See-saw + rod + blade (100 % infill, single colour) | ~8 min | 2.6 g |
+| **Total** | **~1 h 45 min** (~2 h with start-up) | **~48 g** |
+
+The two-colour AMS blade adds roughly 30 min. The stripe goes through the whole
+blade, so the AMS Lite swaps filament about 30 times over its 15 layers.
+
 ### Multi-colour blade with the AMS Lite
 
 1. Drag **both** `blade_red.stl` and `blade_white.stl` into Bambu Studio together.

@@ -34,7 +34,7 @@ axle, click switch under the roof button.*
 | 4 | **D6 × 2 mm round magnets** (2 per coupler) | [Bambu Lab store – magnets](https://us.store.bambulab.com/collections/magnets) | Sealed inside the couplers during printing. |
 | 1 | M3 × 10 mm screw (countersunk or button head) | Any hardware store / Bambu Maker's Supply | Holds the roof hatch closed. It self-taps into the plastic. |
 | 2 | AAA batteries | — | Alkaline (fastest) or NiMH rechargeable (a bit slower). |
-| — | PLA filament | Bambu Lab | About 30 g. Any colours: body, wheels and button look nice in three colours. |
+| — | PLA filament | Bambu Lab | About 40 g. Any colours: body, wheels and button look nice in three colours. |
 
 ### Why these parts
 
@@ -68,6 +68,19 @@ Print settings for the Bambu Lab A1, PLA, 0.4 mm nozzle:
 - **Wheels, axle and button:** 100 % infill. They're tiny, and stiff wheels
   press on more securely.
 - A brim on the body helps, because it stands on the thin rim of its walls.
+
+### Estimated print time (A1)
+
+Times come from slicing these STLs with an A1-like profile (Bambu PLA Basic
+speeds and accelerations, settings as above, 0.2 mm layers). They don't include
+the A1's ~5–6 min start routine on each plate.
+
+| Plate | Time | Filament |
+|---|---|---|
+| Body (20 % infill, brim) | ~45 min | 22 g |
+| Hatch | ~11 min | 6.5 g |
+| Button + 4 wheels + axle (100 % infill) | ~19 min | 9.6 g |
+| **Total** | **~1 h 15 min** (~1.5 h with start-up and the magnet pause) | **~38 g** |
 
 ### Sealing the coupler magnets (body print)
 
