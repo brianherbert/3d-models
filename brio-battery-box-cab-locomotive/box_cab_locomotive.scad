@@ -27,10 +27,11 @@
 //  (pause-at-height); the roof button is captive; no wires or moving
 //  parts other than the wheels can be reached.
 //
-//  Axles are held in "keyhole" bearings: a 3.4 mm slot from below lets
-//  the 3 mm shaft in, then the 7 mm wheel hubs are pressed on from the
-//  outside and can never come back out through the slot.  A cage around
-//  the gearbox stops the motor body turning under load.
+//  Axles are held in "keyhole" bearings: a 3.4 mm slot from above lets
+//  the 3 mm shaft drop in through the battery floor, then the 7 mm wheel
+//  hubs are pressed on from the outside and can never lift out through
+//  the slot.  A bar behind the gearbox and a saddle under the nose of the
+//  can stop the motor body turning under load.
 //
 //  Parts (select with `part`):
 //    "body"         main body / chassis (exported upside down - print as is)
@@ -57,21 +58,21 @@ groove_c = 13;          // groove centre from track centreline
 groove_d = 3;
 
 // ---------------- wheels & axles ----------------
-wheel_d    = 22;
+wheel_d    = 26;        // 26 mm: keeps the motor body 2.6 mm above the track
 wheel_w    = 4.0;
 wheel_y0   = 10.9;      // inner face of the tread (|Y|)
 axle_z     = wheel_d/2 - groove_d;   // 8
 wheelbase  = 45;
 front_x    = -wheelbase;
 hub_d      = 7;         // hub that runs in the frame bearing
-hub_y0     = 8.6;       // inner end of the hub
+hub_y0     = 6.6;       // inner end of the hub
 ring_d     = 9;         // spacer ring between hub and tread
-frame_y0   = 8.8;       // frame bearing wall, inner face
-frame_y1   = 10.5;      //                    outer face
+frame_y0   = 6.8;       // frame bearing wall, inner face
+frame_y1   = 8.5;       //                    outer face
 bearing_d  = hub_d + 0.35;
 slot_w     = 3.4;       // lets the 3 mm shaft in, never the 7 mm hub
 brg_hx     = 6;         // half-length of a plain bearing wall
-dish_depth = 2.4;       // recess in the wheel face (hides a long shaft end)
+dish_depth = 2.0;       // recess in the wheel face (the shaft end sits 0.4 mm below it)
 
 // optional traction tyre (TPU) on the drive wheels
 groove_w   = 2.6;  groove_dp = 1.2;
@@ -87,23 +88,23 @@ bore_flat  = 2.55;
 // ---------------- battery holder (Adafruit #4191) ----------------
 batt_l = 62.5; batt_w = 25.3; batt_h = 15.4;
 batt_clear = 0.4;
-batt_z0  = 22.5;        // underside of the holder (clears the motor gearbox)
+batt_z0  = 23.5;        // underside of the holder (0.5 mm above the wheel tops)
 batt_xc  = -14;         // holder centre: ~2/3 of its weight on the drive axle
 
-// ---------------- assumed motor geometry (Bambu LA009) ----------------
-// Bambu does not publish a drawing; these are typical N20 worm-gear
-// values.  MEASURE YOUR MOTOR and set these before printing the body:
-// the gearbox cage and the can clearance are built from them.
-m_gb_x0 = -6;  m_gb_x1 = 12;     // gearbox extent along X, relative to the shaft
-m_gb_w  = 12;                    // gearbox width (Y)
-m_gb_z0 = -5;  m_gb_z1 = 13;     // gearbox extent in Z, relative to the shaft
-m_can_d = 12;  m_can_l = 15;     // motor can
-m_can_off = 7;                   // can axis above the shaft axis
-m_plug_l  = 3;                   // connector stub beyond the can
-m_shaft_tip = 15.5;              // |Y| of each shaft tip
-// the motor is installed mirrored: the can points FORWARD (-X)
-gb_x0 = -m_gb_x1;  gb_x1 = -m_gb_x0;              // -12 .. 6
-can_x0 = gb_x0 - m_can_l - m_plug_l;              // -30
+// ---------------- motor geometry (Bambu LA009, from Bambu's own 3D model) ----------------
+// The motor is a 12 x 10 mm bar with the 3 mm D-shaft through its centre
+// line.  Positions along X are relative to the shaft; the can points
+// FORWARD (-X).  Heights are relative to the shaft axis.
+m_rear    = 3.96;                // gearbox face behind the shaft
+m_body    = -28.6;               // front end of the 12 x 10 body (can)
+m_cap0    = -30.1;  m_cap1 = -31.4;   // plastic end cap (12 x 10), 1.5 mm gap before it
+m_end     = -34.32;              // tips of the solder tabs / lead exit
+m_h       = 12;                  // body height (Z), centred on the shaft
+m_w       = 10;                  // body width (Y), centred on the shaft
+m_boss_d  = 4;  m_boss_y = 5.5;  // bearing boss on each side face
+m_shaft_tip = 12.5;              // |Y| of each shaft tip
+m_gap     = 0.4;                 // clearance of the cage bar and saddle
+gb_x1 = m_rear;  can_x0 = m_end;
 
 // ---------------- switch (Adafruit #3064 inline click switch) ----------------
 sw_len_x = 12;  sw_len_y = 24;  sw_h_nom = 9;     // assumed housing size
@@ -123,14 +124,17 @@ body_x1   = tray_x1 + rwall;                       // outer rear
 floor_z0  = batt_z0 - 2;                           // battery floor underside
 top_z     = batt_z0 + batt_h + 2.5;                // top of the walls
 hatch_t   = 2.0;
-brg_z0    = 2.9;                                   // bottom of the bearing walls
+brg_z0    = 2.6;                                   // bottom of the bearing walls and can saddle
 bunk_z0   = 6;  bunk_t = 1.5;                      // cable bunker floor
 
-// gearbox cage: bearing walls extended fore and aft with cross bars
-cage_gap  = 0.5;
-cage_x0   = gb_x0 - cage_gap - 1.2;  cage_x1 = gb_x1 + cage_gap + 1.2;
-// opening in the battery floor over the motor (can tip .. bunker)
-bay_x0    = can_x0 - 1;  bay_x1 = tray_x1 - 0.01;  bay_hw = frame_y0 - 0.2;
+// motor cage: long bearing walls either side of the motor, a bar behind
+// the gearbox and a saddle under the nose of the can (the motor drops in
+// from above through the battery floor, so the saddle can be closed)
+sad_x0    = m_body + 1.1;  sad_x1 = sad_x0 + 1.5;      // saddle under the can
+cage_x0   = sad_x0;        cage_x1 = gb_x1 + m_gap + 1.2;
+sad_z1    = axle_z - m_h/2 - m_gap;                    // saddle top
+// opening in the battery floor over the motor (lead exit .. bunker)
+bay_x0    = can_x0 - 3;  bay_x1 = tray_x1 - 0.01;  bay_hw = frame_y0 - 0.2;
 
 // switch shelf + roof button (front)
 shelf_z   = batt_z0 + 4;                           // shelf top; 4 mm cable slot beneath
@@ -219,11 +223,11 @@ module axle_at() {
 //  body
 // =====================================================================
 module keyhole(xc) {
-    translate([xc, 0, axle_z]) rotate([-90, 0, 0]) cylinder(d = bearing_d, h = 40, center = true);
-    translate([xc - slot_w/2, -20, brg_z0 - 1]) cube([slot_w, 40, axle_z - brg_z0 + 1]);
-    // lead-in chamfer at the slot mouth
-    translate([xc, -20, brg_z0]) rotate([-90, 0, 0])
-        linear_extrude(40) polygon([[-slot_w/2 - 1, 0.01], [slot_w/2 + 1, 0.01], [slot_w/2, -1], [-slot_w/2, -1]]);
+    // bearing hole (teardrop, point down, so it prints upside down) with a
+    // slot running UP through the floor: the shaft drops in from above
+    translate([xc, 0, axle_z]) rotate([-90, 0, 0]) linear_extrude(40, center = true)
+        union() { circle(d = bearing_d); rotate(45) square(bearing_d/2); }
+    translate([xc - slot_w/2, -20, axle_z]) cube([slot_w, 40, batt_z0 - axle_z + 1]);
 }
 
 module bearing_walls(x0, x1, xc) {
@@ -265,16 +269,12 @@ module body_solid() {
     }
     // front pilot plate between the front wheels, carries the coupler
     translate([body_x0, -frame_y1, cpl_z0]) cube([wall, 2*frame_y1, floor_z0 - cpl_z0 + 0.01]);
-    // drive-axle bearing walls, extended into a cage around the gearbox
+    // drive-axle bearing walls, running the length of the motor
     bearing_walls(cage_x0, cage_x1, 0);
-    // cage cross bars (fore and aft of the gearbox), bridged between the
-    // walls; the fore bar has an arch for the motor can to pass through
-    difference() {
-        for (x = [cage_x0, cage_x1 - 1.2])
-            translate([x, -frame_y0 - 0.01, brg_z0]) cube([1.2, 2*frame_y0 + 0.02, floor_z0 - brg_z0 + 0.01]);
-        translate([cage_x0 - 1, 0, axle_z + m_can_off]) rotate([0, 90, 0]) cylinder(d = m_can_d + 1.2, h = 4);
-        translate([cage_x0 - 1, -(m_can_d + 1.2)/2, axle_z + m_can_off]) cube([4, m_can_d + 1.2, 30]);
-    }
+    // bar behind the gearbox and saddle under the nose of the can, both
+    // bridged between the walls: together they stop the motor turning
+    translate([cage_x1 - 1.2, -frame_y0 - 0.01, brg_z0]) cube([1.2, 2*frame_y0 + 0.02, floor_z0 - brg_z0 + 0.01]);
+    translate([sad_x0, -frame_y0 - 0.01, brg_z0]) cube([sad_x1 - sad_x0, 2*frame_y0 + 0.02, sad_z1 - brg_z0]);
     // front axle bearing walls
     bearing_walls(front_x - brg_hx, front_x + brg_hx, front_x);
     // stiffeners from the front bearings to the pilot plate
@@ -291,6 +291,11 @@ module body_solid() {
 module body_cuts() {
     // opening in the battery floor over the motor and the bunker
     translate([bay_x0, -bay_hw, floor_z0 - 1]) cube([bay_x1 - bay_x0, 2*bay_hw, 5]);
+    // axle slots through the floor ledges (shafts drop in from above)
+    for (x = [0, front_x]) translate([x - slot_w/2, -in_w/2 - 0.01, floor_z0 - 1]) cube([slot_w, in_w + 0.02, 5]);
+    // wheel arches through the floor ledges and side walls
+    for (x = [0, front_x]) mirror_y()
+        translate([x, wheel_y0 - 0.3, axle_z]) rotate([-90, 0, 0]) cylinder(d = wheel_d + 2.4, h = 6);
     // cable slot under the switch shelf (open to the battery bay)
     translate([cab_x0 - 0.01, -in_w/2, batt_z0 - 0.01]) cube([cab_len + 0.5, in_w, shelf_z - 1.5 - batt_z0]);
     // hatch screw pilot hole in the rear wall
@@ -372,10 +377,13 @@ module shim() { cube([sw_len_x, 20, 2]); }
 // =====================================================================
 module dummy_motor() {
     translate([0, 0, axle_z]) {
-        color("Goldenrod") translate([gb_x0, -m_gb_w/2, m_gb_z0]) cube([gb_x1 - gb_x0, m_gb_w, m_gb_z1 - m_gb_z0]);
-        color("Silver") translate([gb_x0 - m_can_l, 0, m_can_off]) rotate([0, 90, 0]) cylinder(d = m_can_d, h = m_can_l);
-        color("White") translate([can_x0, -4, m_can_off - 3]) cube([m_plug_l, 8, 6]);
+        color("Silver") translate([m_body, -m_w/2, -m_h/2]) cube([m_rear - m_body, m_w, m_h]);
+        color("Goldenrod") translate([m_body - 1.0, -m_w/2, -m_h/2]) cube([1.0, m_w, m_h]);   // gearbox-side detail omitted
+        color("Black") translate([m_cap1, -m_w/2, -m_h/2]) cube([m_cap0 - m_cap1, m_w, m_h]);
+        color("Silver") translate([m_cap0 - 1.5, -2, -2]) cube([1.5, 4, 4]);
+        color("Goldenrod") for (y = [-2.2, 1.2]) translate([m_end, y, -2]) cube([m_cap1 - m_end, 1, 4]);
         color("Silver") rotate([90, 0, 0]) cylinder(d = shaft_d, h = 2*m_shaft_tip, center = true);
+        color("Silver") mirror_y() translate([0, m_w/2 - 0.01, 0]) rotate([-90, 0, 0]) cylinder(d = m_boss_d, h = m_boss_y - m_w/2 + 0.01);
     }
 }
 module dummy_battery() {

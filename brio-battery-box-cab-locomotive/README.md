@@ -8,7 +8,7 @@ stops it.
   output shaft *is* the drive axle. All the electrical parts plug into each other.
 - **Toddler-minded:** batteries under a screwed-down roof hatch; coupler magnets
   sealed inside the plastic; captive roof button; nothing reachable but the wheels.
-- **Brio proportions:** 99 × 30 × 58 mm (L × W × H on the track), 45 mm
+- **Brio proportions:** 99 × 30 × 59 mm (L × W × H on the track), 45 mm
   wheelbase with the axles near the ends, so the couplers stay close to the
   track centreline on curves. Narrower than the 40 mm track, so it clears
   platforms, signals and tunnels.
@@ -61,6 +61,9 @@ driving the rear wheels. Cables coil in the bunker behind the drive wheels.*
 | `wheel.stl` | 4 (or 2) | As exported | Plain wheel |
 | `wheel_drive.stl` | 0 or 2 | As exported | Drive wheel with a tyre groove — use instead of two plain wheels if you print tyres |
 | `tyre.stl` | 0 or 2 | As exported | **TPU**, fits `wheel_drive` |
+
+Wheels are 26 mm (Brio's are 22–24 mm) so the motor body clears the track by
+4 mm; the lowest printed point is 2.6 mm above the rails.
 | `axle.stl` | 1 | As exported (on its flat) | Front axle |
 | `shim.stl` | 0–2 | As exported | Only if the button doesn't click (see below) |
 
@@ -82,16 +85,16 @@ accelerations, settings as above). Add the A1's ~5–6 min start routine per pla
 
 | Plate | Time | Filament |
 |---|---|---|
-| Body (20 % infill, brim) | ~46 min | 23 g |
+| Body (20 % infill, brim) | ~47 min | 22 g |
 | Hatch | ~11 min | 6 g |
-| Button + 4 wheels + axle (100 % infill) | ~21 min | 8 g |
+| Button + 4 wheels + axle (100 % infill) | ~26 min | 11 g |
 | 2 TPU tyres (optional) | ~3 min | 1 g |
-| **Total** | **~1 h 20 min** (~1.5 h with start-up and the magnet pause) | **~38 g** |
+| **Total** | **~1 h 25 min** (~1.5 h with start-up and the magnet pause) | **~40 g** |
 
 ### Sealing the coupler magnets (body print)
 
 1. In Bambu Studio, slice `body.stl`. In the layer slider, find the first layer
-   **above 33.55 mm** (33.6 mm at 0.2 mm layers). Right-click it and choose
+   **above 34.55 mm** (34.6 mm at 0.2 mm layers). Right-click it and choose
    **Add Pause**.
 2. Before printing, work out the magnet polarity so the loco couples to your
    existing Brio wagons. Make two stacks of two D6×2 magnets.
@@ -105,29 +108,23 @@ accelerations, settings as above). Add the A1's ~5–6 min start routine per pla
    the marked face toward the end of the loco. Resume; the printer seals the
    magnets in.
 
-## Before you print the body: measure your motor
+## Motor fit: verified against Bambu's own model
 
-Bambu doesn't publish a dimensioned drawing of the LA009, but every Maker's
-Supply product page has a **"3D Model"** link (scroll down) that downloads a zip
-with the part's STL, no purchase needed. Open it in Bambu Studio or any mesh
-viewer and read the dimensions off it. The body here is modelled around
-typical N20 worm-gear dimensions. The gearbox cage and the can
-clearance are built from the `m_*` values at the top of
-`box_cab_locomotive.scad`. Measure your motor and check:
+The body is built around the actual LA009 geometry, taken from the 3D model
+Bambu provides on the product page ("3D Model" link; STL + STEP, no purchase
+needed). What the model shows, and what the body does with it:
 
-| Value | Assumed | What it sets |
+| Measured | Value | Used for |
 |---|---|---|
-| `m_gb_x0` / `m_gb_x1` | −6 / +12 mm from the shaft, along the can direction | Gearbox cage bars (0.5 mm clearance each end) |
-| `m_gb_w` | 12 mm | Must be under 17 mm to fit between the bearing walls |
-| `m_gb_z0` / `m_gb_z1` | −5 / +13 mm from the shaft | Ground clearance (≥ 3 mm) and battery clearance |
-| `m_can_d`, `m_can_off` | 12 mm can, axis 7 mm above the shaft | Arch in the front cage bar; can must clear the battery floor |
-| `m_shaft_tip` | 15.5 mm from the motor centre, each side | Each shaft end must reach **at least 14 mm** from the centre, or the wheel hubs get too little shaft. If the shaft is longer than 15 mm it just sits deeper in the wheel's recessed face. |
+| Body (can + gearbox) | 12 mm tall × 10 mm wide, 38.3 mm long incl. the end cap and solder tabs | Channel between the bearing walls; floor opening |
+| Shaft | 3 mm D-shaft (2.5 mm across the flat), 25 mm tip to tip, through the body's centre line, 4 mm from the gearbox end | Keyhole bearings at ±6.8–8.5 mm; 5.9 mm of shaft in each wheel hub |
+| Body below the shaft axis | 6 mm | 26 mm wheels, so the motor sits 4 mm above the track |
+| Bearing bosses | 4 mm dia, 0.5 mm proud of each side face | Cleared by the bearing walls |
 
-If anything differs, change the value and re-export `body.stl`:
-
-```sh
-openscad -o stl/body.stl -D 'part="body"' box_cab_locomotive.scad
-```
+The motor mesh was placed in the model and checked: no overlap with the body,
+and it can rock only about +5° / −1° about the shaft before the bar behind the
+gearbox or the saddle under the can nose stops it. The dummy motor in the
+OpenSCAD preview is drawn from the same numbers.
 
 The click switch (#3064) housing is assumed to be about 12 × 24 × 9 mm. If
 yours is shorter, the printed shims go under it; if it's longer than 14 mm in
@@ -137,27 +134,29 @@ one direction, lay it across the cab (the cab is 26 mm wide).
 
 1. **Tyres (optional):** stretch a TPU tyre into the groove of each
    `wheel_drive` wheel.
-2. **Motor:** turn the body upside down. Hold the motor with the shaft across
-   the body and the can pointing toward the **front** (button end). Lower the
-   gearbox straight into the cage between the two cross bars; the can passes
-   through the arch in the front bar and lies under the battery floor. Guide the
-   shaft ends into the two narrow slots until they seat in the round bearings.
+2. **Motor:** with the body the right way up and the battery bay empty, hold
+   the motor with its shaft across the body and the can pointing toward the
+   **front** (button end). Lower it through the opening in the battery floor:
+   the shaft ends drop down the two narrow slots into the round bearings, the
+   can nose lands in the saddle, and the gearbox end sits just in front of the
+   cross bar. The solder tabs and lead end up near the front of the opening.
 3. **Drive wheels:** press a wheel onto each end of the motor shaft (the
    grooved ones if you printed tyres), matching the flat in the bore to the flat
    on the shaft. Squeeze both wheels on together between your thumbs so the
    shaft is in compression and nothing is pushed through the gearbox. Stop when
    each wheel's spacer ring is **a hair (≈0.3 mm, a sheet of paper) from the
    frame**: the wheels must spin without rubbing. The 7 mm hubs now fill the
-   bearings and can never drop back out through the 3.4 mm slots, which is what
+   bearings and can never lift out through the 3.4 mm slots, which is what
    holds the motor in.
-4. **Front wheels:** push the printed axle up into the front slots, then press a
-   plain wheel onto each end the same way, again leaving a paper-thin gap.
+4. **Front wheels:** drop the printed axle into the front slots the same way
+   (through the floor at the front of the battery bay), then press a plain
+   wheel onto each end, again leaving a paper-thin gap.
 5. **Wiring:** turn the body right side up. Plug battery holder → click-switch
    cable → Bambu conversion wire → motor. Every plug only fits one way. Lay the
    click switch on the shelf in the front cab, button facing up. Feed the
-   conversion wire and motor lead down through the floor opening at the front of
-   the battery bay to the motor plug. Coil the spare switch cable into the
-   bunker at the back of the battery bay and in the gaps beside the motor.
+   conversion wire down through the front of the floor opening to the motor's
+   lead. Coil the spare switch cable in the gaps beside the motor and in the
+   bunker at the back of the battery bay.
 6. **Batteries:** put 2×AAA in the holder and slide its own switch to **ON**.
    Lay it in the battery bay with its lead toward the **front** (it hops over the
    low fence onto the switch shelf). If the lead comes out of the other end, run
@@ -171,17 +170,17 @@ one direction, lay it across the cab (the cab is 26 mm wide).
 
 ## Speed
 
-There is no speed control; the motor's gear ratio sets it. With 22 mm wheels:
+There is no speed control; the motor's gear ratio sets it. With 26 mm wheels:
 
 | Power | Motor speed | Loco speed (no load) | Pulling 2–3 wagons |
 |---|---|---|---|
-| 2 × alkaline AAA (≈3.1 V) | ~135 rpm | ~15 cm/s | ~11–13 cm/s |
-| 2 × NiMH AAA (≈2.4 V) | ~105 rpm | ~12 cm/s | ~9–10 cm/s |
+| 2 × alkaline AAA (≈3.1 V) | ~135 rpm | ~18 cm/s | ~13–15 cm/s |
+| 2 × NiMH AAA (≈2.4 V) | ~105 rpm | ~14 cm/s | ~10–12 cm/s |
 
 For comparison, Brio's standard battery engine runs at roughly 8–10 cm/s
-(measured by eye on a loop; Brio doesn't publish it). So on alkalines this loco
-is a little brisker than Brio's; on NiMH it matches. 15 cm/s is one standard
-straight per second.
+(measured by eye on a loop; Brio doesn't publish it). So this loco is brisker
+than Brio's, especially on alkalines. **NiMH cells are the recommended
+battery**: slower, rechargeable, and the safer chemistry for a toddler toy.
 
 **Derailing:** speed isn't the risk. On the tightest Brio curve (R ≈ 182 mm)
 15 cm/s gives a sideways push of about 1 % of the loco's weight; it would need
@@ -192,9 +191,8 @@ switch or a lumpy joint, and a lighter, slower train helps there too.
 
 1. Use **NiMH rechargeables** — 20 % slower, no changes. Also the safer cell
    type for a toddler toy.
-2. Set `wheel_d = 20` in the model and re-export the wheels (and body, because
-   the axle height follows the wheel). ~10 % slower. Don't go below 20 mm: the
-   gearbox would get too close to the track.
+2. Smaller wheels would slow it, but the motor body hangs 6 mm below the axle,
+   so anything under 26 mm brings it within 3 mm of the track. Not recommended.
 3. A speed knob: Bambu's Potentiometer Board plugs into their Power
    Distribution Board (IA005), but the PDB is 53 mm long and would need a longer
    body. Not worth it for a toddler's engine.
@@ -210,8 +208,8 @@ nothing is stressed. Estimated limits, weakest first:
 | Wheel grip, bare PLA | ~20 g of pull | ~57 g on the driven axle × μ ≈ 0.35 on lacquered beech |
 | Wheel grip, TPU tyres | ~45 g | same × μ ≈ 0.8 |
 | Coupler magnet | ~150 g or more | 2 × D6×2 N35 through a 0.8 mm skin; Brio's own magnets set the real figure |
-| Motor, continuous | ~130–250 g at the rim | 140–280 g·cm rated torque ÷ 1.1 cm wheel radius |
-| Motor, stall | ~320 g | 350 g·cm ÷ 1.1 cm |
+| Motor, continuous | ~110–215 g at the rim | 140–280 g·cm rated torque ÷ 1.3 cm wheel radius |
+| Motor, stall | ~270 g | 350 g·cm ÷ 1.3 cm |
 
 The magnet has ~3× margin over the hardest pull the wheels can transmit, and
 the motor runs at a fraction of its rating even with tyres and a full train.
@@ -233,21 +231,22 @@ wheels slip first, so it can't happen there.
 
 ## Brio compatibility
 
-- **Wheels:** 22 mm diameter at 26 mm gauge, 4 mm wide, running in the standard
+- **Wheels:** 26 mm diameter at 26 mm gauge, 4 mm wide, running in the standard
   6 × 3 mm grooves.
 - **Curves:** 45 mm wheelbase with 24 mm front / 30 mm rear overhang. On a
   standard Brio curve (R ≈ 182 mm) the couplers sit about 4.5 and 6 mm off the
   track centreline, similar to Brio's own engines, so magnets stay coupled.
 - **Couplers:** magnetic, centre 10 mm above the track surface.
-- **Clearance:** lowest point 2.9 mm above the track surface (the bearing
-  walls). Clears switches, crossings and ramp transitions.
+- **Clearance:** lowest printed point 2.6 mm above the track surface (the
+  bearing walls and can saddle); the motor body is at 4 mm. Clears switches,
+  crossings and ramp transitions.
 
 ## Safety notes
 
 This is a home-made toy, not a certified one. Before handing it to a toddler:
 
 - **Wheels:** check that all four wheels are pressed on hard and can't be pulled
-  off. A loose 22 mm wheel is a small part; add a drop of superglue to each wheel
+  off. A loose 26 mm wheel is a small part; add a drop of superglue to each wheel
   bore if in doubt.
 - **Hatch:** keep the hatch screw tight. Batteries must not be reachable without
   a screwdriver.
@@ -263,11 +262,20 @@ This is a home-made toy, not a certified one. Before handing it to a toddler:
 Open `box_cab_locomotive.scad` in OpenSCAD and set `part = "assembly"` to
 preview everything, `"cutaway"` for the section view. Useful parameters:
 
-- `m_*` – your motor's dimensions (see above).
+- `m_*` – the LA009's measured dimensions (only change these for a different motor).
 - `batt_xc` – battery position; more negative moves weight off the drive axle.
 - `wheelbase` – 45 mm default.
 - `mag_z` – coupler height. `bore_d` / `bore_flat` – wheel press fit.
 - `groove_dp`, `tyre_t` – tyre groove depth and tyre thickness.
+
+## Changes in v3
+
+- Body rebuilt around Bambu's actual LA009 model: 12 × 10 mm body with the
+  shaft through its centre, 25 mm shaft. Bearing walls moved inward for 5.9 mm
+  of shaft in each hub; 26 mm wheels with arches for 4 mm motor clearance.
+- Motor now drops in from above through the battery floor; a saddle under the
+  can nose and a bar behind the gearbox limit it to ~+5°/−1° of rock.
+- Floor raised 1 mm; speed table and pulling-power figures updated for 26 mm wheels.
 
 ## Changes in v2
 
