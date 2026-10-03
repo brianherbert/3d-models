@@ -5,12 +5,12 @@ toddler presses the big red button on the roof and it goes; pressing it again
 stops it.
 
 - **Two solder joints, no gears to print, one screw.** The motor's double-ended
-  output shaft *is* the drive axle. The on/off button is a 12 mm panel-mount
+  output shaft *is* the drive axle. The on/off button is a 16 mm panel-mount
   latching switch soldered into the battery lead; everything else plugs
   together. (A no-solder variant with a plug-in switch cable is included.)
 - **Toddler-minded:** batteries under a screwed-down roof hatch; coupler magnets
   sealed inside the plastic; captive roof button; nothing reachable but the wheels.
-- **Brio proportions:** 99 × 30 × 59 mm (L × W × H on the track), 45 mm
+- **Brio proportions:** 105 × 30 × 59 mm (L × W × H on the track), 45 mm
   wheelbase with the axles near the ends, so the couplers stay close to the
   track centreline on curves. Narrower than the 40 mm track, so it clears
   platforms, signals and tunnels.
@@ -31,7 +31,7 @@ driving the rear wheels. Cables coil in the bunker behind the drive wheels.*
 | 1 | **N20 Dual Shaft Worm Gear Motor, 3 V 130 rpm (LA009)** | [Bambu Lab store](https://us.store.bambulab.com/products/n20-dual-shaft-worm-gear-motor) | The shaft is the drive axle. Rated 2–4 V, so it suits 2×AAA. |
 | 1 | **50 mm PH2.0 to SH1.0 Conversion Wire (XC004)** | [Bambu Lab store](https://us.store.bambulab.com/products/50mm-ph2-0-to-sh1-0-conversion-wire) | Joins the JST-PH switch cable to the motor's SH1.0 socket. |
 | 1 | **2 × AAA Battery Holder with On/Off Switch & JST PH (#4191)** | [Adafruit](https://www.adafruit.com/product/4191) | 62.5 × 25.3 × 15.4 mm. The smallest pack that runs the motor well. Its own switch stays ON inside. |
-| 1 | **12 mm latching push-button switch, PBS-11A type** (red cap) | Amazon/eBay, ~$1 each in packs | 12 mm panel hole, 17 × 21 mm overall, 2 solder tabs. Make sure it's the **latching** (self-locking, PBS-11**A**) one, not the momentary PBS-11B. Mounts through the roof with its own nut. |
+| 1 | **16 mm latching pushbutton, red (Adafruit #1442)** | [Adafruit](https://www.adafruit.com/product/1442), also Digi-Key / Mouser / Micro Center | The reference part: published drawing (18 mm bezel, 15.6 mm threaded body, 29.4 mm overall, 5 mm button). Solder to its **NO** and **C** tabs; ignore the LED tabs. Any "16 mm 1NO1NC latching" button is the same part dimensionally. Mounts through the roof with its own nut. |
 | 4 | **D6 × 2 mm round magnets** (2 per coupler) | [Bambu Lab store – magnets](https://us.store.bambulab.com/collections/magnets) | Sealed inside the couplers during printing. |
 | 1 | M3 × 10 mm screw (countersunk or button head) | Any hardware store / Bambu Maker's Supply | Holds the roof hatch closed. It self-taps into the plastic. |
 | 2 | AAA batteries | — | Alkaline (fastest, ~1.5–2 h running) or NiMH (a little slower). |
@@ -48,7 +48,7 @@ List prices at the time of writing, US stores:
 | Bambu XC004 wire | $1.08 | No cheaper equivalent worth the bother. |
 | Bambu D6×2 magnets, pack of 20 | $1.75 | Already ~9¢ each; bulk Amazon/eBay packs of 50–100 cost about the same per magnet. Any 6 × 2 mm N35 disc works (or set `mag_t` for a single 6 × 4 mm). |
 | Adafruit #4191 battery holder | ~$3 | Amazon "2×AAA holder with switch and JST-PH" packs of 5 for ~$8, if you'll build several. |
-| PBS-11A 12 mm latching button | ~$1 | Sold in packs of 5–12 for $6–9. Adafruit's #3064 plug-in switch cable ($2.95) is the no-solder alternative (see the variant below). |
+| Adafruit #1442 16 mm latching button | $2.50 | Generic 16 mm latching buttons are ~$1 each in packs. A 12 mm PBS-11A (~$1) fits the `12mm-switch-variant` files. Adafruit's #3064 plug-in switch cable ($2.95) is the no-solder alternative. |
 | M3 screw, AAA cells, ~40 g PLA | <$2 | — |
 | **Parts total** | **~$17** | |
 
@@ -80,6 +80,7 @@ you'd order from regardless.
 |---|---|---|---|
 | `body.stl` | 1 | As exported (upside down) | **Pause for magnets** (below) |
 | `hatch.stl` | 1 | As exported (upside down) | |
+| `stl/12mm-switch-variant/` | — | — | Body and hatch for a 12 mm PBS-11A button instead of the 16 mm one |
 | `stl/inline-switch-variant/` | — | — | Body, hatch, button and shim for the no-solder Adafruit #3064 variant |
 | `wheel.stl` | 4 (or 2) | As exported | Plain wheel |
 | `wheel_drive.stl` | 0 or 2 | As exported | Drive wheel with a tyre groove — use instead of two plain wheels if you print tyres |
@@ -170,10 +171,12 @@ OpenSCAD preview is drawn from the same numbers.
 4. **Front wheels:** drop the printed axle into the front slots the same way
    (through the floor at the front of the battery bay), then press a plain
    wheel onto each end, again leaving a paper-thin gap.
-5. **Switch:** push the PBS-11A through the 12 mm hole in the roof hatch from
-   the top, and tighten its nut underneath. Cut the battery holder's **red**
-   wire about 60 mm from the holder, strip both ends, and solder one end to
-   each tab of the switch. Slip heat-shrink or tape over the joints.
+5. **Switch:** push the 16 mm button through the hole in the roof hatch from
+   the top and tighten its nut underneath. Cut the battery holder's **red**
+   wire about 60 mm from the holder, strip both ends, and solder one to the
+   switch's **NO** tab and the other to its **C** tab (the LED tabs stay
+   unused). Slip heat-shrink or tape over the joints. The switch body hangs
+   into a closed well in the front cab.
 6. **Wiring:** plug battery holder → Bambu conversion wire → motor. Each plug
    only fits one way. Feed the conversion wire down through the front of the
    floor opening to the motor's lead; the spare motor lead lies on top of the
@@ -184,6 +187,13 @@ OpenSCAD preview is drawn from the same numbers.
 8. **Roof:** hold the hatch tilted, push its front tongue through the slot in
    the front wall, lower the back, and fit the M3 screw at the rear.
 9. **Test:** press the button: the motor starts. Press again: it stops.
+
+### 12 mm button variant
+
+Set `switch_type = "pbs11"` or use `stl/12mm-switch-variant/`: a 12.4 mm roof
+hole and a smaller well for a PBS-11A type button (12 mm hole, 17 × 21 mm
+overall, latching, 2 tabs). These vary more between sellers than the 16 mm
+family, so check it's the self-locking one and under 17 mm deep.
 
 ### No-solder variant (Adafruit #3064 inline switch)
 
@@ -261,9 +271,9 @@ wheels slip first, so it can't happen there.
 
 - **Wheels:** 26 mm diameter at 26 mm gauge, 4 mm wide, running in the standard
   6 × 3 mm grooves.
-- **Curves:** 45 mm wheelbase with 24 mm front / 30 mm rear overhang. On a
-  standard Brio curve (R ≈ 182 mm) the couplers sit about 4.5 and 6 mm off the
-  track centreline, similar to Brio's own engines, so magnets stay coupled.
+- **Curves:** 45 mm wheelbase with 30 mm overhang at each end. On a standard
+  Brio curve (R ≈ 182 mm) the couplers sit about 6 mm off the track
+  centreline, similar to Brio's own engines, so magnets stay coupled.
 - **Couplers:** magnetic, centre 10 mm above the track surface.
 - **Clearance:** lowest printed point 2.6 mm above the track surface (the
   bearing walls and can saddle); the motor body is at 4 mm. Clears switches,
@@ -296,6 +306,13 @@ preview everything, `"cutaway"` for the section view. Useful parameters:
 - `mag_z` – coupler height. `bore_d` / `bore_flat` – wheel press fit.
 - `groove_dp`, `tyre_t` – tyre groove depth and tyre thickness.
 
+## Changes in v5
+
+- Reference switch is now the Adafruit #1442 16 mm latching pushbutton (a
+  documented part, bigger cap for small hands). The front cab is 22 mm long
+  for its nut and a closed round well under the cab encloses the switch body.
+  12 mm (PBS-11A) and no-solder (#3064) variants are exported alongside.
+
 ## Changes in v4
 
 - Default on/off is now a 12 mm panel-mount latching push button (PBS-11A)
@@ -315,7 +332,8 @@ preview everything, `"cutaway"` for the section view. Useful parameters:
 ## Changes in v2
 
 - Motor turned round (can forward under the battery) and the axles moved to
-  the ends: rear overhang cut from 52 mm to 30 mm, total length 107 → 99 mm.
+  the ends: rear overhang cut from 52 mm to 30 mm, total length 107 → 99 mm
+  (105 mm since v5's longer switch cab).
   On a Brio curve the rear coupler is now ~6 mm off centre instead of ~12 mm.
 - Gearbox cage so the motor body can't rock under load.
 - Switch shelf fence and battery stops rebuilt as wall-to-wall bridges; the old

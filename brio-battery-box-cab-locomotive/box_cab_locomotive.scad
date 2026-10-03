@@ -107,20 +107,26 @@ m_gap     = 0.4;                 // clearance of the cage bar and saddle
 gb_x1 = m_rear;  can_x0 = m_end;
 
 // ---------------- on/off switch ----------------
-//  "pbs11"  : 12 mm panel-mount latching pushbutton (PBS-11A type) through
-//             the roof hatch, soldered into the battery holder's red lead.
-//             No printed button, no shelf, ~25 cm of wire in total.
+//  "p16"    : 16 mm panel-mount latching pushbutton (Adafruit #1442 family,
+//             any "16 mm 1NO1NC latching") through the roof hatch, soldered
+//             into the battery holder's red lead.  Documented dimensions,
+//             no printed button, ~25 cm of wire in total.      <- default
+//  "pbs11"  : same idea with a 12 mm PBS-11A type button.
 //  "inline" : Adafruit #3064 click-switch cable on a shelf under a printed
 //             captive roof button.  No soldering, ~80 cm of wire to stow.
-switch_type = "pbs11";
-// PBS-11A (12 mm) nominal dimensions
-pbs_hole   = 12.4;      // panel hole for the M12 thread
-pbs_cap_d  = 12;  pbs_cap_h = 6;        // button cap above the panel
-pbs_flange = 14.5;                       // bezel on top of the panel
-pbs_body_d = 10;  pbs_below = 17;        // body + terminals below the panel
+switch_type = "p16";
+p16 = (switch_type == "p16");
+// panel-mount button dimensions (16 mm family / PBS-11A)
+pbs_hole   = p16 ? 16.4 : 12.4;          // panel hole for the thread
+pbs_cap_d  = p16 ? 16 : 12;  pbs_cap_h = p16 ? 5 : 6;    // button above the bezel
+pbs_flange = p16 ? 18 : 14.5;            // bezel on top of the panel
+pbs_body_d = p16 ? 15.6 : 10;            // threaded body
+pbs_nut    = p16 ? 20 : 15;              // nut, across corners
+pbs_below  = p16 ? 24 : 17;              // body + terminals below the panel
+well_clear = 0.6;                        // radial clearance in the well
 // inline switch (Adafruit #3064), assumed housing size
 sw_len_x = 12;  sw_len_y = 24;  sw_h_nom = 9;
-cab_len  = sw_len_x + 4;                          // switch cab interior length
+cab_len  = switch_type == "inline" ? sw_len_x + 4 : pbs_nut + 1.6;   // switch cab interior length
 
 // ---------------- body ----------------
 wall      = 1.6;
@@ -150,7 +156,9 @@ bay_x0    = can_x0 - 3;  bay_x1 = tray_x1 - 0.01;  bay_hw = frame_y0 - 0.2;
 
 // switch shelf + roof button (front)
 shelf_z   = batt_z0 + 4;                           // shelf top; 4 mm cable slot beneath
-btn_x     = (cab_x0 + cab_x1)/2;
+btn_x     = switch_type == "inline" ? (cab_x0 + cab_x1)/2 : cab_x0 + pbs_nut/2 + 0.6;
+well_r    = pbs_body_d/2 + well_clear;             // bore of the switch well
+well_z0   = 10;                                     // bottom of the well (above the front axle)
 btn_d     = 12;
 btn_hole  = 13;
 foot_x    = sw_len_x; foot_y = 18;
@@ -291,6 +299,9 @@ module body_solid() {
     bearing_walls(front_x - brg_hx, front_x + brg_hx, front_x);
     // stiffeners from the front bearings to the pilot plate
     mirror_y() translate([body_x0, frame_y0, 12]) cube([front_x - brg_hx - body_x0 + 0.01, frame_y1 - frame_y0, floor_z0 - 12 + 0.01]);
+    // round well under the switch cab so the button's body is enclosed
+    if (switch_type != "inline")
+        translate([btn_x, 0, well_z0]) cylinder(r = well_r + 1.0, h = floor_z0 - well_z0 + 0.01);
     // couplers
     coupler_block(true);
     coupler_block(false);
@@ -313,6 +324,9 @@ module body_cuts() {
     // cable slot under the switch shelf (open to the battery bay)
     if (switch_type == "inline")
         translate([cab_x0 - 0.01, -in_w/2, batt_z0 - 0.01]) cube([cab_len + 0.5, in_w, shelf_z - 1.5 - batt_z0]);
+    // bore of the switch well
+    if (switch_type != "inline")
+        translate([btn_x, 0, well_z0 + 1.0]) cylinder(r = well_r, h = 40);
     // hatch screw pilot hole in the rear wall
     translate([screw_x, 0, top_z - 12]) cylinder(d = 2.5, h = 13);
     // hatch tongue slot through the front wall
@@ -363,7 +377,7 @@ module hatch() {
         } else {
             // panel hole for the PBS-11A, nut clearance below
             translate([btn_x, 0, top_z - 5]) cylinder(d = pbs_hole, h = 20);
-            translate([btn_x, 0, top_z - 3]) cylinder(d = 19, h = 3);
+            translate([btn_x, 0, top_z - 3]) cylinder(d = pbs_nut + 1.5, h = 3);
         }
         // countersunk M3 screw hole over the rear wall
         translate([screw_x, 0, top_z - 5]) cylinder(d = 3.4, h = 20);
@@ -416,7 +430,7 @@ module dummy_switch() {
     else translate([btn_x, 0, top_z + hatch_t]) {
         color("Red")   cylinder(d = pbs_cap_d, h = pbs_cap_h);
         color("Black") translate([0, 0, -0.01]) cylinder(d = pbs_flange, h = 1.5);
-        color("Black") translate([0, 0, -hatch_t - 5]) cylinder(d = pbs_body_d + 2, h = 5);          // nut
+        color("Black") translate([0, 0, -hatch_t - 4]) cylinder(d = pbs_nut, h = 4, $fn = 6);        // nut
         color("DimGray") translate([0, 0, -hatch_t - pbs_below]) cylinder(d = pbs_body_d, h = pbs_below);
     }
 }
