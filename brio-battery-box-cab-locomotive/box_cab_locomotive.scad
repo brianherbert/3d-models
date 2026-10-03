@@ -39,7 +39,7 @@
 //    "button"       roof push button (inline switch variant only)
 //    "wheel"        plain front wheel - print 2
 //    "wheel_drive"  drive wheel with a groove for a TPU tyre - print 2 (optional)
-//    "wheel_drive_oring"  drive wheel grooved for a 22 x 2.5 mm O-ring - print 2 (default)
+//    "wheel_drive_oring"  drive wheel grooved for a 22 x 2 mm O-ring - print 2 (default)
 //    "tyre"         TPU tyre ring for the drive wheel - print 2 (optional)
 //    "axle"         front axle (lies on its flat)
 //    "shim"         2 mm spacer under the click switch, only if needed
@@ -77,13 +77,14 @@ dish_depth = 2.0;       // recess in the wheel face (the shaft end sits 0.4 mm b
 
 // optional traction tyres on the drive wheels
 //   "tpu"   : printed TPU ring (tyre.stl)
-//   "oring" : hardware-store nitrile O-ring, 22 mm ID x 2.5 mm section
+//   "oring" : nitrile O-ring from a metric assortment, 22 mm ID x 2 mm section
+//             (20 x 2 and the SAE AS568-118, 21.9 x 2.62, also fit)
 groove_w   = 2.6;  groove_dp = 1.2;               // TPU ring groove
 tyre_t     = 1.7;  tyre_w    = groove_w - 0.2;
 tyre_id    = wheel_d - 2*groove_dp - 0.4;        // slight stretch
-oring_cs   = 2.5;  oring_id = 22;
-og_w       = oring_cs + 0.3;                     // O-ring groove
-og_dp      = (wheel_d - (oring_id + 0.4))/2;     // groove bottom = ID + 0.4 (stretch)
+oring_cs   = 2.0;  oring_id = 22;
+og_w       = 2.8;                                // O-ring groove width (takes 2 to 2.65 mm sections)
+og_dp      = (wheel_d - (oring_id + 1.4))/2;     // groove bottom = ID + 1.4 (6 % stretch); ring sits 0.7 mm proud
 
 // D-shaft (N20 output shaft and printed front axle)
 shaft_d    = 3.0;

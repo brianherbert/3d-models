@@ -37,7 +37,7 @@ driving the rear wheels. Cables coil in the bunker behind the drive wheels.*
 | 1 | **M3 × 10 mm flat-head Phillips screw** (from the Fgruh M3 flat-head assortment) | [Amazon](https://a.co/d/09Z5iRX5) | Holds the roof hatch closed, flush with the roof. It self-taps into the plastic. The kit's nuts and washers aren't needed. For a socket cap head instead, set `screw_head = "cap"` and use M3 × 12. |
 | 2 | AAA batteries | — | Alkaline (fastest, ~1.5–2 h running) or NiMH (a little slower). |
 | — | PLA filament, ~40 g | Bambu Lab | Body, hatch, wheels, button. Three colours look great. |
-| 2 | *Optional:* nitrile O-rings, **AS568-118** (21.9 × 2.62 mm) or **-117**; metric 22 × 2.5 or 21 × 2.5 | Any SAE "407-piece" O-ring assortment (~$10); look for -117/-118 in its size chart | Traction tyres; the drive wheels are grooved for them, so they can go on any time. Not the thin 1/16"-section (-0xx) rings. |
+| 2 | *Optional:* nitrile O-rings, **22 × 2 mm** (ID × section) | Metric O-ring assortment kits (~$7–10, e.g. the ZDBB 1010-piece box) | Traction tyres; the drive wheels are grooved for them, so they can go on any time. 20 × 2 also fits (tighter), as does the SAE AS568-118 (21.9 × 2.62) from an inch-sized kit, sitting a little prouder. |
 | — | *Optional:* TPU 95A HF filament, ~1 g | Bambu Lab | Printed tyres instead of O-rings, if you have TPU anyway. |
 
 ### Cost and cheaper alternatives
@@ -76,8 +76,8 @@ you'd order from regardless.
 - **Traction:** bare PLA wheels on wood give roughly 20 g of pull, enough for a
   few wagons on the flat but marginal on Brio ramps. A rubber tyre on each
   drive wheel more than doubles that; Brio's own engines use rubber tyres for
-  the same reason. A nitrile O-ring from an assortment box (AS568-118, or
-  metric 22 × 2.5) does the job for pennies; printed TPU tyres are the alternative if you have TPU.
+  the same reason. A 22 × 2 mm nitrile O-ring from an assortment box does
+  the job for pennies; printed TPU tyres are the alternative if you have TPU.
 
 ## Printed parts (`stl/`)
 
@@ -88,7 +88,7 @@ you'd order from regardless.
 | `stl/12mm-switch-variant/` | — | — | Body and hatch for a 12 mm PBS-11A button instead of the 16 mm one |
 | `stl/inline-switch-variant/` | — | — | Body, hatch, button and shim for the no-solder Adafruit #3064 variant |
 | `wheel.stl` | 2 | As exported | Front wheels |
-| `wheel_drive_oring.stl` | 2 | As exported | Drive wheels, grooved for a 3/32"-section nitrile O-ring (AS568-117/-118 or metric 22 × 2.5). Runs fine bare on its tread lands; add the O-rings later if you want more grip. |
+| `wheel_drive_oring.stl` | 2 | As exported | Drive wheels, grooved for a 22 × 2 mm nitrile O-ring. Runs fine bare on its tread lands; add the O-rings later if you want more grip. |
 | `wheel_drive.stl` + `tyre.stl` | optional | As exported | Drive wheel and printed **TPU** tyre, if you have TPU instead of O-rings |
 
 Wheels are 26 mm (Brio's are 22–24 mm) so the motor body clears the track by
@@ -158,9 +158,10 @@ OpenSCAD preview is drawn from the same numbers.
 ## Assembly (about 10 minutes, a screwdriver is the only tool)
 
 1. **Tyres (optional, can be done later):** stretch an O-ring into the groove
-   of each drive wheel. It should sit about 0.8 mm proud of the tread. Any
-   3/32" (2.5–2.65 mm) section ring with a 20–22 mm inside diameter works:
-   AS568-117 or -118 from an SAE assortment, or metric 20/21/22 × 2.5.
+   of each drive wheel. A 22 × 2 ring sits about 0.7 mm proud of the tread;
+   20 × 2 and AS568-118 (21.9 × 2.62) also work. Don't use anything with an
+   inside diameter over 23 mm (it walks out) or a section over 2.7 mm (it
+   won't seat in the groove).
 2. **Motor:** with the body the right way up and the battery bay empty, hold
    the motor with its shaft across the body and the can pointing toward the
    **front** (button end). Lower it through the opening in the battery floor:
