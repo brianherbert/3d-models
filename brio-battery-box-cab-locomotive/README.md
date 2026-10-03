@@ -37,7 +37,7 @@ driving the rear wheels. Cables coil in the bunker behind the drive wheels.*
 | 1 | **M3 × 10 mm flat-head Phillips screw** (from the Fgruh M3 flat-head assortment) | [Amazon](https://a.co/d/09Z5iRX5) | Holds the roof hatch closed, flush with the roof. It self-taps into the plastic. The kit's nuts and washers aren't needed. For a socket cap head instead, set `screw_head = "cap"` and use M3 × 12. |
 | 2 | AAA batteries | — | Alkaline (fastest, ~1.5–2 h running) or NiMH (a little slower). |
 | — | PLA filament, ~40 g | Bambu Lab | Body, hatch, wheels, button. Three colours look great. |
-| 2 | *Optional:* nitrile O-rings, **22 × 2 mm** (ID × section) | Metric O-ring assortment kits (~$7–10, e.g. the ZDBB 1010-piece box) | Traction tyres; the drive wheels are grooved for them, so they can go on any time. 20 × 2 also fits (tighter), as does the SAE AS568-118 (21.9 × 2.62) from an inch-sized kit, sitting a little prouder. |
+| 2 | *Optional:* nitrile O-rings, **22 × 2 mm** (ID × section) | [ZDBB 1010-piece metric O-ring kit, Amazon](https://a.co/d/0eY7CVIx) (~$10), or any metric assortment with 22 × 2 | Traction tyres; the drive wheels are grooved for them, so they can go on any time. 20 × 2 also fits (tighter), as does the SAE AS568-118 (21.9 × 2.62) from an inch-sized kit, sitting a little prouder. |
 | — | *Optional:* TPU 95A HF filament, ~1 g | Bambu Lab | Printed tyres instead of O-rings, if you have TPU anyway. |
 
 ### Cost and cheaper alternatives
