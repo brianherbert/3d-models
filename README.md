@@ -24,6 +24,8 @@ Each model folder follows the same layout:
 - `README.md` covers what the model is, how to print it, and any parts or
   assembly it needs.
 - `stl/` holds the ready-to-print files. Open these in Bambu Studio.
+- Some models also have a Bambu Studio project (`.3mf`) with the A1 print
+  settings already chosen. Open that instead of the STL when there is one.
 - `images/` holds the renders used in the README.
 - The source (`.scad` or `.py`) regenerates the STLs, and its key dimensions
   are parameters at the top of the file.
