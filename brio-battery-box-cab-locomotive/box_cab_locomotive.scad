@@ -121,6 +121,8 @@ gb_x1 = m_rear;  can_x0 = m_end;
 //  "inline" : Adafruit #3064 click-switch cable on a shelf under a printed
 //             captive roof button.  No soldering, ~80 cm of wire to stow.
 switch_type = "p16";
+// hatch screw head: "flat" (countersunk Phillips, sits flush) or "cap" (socket head)
+screw_head = "flat";
 p16 = (switch_type == "p16");
 // panel-mount button dimensions (16 mm family / PBS-11A)
 pbs_hole   = p16 ? 16.4 : 12.4;          // panel hole for the thread
@@ -386,10 +388,13 @@ module hatch() {
             translate([btn_x, 0, top_z - 5]) cylinder(d = pbs_hole, h = 20);
             translate([btn_x, 0, top_z - 3]) cylinder(d = pbs_nut + 1.5, h = 3);
         }
-        // M3 screw hole over the rear wall, counterbored for a socket cap head
-        // (5.5 mm head sits ~1.8 mm proud); a flat head also fits
+        // M3 screw hole over the rear wall: countersunk for a flat head
+        // (flush, M3 x 10) or counterbored for a socket cap head (M3 x 12)
         translate([screw_x, 0, top_z - 5]) cylinder(d = 3.4, h = 20);
-        translate([screw_x, 0, top_z + hatch_t - 1.2]) cylinder(d = 6.2, h = 1.21);
+        if (screw_head == "flat")
+            translate([screw_x, 0, top_z + hatch_t - 1.7]) cylinder(d1 = 3.4, d2 = 6.8, h = 1.71);
+        else
+            translate([screw_x, 0, top_z + hatch_t - 1.2]) cylinder(d = 6.2, h = 1.21);
         // engraved roof panel lines
         for (x = [tray_x0 + 6, tray_x1 - 10]) translate([x, -out_w/2 + 3, top_z + hatch_t - 0.5]) cube([0.8, out_w - 6, 1]);
     }
