@@ -198,9 +198,12 @@ def mesh_of(field, xs, ys, zs, res, level=0.0):
     v, f, _, _ = measure.marching_cubes(field, level=level, spacing=(res, res, res))
     v += np.array([xs[0], ys[0], zs[0]])
     m = trimesh.Trimesh(v, f, process=True)
-    # keep the largest body (marching cubes leaves slivers along the blends)
-    parts = m.split(only_watertight=False)
-    m = max(parts, key=lambda p: p.volume)
+    # drop the slivers marching cubes leaves along the blends, but keep every
+    # real shell, including cavity shells (negative volume): the hinge socket
+    # and mouth void are separate shells and must survive
+    parts = [p for p in m.split(only_watertight=False) if abs(p.volume) > 40.0]
+    print("   shells kept:", [round(p.volume, 0) for p in parts])
+    m = trimesh.util.concatenate(parts) if len(parts) > 1 else parts[0]
     m.fix_normals()
     return m
 
@@ -261,6 +264,7 @@ def build(res, preview=False):
     STRUT = (0.0, float(low[:, 1].mean()), float(jaw.bounds[0][2]) - 0.2)
     print("chin strut at", np.round(STRUT, 1))
     b = evaluate(body_fn, xs, ys, zs); body = mesh_of(b, xs, ys, zs, res)
+    np.save("/tmp/claude-0/horse_field_body.npy", b); np.save("/tmp/claude-0/horse_field_jaw.npy", j)
     print("body:", "watertight" if body.is_watertight else "NOT watertight",
           "| jaw:", "watertight" if jaw.is_watertight else "NOT watertight",
           "| jaw volume", round(jaw.volume / 1000, 1), "cm3")
