@@ -34,7 +34,7 @@ driving the rear wheels. Cables coil in the bunker behind the drive wheels.*
 | 1 | **16 mm latching pushbutton, red (Adafruit #1442)** | [Adafruit](https://www.adafruit.com/product/1442), also Digi-Key / Mouser / Micro Center | The reference part: published drawing (18 mm bezel, 15.6 mm threaded body, 29.4 mm overall, 5 mm button). Uses its **NO** and **C** tabs; the LED tabs stay empty. Any "16 mm 1NO1NC latching" button is the same part dimensionally. Mounts through the roof with its own nut. |
 | 1 pack | **Quick-Connect Wire Pairs, 0.11" (Adafruit #1152)** | [Adafruit](https://www.adafruit.com/product/1152) | Push-on spade leads for the switch tabs, so the switch end needs no soldering and the roof unplugs for service. You use 2 of the 10. |
 | 4 | **D6 × 2 mm round magnets** (2 per coupler) | [Bambu Lab store – magnets](https://us.store.bambulab.com/collections/magnets) | Sealed inside the couplers during printing. |
-| 1 | M3 × 10 mm screw (countersunk or button head) | Any hardware store / Bambu Maker's Supply | Holds the roof hatch closed. It self-taps into the plastic. |
+| 1 | M3 × 12 mm screw, socket cap or button head (M3 × 10 if flat head) | Any M3 assortment kit / Bambu Maker's Supply | Holds the roof hatch closed. It self-taps into the plastic; the hatch has a shallow counterbore so a cap head sits ~1.8 mm proud. |
 | 2 | AAA batteries | — | Alkaline (fastest, ~1.5–2 h running) or NiMH (a little slower). |
 | — | PLA filament, ~40 g | Bambu Lab | Body, hatch, wheels, button. Three colours look great. |
 | 2 | *Optional:* nitrile O-rings, 22 mm ID × 2.5 mm section | Hardware store / assortment box, cents each | Traction tyres; the drive wheels are grooved for them, so they can go on any time. |
@@ -193,7 +193,8 @@ OpenSCAD preview is drawn from the same numbers.
    Lay it in the battery bay with the lead toward the **front**; the switch
    wires reach the hatch over the low fence.
 8. **Roof:** hold the hatch tilted, push its front tongue through the slot in
-   the front wall, lower the back, and fit the M3 screw at the rear.
+   the front wall, lower the back, and fit the M3 × 12 screw at the rear. Snug,
+   not tight: it's threading into plastic.
 9. **Test:** press the button: the motor starts. Press again: it stops.
 
 ### 12 mm button variant
