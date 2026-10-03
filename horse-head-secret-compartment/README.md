@@ -16,11 +16,12 @@ surface is self-supporting.*
 
 ## What it is
 
-- **Size:** about 150 mm tall (ears to base), 55 mm wide, 125 mm long, on an
-  oval plinth. Head lowered in a calm, grazing pose.
+- **Size:** 168 mm tall (plinth to ear tips), 121 mm long, 52 mm wide at the
+  jowls, on an 80 × 112 mm oval plinth. Head lowered in a calm, grazing pose.
 - **Compartment:** the lower jaw is a hollow scoop with 2.4 mm walls, open at
-  the tongue. It holds a few coins, a ring, a USB stick, a folded note or a
-  small key. The jaw opens to about 35°.
+  the tongue: about 19 cm³, a pocket roughly 28 mm wide, 50 mm long and up to
+  42 mm deep. It holds a handful of coins, a ring, a USB stick, a folded note
+  or a small key. The jaw opens to about 35°.
 - **Mechanism:** a diamond-section pin, printed as part of the jaw, sits in a
   matching socket in the jowls. The jaw's heel is a cylinder around the pin
   so it turns without binding; the body is carved to the jaw's full swept path.
@@ -33,7 +34,8 @@ surface is self-supporting.*
 |---|---|
 | `stl/horse_head.stl` | **The part to print.** Body and jaw in one file, already positioned. |
 | `sculpt_horse_head.py` | The parametric sculpt (Python: numpy, scikit-image, trimesh, manifold3d). |
-| `stl/preview_*.stl` | Body, jaw and solid-head meshes separately, for viewing or remixing. |
+| `stl/preview_*.stl` | Body, jaw (closed and open) and solid-head meshes separately, for viewing or remixing. |
+| `verify.py` | Re-runs the checks: watertightness, jaw swing, mid-air islands. |
 
 ## Printing (Bambu Lab A1, PLA, 0.4 mm nozzle)
 
@@ -50,7 +52,10 @@ surface is self-supporting.*
 
 ### Estimated print time
 
-See the table at the bottom; filled in from a slice with A1 speeds.
+Sliced with an A1-like profile (Bambu PLA Basic speeds, 0.2 mm layers,
+3 walls, 15 % gyroid): **about 4 h 30 min and 149 g of PLA**, plus the A1's
+start-up routine. Most of the time is the solid-feeling neck and plinth; 10 %
+infill saves ~20 minutes with no visible difference.
 
 ## After printing
 
@@ -78,7 +83,9 @@ python3 sculpt_horse_head.py --res 0.8  # quick draft
 - `GAP`, `PIN_GAP` – print-in-place clearances.
 - `WALL` – compartment wall thickness. `OPEN_MAX` – designed opening angle.
 - The sculpt itself is a list of blended ellipsoids, cones and capsules in
-  `horse_sdf()`; move or resize them to change the horse.
+  `horse_sdf()`; move or resize them to change the horse. It is stylised rather
+  than anatomical: recognisably a horse, with the proportions right, but the
+  surface is smooth blends, not muscle and vein detail.
 
 To scale the whole thing, scale the STL in the slicer; the 0.45 mm gaps scale
 too, so stay within about 80–130 %.

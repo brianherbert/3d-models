@@ -244,7 +244,7 @@ def build(res, preview=False):
             notch = np.maximum(np.abs(P[:, 2] - (PLINTH_H + 1.0)) - 0.6, 0.3 - np.minimum(np.abs(P[:, 0] - sx), np.abs(P[:, 1] - sy)))
             blade = np.maximum(blade, -notch)
             b = np.minimum(b, np.maximum(blade, j - 0.2))    # never closer than 0.2 mm (one layer) to the jaw
-        return b
+        # hinge socket in the jowls (a touch longer than the pin)
         b = np.maximum(b, -(pin_sdf(Ph, PIN_R + PIN_GAP * np.sqrt(2), XP + 0.6)))
         return b
     def jaw_fn(P):
