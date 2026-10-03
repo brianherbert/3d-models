@@ -174,9 +174,12 @@ def mouth_cavity_sdf(Ph):
 
 # ----------------------------------------------------------------- meshing
 def grid(res):
-    xs = np.arange(-50, 50 + res, res)
-    ys = np.arange(-75, 110 + res, res)
-    zs = np.arange(-2, 180 + res, res)
+    # start the grid a fraction of a cell off round numbers so no sample plane
+    # lands exactly on the z = 0 base or the plinth top (exact zeros in the
+    # field make marching cubes produce degenerate faces)
+    xs = np.arange(-50 + 0.37 * res, 50 + res, res)
+    ys = np.arange(-75 + 0.37 * res, 110 + res, res)
+    zs = np.arange(-2 + 0.37 * res, 180 + res, res)
     return xs, ys, zs
 
 def evaluate(fn, xs, ys, zs, slab=24):
