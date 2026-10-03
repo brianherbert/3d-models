@@ -37,7 +37,8 @@ driving the rear wheels. Cables coil in the bunker behind the drive wheels.*
 | 1 | M3 × 10 mm screw (countersunk or button head) | Any hardware store / Bambu Maker's Supply | Holds the roof hatch closed. It self-taps into the plastic. |
 | 2 | AAA batteries | — | Alkaline (fastest, ~1.5–2 h running) or NiMH (a little slower). |
 | — | PLA filament, ~40 g | Bambu Lab | Body, hatch, wheels, button. Three colours look great. |
-| — | *Optional:* TPU 95A HF filament, ~1 g | Bambu Lab | Two traction tyres for the drive wheels (see below). |
+| 2 | *Optional:* nitrile O-rings, 22 mm ID × 2.5 mm section | Hardware store / assortment box, cents each | Traction tyres for the drive wheels; use `wheel_drive_oring.stl`. |
+| — | *Optional:* TPU 95A HF filament, ~1 g | Bambu Lab | Printed tyres instead of O-rings, if you have TPU anyway. |
 
 ### Cost and cheaper alternatives
 
@@ -73,8 +74,10 @@ you'd order from regardless.
 - **Pushing it by hand:** the worm gear self-locks, so with the power off the
   driving wheels slide instead of turning. Nothing can be damaged.
 - **Traction:** bare PLA wheels on wood give roughly 20 g of pull, enough for a
-  few wagons on the flat but marginal on Brio ramps. The optional TPU tyres more
-  than double that. Brio's own engines use rubber tyres for the same reason.
+  few wagons on the flat but marginal on Brio ramps. A rubber tyre on each
+  drive wheel more than doubles that; Brio's own engines use rubber tyres for
+  the same reason. A 22 × 2.5 mm nitrile O-ring from an assortment box does
+  the job for pennies; printed TPU tyres are the alternative if you have TPU.
 
 ## Printed parts (`stl/`)
 
@@ -85,7 +88,8 @@ you'd order from regardless.
 | `stl/12mm-switch-variant/` | — | — | Body and hatch for a 12 mm PBS-11A button instead of the 16 mm one |
 | `stl/inline-switch-variant/` | — | — | Body, hatch, button and shim for the no-solder Adafruit #3064 variant |
 | `wheel.stl` | 4 (or 2) | As exported | Plain wheel |
-| `wheel_drive.stl` | 0 or 2 | As exported | Drive wheel with a tyre groove — use instead of two plain wheels if you print tyres |
+| `wheel_drive_oring.stl` | 0 or 2 | As exported | Drive wheel grooved for a **22 × 2.5 mm nitrile O-ring** (hardware-store assortment). The cheap traction option. |
+| `wheel_drive.stl` | 0 or 2 | As exported | Drive wheel grooved for a printed TPU tyre |
 | `tyre.stl` | 0 or 2 | As exported | **TPU**, fits `wheel_drive` |
 
 Wheels are 26 mm (Brio's are 22–24 mm) so the motor body clears the track by
@@ -154,8 +158,9 @@ OpenSCAD preview is drawn from the same numbers.
 
 ## Assembly (about 10 minutes, a screwdriver is the only tool)
 
-1. **Tyres (optional):** stretch a TPU tyre into the groove of each
-   `wheel_drive` wheel.
+1. **Tyres (optional):** stretch an O-ring into the groove of each
+   `wheel_drive_oring` wheel (or a TPU tyre onto `wheel_drive`). It should sit
+   about 0.7 mm proud of the tread.
 2. **Motor:** with the body the right way up and the battery bay empty, hold
    the motor with its shaft across the body and the can pointing toward the
    **front** (button end). Lower it through the opening in the battery floor:
@@ -250,7 +255,7 @@ nothing is stressed. Estimated limits, weakest first:
 | Link | Limit | Basis |
 |---|---|---|
 | Wheel grip, bare PLA | ~20 g of pull | ~57 g on the driven axle × μ ≈ 0.35 on lacquered beech |
-| Wheel grip, TPU tyres | ~45 g | same × μ ≈ 0.8 |
+| Wheel grip, rubber tyres (O-ring or TPU) | ~45 g | same × μ ≈ 0.8 |
 | Coupler magnet | ~150 g or more | 2 × D6×2 N35 through a 0.8 mm skin; Brio's own magnets set the real figure |
 | Motor, continuous | ~110–215 g at the rim | 140–280 g·cm rated torque ÷ 1.3 cm wheel radius |
 | Motor, stall | ~270 g | 350 g·cm ÷ 1.3 cm |
@@ -263,7 +268,7 @@ Rough wagon counts (Brio wagon ≈ 40–60 g, ~3–5 g drag each on the flat):
 | | Flat track | Through curves | Brio ramp (~15 %) |
 |---|---|---|---|
 | Bare PLA wheels | ~5 | ~3–4 | loco alone just climbs; slips with wagons |
-| TPU tyres | ~10 | ~6–8 | ~3 |
+| O-ring or TPU tyres | ~10 | ~6–8 | ~3 |
 
 It slows noticeably well before those counts. Expect ±30 %: PLA-on-beech
 friction, Brio magnet strength and wagon drag all vary.

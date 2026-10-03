@@ -39,6 +39,7 @@
 //    "button"       roof push button (inline switch variant only)
 //    "wheel"        plain wheel - print 4 (or 2 + 2 drive wheels)
 //    "wheel_drive"  drive wheel with a groove for a TPU tyre - print 2 (optional)
+//    "wheel_drive_oring"  drive wheel grooved for a 22 x 2.5 mm O-ring - print 2 (optional)
 //    "tyre"         TPU tyre ring for the drive wheel - print 2 (optional)
 //    "axle"         front axle (lies on its flat)
 //    "shim"         2 mm spacer under the click switch, only if needed
@@ -74,10 +75,15 @@ slot_w     = 3.4;       // lets the 3 mm shaft in, never the 7 mm hub
 brg_hx     = 6;         // half-length of a plain bearing wall
 dish_depth = 2.0;       // recess in the wheel face (the shaft end sits 0.4 mm below it)
 
-// optional traction tyre (TPU) on the drive wheels
-groove_w   = 2.6;  groove_dp = 1.2;
+// optional traction tyres on the drive wheels
+//   "tpu"   : printed TPU ring (tyre.stl)
+//   "oring" : hardware-store nitrile O-ring, 22 mm ID x 2.5 mm section
+groove_w   = 2.6;  groove_dp = 1.2;               // TPU ring groove
 tyre_t     = 1.7;  tyre_w    = groove_w - 0.2;
 tyre_id    = wheel_d - 2*groove_dp - 0.4;        // slight stretch
+oring_cs   = 2.5;  oring_id = 22;
+og_w       = oring_cs + 0.3;                     // O-ring groove
+og_dp      = (wheel_d - (oring_id + 0.4))/2;     // groove bottom = ID + 0.4 (stretch)
 
 // D-shaft (N20 output shaft and printed front axle)
 shaft_d    = 3.0;
@@ -189,7 +195,8 @@ module rounded_box(p0, p1, r) {
 // =====================================================================
 //  wheels
 // =====================================================================
-module wheel_flat(drive = false) {
+module wheel_flat(drive = false, oring = false) {
+    gw = oring ? og_w : groove_w;  gd = oring ? og_dp : groove_dp;
     // printed lying down: outer face on the bed, hub pointing up
     difference() {
         union() {
@@ -207,9 +214,9 @@ module wheel_flat(drive = false) {
             cylinder(d = ring_d + 1.5, h = dish_depth + 1);
         }
         if (drive)
-            translate([0, 0, (wheel_w - groove_w)/2]) difference() {
-                cylinder(d = wheel_d + 2, h = groove_w);
-                translate([0, 0, -1]) cylinder(d = wheel_d - 2*groove_dp, h = groove_w + 2);
+            translate([0, 0, (wheel_w - gw)/2]) difference() {
+                cylinder(d = wheel_d + 2, h = gw);
+                translate([0, 0, -1]) cylinder(d = wheel_d - 2*gd, h = gw + 2);
             }
     }
 }
@@ -472,6 +479,7 @@ else if (part == "hatch") translate([0, 0, top_z + hatch_t]) rotate([180, 0, 0])
 else if (part == "button") translate([-btn_x, 0, -btn_rest_z]) button();
 else if (part == "wheel") wheel_flat(false);
 else if (part == "wheel_drive") wheel_flat(true);
+else if (part == "wheel_drive_oring") wheel_flat(true, true);
 else if (part == "tyre") tyre();
 else if (part == "axle") axle_flat();
 else if (part == "shim") shim();
