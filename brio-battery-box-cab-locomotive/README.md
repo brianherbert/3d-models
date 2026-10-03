@@ -172,12 +172,17 @@ one direction, lay it across the cab (the cab is 26 mm wide).
 4. **Front wheels:** drop the printed axle into the front slots the same way
    (through the floor at the front of the battery bay), then press a plain
    wheel onto each end, again leaving a paper-thin gap.
-5. **Wiring:** turn the body right side up. Plug battery holder → click-switch
-   cable → Bambu conversion wire → motor. Every plug only fits one way. Lay the
-   click switch on the shelf in the front cab, button facing up. Feed the
-   conversion wire down through the front of the floor opening to the motor's
-   lead. Coil the spare switch cable in the gaps beside the motor and in the
-   bunker at the back of the battery bay.
+5. **Wiring:** plug battery holder → click-switch cable → Bambu conversion
+   wire → motor. Every plug only fits one way. There is about 80 cm of wire in
+   total, so tidy it before it goes in: fold the long switch cable into a flat
+   bundle of ~35 mm loops and tape or zip-tie it. Stick the click switch to the
+   shelf in the front cab with a square of double-sided foam tape, button up.
+   Feed the conversion wire down through the front of the floor opening to the
+   motor's lead. Lay the cable bundle flat **on top of the motor** (there is
+   7.5 mm between it and the battery holder); the holder lead and conversion
+   wire go in the slot under the switch shelf, and anything left in the bunker
+   at the back of the battery bay. Nothing should hang into the open underside
+   in front of the motor.
 6. **Batteries:** put 2×AAA in the holder and slide its own switch to **ON**.
    Lay it in the battery bay with its lead toward the **front** (it hops over the
    low fence onto the switch shelf). If the lead comes out of the other end, run
