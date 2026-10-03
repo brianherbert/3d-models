@@ -36,7 +36,7 @@
 //  Parts (select with `part`):
 //    "body"         main body / chassis (exported upside down - print as is)
 //    "hatch"        roof hatch          (exported upside down - print as is)
-//    "button"       roof push button
+//    "button"       roof push button (inline switch variant only)
 //    "wheel"        plain wheel - print 4 (or 2 + 2 drive wheels)
 //    "wheel_drive"  drive wheel with a groove for a TPU tyre - print 2 (optional)
 //    "tyre"         TPU tyre ring for the drive wheel - print 2 (optional)
@@ -106,8 +106,20 @@ m_shaft_tip = 12.5;              // |Y| of each shaft tip
 m_gap     = 0.4;                 // clearance of the cage bar and saddle
 gb_x1 = m_rear;  can_x0 = m_end;
 
-// ---------------- switch (Adafruit #3064 inline click switch) ----------------
-sw_len_x = 12;  sw_len_y = 24;  sw_h_nom = 9;     // assumed housing size
+// ---------------- on/off switch ----------------
+//  "pbs11"  : 12 mm panel-mount latching pushbutton (PBS-11A type) through
+//             the roof hatch, soldered into the battery holder's red lead.
+//             No printed button, no shelf, ~25 cm of wire in total.
+//  "inline" : Adafruit #3064 click-switch cable on a shelf under a printed
+//             captive roof button.  No soldering, ~80 cm of wire to stow.
+switch_type = "pbs11";
+// PBS-11A (12 mm) nominal dimensions
+pbs_hole   = 12.4;      // panel hole for the M12 thread
+pbs_cap_d  = 12;  pbs_cap_h = 6;        // button cap above the panel
+pbs_flange = 14.5;                       // bezel on top of the panel
+pbs_body_d = 10;  pbs_below = 17;        // body + terminals below the panel
+// inline switch (Adafruit #3064), assumed housing size
+sw_len_x = 12;  sw_len_y = 24;  sw_h_nom = 9;
 cab_len  = sw_len_x + 4;                          // switch cab interior length
 
 // ---------------- body ----------------
@@ -282,10 +294,12 @@ module body_solid() {
     // couplers
     coupler_block(true);
     coupler_block(false);
-    // switch shelf across the front cab, with a full-width fence at its
-    // rear edge (both bridge wall to wall, so they print upside down)
-    translate([cab_x0 - 0.01, -in_w/2 - 0.01, shelf_z - 1.5]) cube([cab_len + 0.02, in_w + 0.02, 1.5]);
-    translate([cab_x1 - 1.2, -in_w/2 - 0.01, shelf_z - 0.01]) cube([1.2, in_w + 0.02, 2]);
+    // inline switch: shelf across the front cab with a full-width fence at
+    // its rear edge (both bridge wall to wall, so they print upside down).
+    // pbs11: just a low fence to keep the battery holder off the switch body.
+    if (switch_type == "inline")
+        translate([cab_x0 - 0.01, -in_w/2 - 0.01, shelf_z - 1.5]) cube([cab_len + 0.02, in_w + 0.02, 1.5]);
+    translate([cab_x1 - 1.2, -in_w/2 - 0.01, switch_type == "inline" ? shelf_z - 0.01 : batt_z0 - 0.01]) cube([1.2, in_w + 0.02, 2]);
 }
 
 module body_cuts() {
@@ -297,7 +311,8 @@ module body_cuts() {
     for (x = [0, front_x]) mirror_y()
         translate([x, wheel_y0 - 0.3, axle_z]) rotate([-90, 0, 0]) cylinder(d = wheel_d + 2.4, h = 6);
     // cable slot under the switch shelf (open to the battery bay)
-    translate([cab_x0 - 0.01, -in_w/2, batt_z0 - 0.01]) cube([cab_len + 0.5, in_w, shelf_z - 1.5 - batt_z0]);
+    if (switch_type == "inline")
+        translate([cab_x0 - 0.01, -in_w/2, batt_z0 - 0.01]) cube([cab_len + 0.5, in_w, shelf_z - 1.5 - batt_z0]);
     // hatch screw pilot hole in the rear wall
     translate([screw_x, 0, top_z - 12]) cylinder(d = 2.5, h = 13);
     // hatch tongue slot through the front wall
@@ -339,11 +354,17 @@ module hatch() {
             translate([body_x0, -7.5, top_z - 2.2]) cube([cab_x0 + 0.3 - body_x0 + 0.01, 15, 1.0]);
             translate([cab_x0 + 0.3, -7.5, top_z - 2.2]) cube([lip_x0 - cab_x0 - 0.3 + 0.01, 15, 2.21]);
         }
-        // keep the lip clear of the button flange
-        translate([btn_x, 0, top_z - 3]) cylinder(d = btn_hole + 4, h = 3);
-        // button hole with a soft chamfer
-        translate([btn_x, 0, top_z - 5]) cylinder(d = btn_hole, h = 20);
-        translate([btn_x, 0, top_z + hatch_t - 0.6]) cylinder(d1 = btn_hole, d2 = btn_hole + 1.2, h = 0.61);
+        if (switch_type == "inline") {
+            // keep the lip clear of the button flange
+            translate([btn_x, 0, top_z - 3]) cylinder(d = btn_hole + 4, h = 3);
+            // button hole with a soft chamfer
+            translate([btn_x, 0, top_z - 5]) cylinder(d = btn_hole, h = 20);
+            translate([btn_x, 0, top_z + hatch_t - 0.6]) cylinder(d1 = btn_hole, d2 = btn_hole + 1.2, h = 0.61);
+        } else {
+            // panel hole for the PBS-11A, nut clearance below
+            translate([btn_x, 0, top_z - 5]) cylinder(d = pbs_hole, h = 20);
+            translate([btn_x, 0, top_z - 3]) cylinder(d = 19, h = 3);
+        }
         // countersunk M3 screw hole over the rear wall
         translate([screw_x, 0, top_z - 5]) cylinder(d = 3.4, h = 20);
         translate([screw_x, 0, top_z + hatch_t - 1.6]) cylinder(d1 = 3.4, d2 = 6.6, h = 1.61);
@@ -390,7 +411,14 @@ module dummy_battery() {
     color("DimGray") translate([batt_xc - batt_l/2, -batt_w/2, batt_z0]) cube([batt_l, batt_w, batt_h]);
 }
 module dummy_switch() {
-    color("Black") translate([btn_x - sw_len_x/2, -sw_len_y/2, shelf_z]) cube([sw_len_x, sw_len_y, sw_h_nom]);
+    if (switch_type == "inline")
+        color("Black") translate([btn_x - sw_len_x/2, -sw_len_y/2, shelf_z]) cube([sw_len_x, sw_len_y, sw_h_nom]);
+    else translate([btn_x, 0, top_z + hatch_t]) {
+        color("Red")   cylinder(d = pbs_cap_d, h = pbs_cap_h);
+        color("Black") translate([0, 0, -0.01]) cylinder(d = pbs_flange, h = 1.5);
+        color("Black") translate([0, 0, -hatch_t - 5]) cylinder(d = pbs_body_d + 2, h = 5);          // nut
+        color("DimGray") translate([0, 0, -hatch_t - pbs_below]) cylinder(d = pbs_body_d, h = pbs_below);
+    }
 }
 module dummy_track() {
     color("BurlyWood") translate([-90, -20, -12]) difference() {
@@ -417,7 +445,7 @@ module wheels(drive = false) {
 module assembly() {
     color("SteelBlue") body();
     color("SteelBlue") hatch();
-    color("Red") button();
+    if (switch_type == "inline") color("Red") button();
     color("Gold") wheels();
     dummy_motor();
     dummy_battery();
@@ -436,7 +464,7 @@ else if (part == "shim") shim();
 else if (part == "assembly") assembly();
 else if (part == "cutaway") {
     difference() {
-        union() { color("SteelBlue") body(); color("SteelBlue") hatch(); color("Red") button(); }
+        union() { color("SteelBlue") body(); color("SteelBlue") hatch(); if (switch_type == "inline") color("Red") button(); }
         translate([-100, -50, -10]) cube([200, 50, 100]);
     }
     color("Gold") { wheel_at(0, 1); wheel_at(front_x, 1); }
