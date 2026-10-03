@@ -23,7 +23,7 @@ L = S.L
 # ----------------------------------------------------------------- mechanism parameters
 TMJ = np.array([0.16 * L, -0.105 * L])     # hinge axis (head y, z)
 R_ARC = 0.32 * L                           # jaw/jowl boundary: an arc about the hinge (front edge of the cheek)
-OPEN_MAX = 20.0                            # designed opening, degrees
+OPEN_MAX = 16.0                            # designed opening, degrees
 GAP = 0.45                                 # print-in-place clearance between jaw and body
 WALL = 2.2                                 # compartment walls
 PIN_R, PIN_GAP, PIN_HALF = 3.0, 0.40, 11.0  # hinge pin (part of the body)
@@ -38,6 +38,7 @@ TONGUE_ROOT = 25.0                         # the tongue is free from NUB_RAD - 3
 SEAM = np.array([[0.16, -0.105], [0.80, -0.085], [0.90, -0.052], [1.10, -0.042]]) * L
 # struts
 STRUT_GAP = 0.2                            # one layer of air between a strut and the part it holds up
+PAD_R = 10.5                               # contact pad radius: covers the steep undersides of both lips
 PLINTH_H = S.PLINTH_H
 
 def seam_z(y):
@@ -164,7 +165,7 @@ def strut_sdf(P):
         h = np.clip((z - PLINTH_H) / max(ztop - PLINTH_H, 1), 0, 1)
         arm = 6.0 - 2.0 * h                                     # cross-shaped blade, narrowing upward
         blade = np.minimum(np.maximum(np.abs(x) - arm, np.abs(y) - 0.6), np.maximum(np.abs(x) - 0.6, np.abs(y) - arm))
-        pad = np.hypot(x, y) - np.clip(4.0 - (ztop - z), 0, 4.0)  # a 45-degree cone widening to the contact
+        pad = np.hypot(x, y) - np.clip(PAD_R - (ztop - z), 0, PAD_R)  # a 45-degree cone widening to the contact
         s = np.maximum(np.minimum(blade, pad), np.maximum(PLINTH_H - 0.5 - z, z - ztop - 3.0))
         notch = np.maximum(np.abs(z - (PLINTH_H + 1.2)) - 0.6, 0.35 - np.minimum(np.abs(x), np.abs(y)))
         d = np.minimum(d, np.maximum(s, -notch))

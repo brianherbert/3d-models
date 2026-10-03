@@ -27,7 +27,7 @@ Bm = M(body)
 hinge = S.h2w([0, B.TMJ[0], B.TMJ[1]])
 nubs = [S.h2w(c) for c in B.nub_centres()]
 print("closed overlap: %.2f mm3" % (Bm ^ M(jaw)).volume())
-for deg in [2, 5, 10, 15, 20]:
+for deg in [2, 5, 10, 15, B.OPEN_MAX]:
     j = jaw.copy()
     j.apply_transform(trimesh.transformations.rotation_matrix(np.radians(-deg), [1, 0, 0], hinge))
     I = Bm ^ M(j)
@@ -43,10 +43,10 @@ for deg in [2, 5, 10, 15, 20]:
         st = np.array([s[:2] for s in B.STRUTS_SAVED]) if hasattr(B, "STRUTS_SAVED") else np.zeros((0, 2))
         if len(st) and len(far):
             ds = np.min([np.hypot(far[:, 0] - sx, far[:, 1] - sy) for sx, sy in st], axis=0)
-            far = far[ds > 7.0]
+            far = far[ds > B.PAD_R + 3.0]
         msg = "only at the detent nubs / struts" if len(far) == 0 else f"ELSEWHERE near {np.round(far.mean(0), 1)} ({len(far)} verts)"
-    print(f"open {deg:2d} deg: overlap {v:7.2f} mm3  {msg}")
-    if deg == 20: j.export("stl/preview_jaw_open.stl")
+    print(f"open {deg:4.0f} deg: overlap {v:7.2f} mm3  {msg}")
+    if deg == B.OPEN_MAX: j.export("stl/preview_jaw_open.stl")
 
 # ---- compartment: the hollow of jaw + body cavity, from the field
 F = np.load("/tmp/claude-0/horse_fields.npz")

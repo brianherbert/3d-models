@@ -76,8 +76,8 @@ ZT = prof([(-0.08, -0.05), (0.00, 0.000), (0.05, 0.030), (0.10, 0.042), (0.20, 0
            (0.80, 0.100), (0.86, 0.105), (0.91, 0.102), (0.95, 0.086), (0.985, 0.055)])
 # bottom line: throat, round jowl, rising jaw line, chin, lower lip
 ZB = prof([(-0.08, -0.13), (0.00, -0.22), (0.06, -0.28), (0.12, -0.33), (0.19, -0.365),
-           (0.27, -0.378), (0.35, -0.365), (0.43, -0.330), (0.50, -0.302), (0.57, -0.280),
-           (0.64, -0.262), (0.70, -0.238), (0.76, -0.208), (0.82, -0.182), (0.87, -0.168),
+           (0.27, -0.378), (0.35, -0.372), (0.43, -0.352), (0.50, -0.328), (0.57, -0.300),
+           (0.64, -0.270), (0.70, -0.240), (0.76, -0.208), (0.82, -0.182), (0.87, -0.168),
            (0.92, -0.150), (0.96, -0.120), (0.985, -0.080)])
 # half-widths at seven section heights u (-1 = bottom, +1 = top), measured
 U_NODES = np.array([-0.8, -0.5, -0.2, 0.1, 0.4, 0.7, 0.9])
@@ -272,7 +272,7 @@ def head_details(Ph, d):
         pts = [[s * (x - 0.006 * L), y * L, z * L] for (y, z), x in zip(a.crest, a.crest_x)]
         jy, jz = a.jowl_c
         # cheek: a broad flat plate whose back and bottom border is a clean edge
-        plate = ellipsoid(Ph, [s * (a.jowl_x - 0.045 * L), jy, jz], np.array([0.050, 0.175, 0.170]) * L)
+        plate = ellipsoid(Ph, [s * (a.jowl_x - 0.045 * L), jy, jz + 0.020 * L], np.array([0.050, 0.170, 0.150]) * L)
         d = smin(d, plate, 0.060 * L)
         dy, dz = Ph[:, 1] - jy, Ph[:, 2] - jz
         rr = np.hypot(dy, dz)
@@ -534,11 +534,14 @@ def head_field_bare(Ph):
 def head_field(Ph):
     return head_field_bare(Ph)
 
-def sculpt(P):
+def body_base(P):
     Ph = w2h(P)
     # head and neck blend only around the throat and poll, never under the face
     kb = 8.0 * np.clip((0.55 * L - Ph[:, 1]) / (0.15 * L), 0, 1) + 0.01
-    d = smin(head_field(Ph), neck(P), kb)
+    return smin(head_field(Ph), neck(P), kb)
+
+def sculpt(P):
+    d = body_base(P)
     d = hair(P, d)
     d = np.maximum(d, PLINTH_H - 0.5 - P[:, 2])
     d = smin(d, plinth(P), 3.0)
