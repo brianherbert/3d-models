@@ -36,6 +36,27 @@ driving the rear wheels. Cables coil in the bunker behind the drive wheels.*
 | — | PLA filament, ~40 g | Bambu Lab | Body, hatch, wheels, button. Three colours look great. |
 | — | *Optional:* TPU 95A HF filament, ~1 g | Bambu Lab | Two traction tyres for the drive wheels (see below). |
 
+### Cost and cheaper alternatives
+
+List prices at the time of writing, US stores:
+
+| Part | Price | Cheaper option? |
+|---|---|---|
+| Bambu LA009 motor | $7.99 | Generic "N20 dual shaft worm gear motor 3 V" is $3–5 on eBay/AliExpress, but comes with bare wires (needs soldering) and unverified dimensions. The body was checked against Bambu's model; a generic one probably matches but you'd have to measure. |
+| Bambu XC004 wire | $1.08 | No cheaper equivalent worth the bother. |
+| Bambu D6×2 magnets, pack of 20 | $1.75 | Already ~9¢ each; bulk Amazon/eBay packs of 50–100 cost about the same per magnet. Any 6 × 2 mm N35 disc works (or set `mag_t` for a single 6 × 4 mm). |
+| Adafruit #4191 battery holder | ~$3 | Amazon "2×AAA holder with switch and JST-PH" packs of 5 for ~$8, if you'll build several. |
+| Adafruit #3064 switch cable | $2.95 | No plug-in equivalent; the alternative is the holder's own slide switch exposed through the roof (no big button). |
+| M3 screw, AAA cells, ~40 g PLA | <$2 | — |
+| **Parts total** | **~$17** | |
+
+The parts are cheap; **shipping from two vendors is the real cost**. Bambu
+and Adafruit each charge several dollars for a small envelope unless you
+reach their free-shipping thresholds. If you're placing a Bambu filament
+order anyway, add the motor, wire and magnets to it. The two Adafruit parts
+are also stocked by Digi-Key, Mouser and Micro Center, so pick whichever
+you'd order from regardless.
+
 ### Why these parts
 
 - **Battery:** 2×AAA is the smallest common pack that gives the motor its rated
