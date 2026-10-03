@@ -9,7 +9,7 @@ vertical axis; the model is assumed +z up, +y forward.
 import sys, vtk
 
 VIEWS = {"eyeside": (85, 5), "eyeq": (55, 10), "muzzle": (25, 15), "side": (90, 8), "threeq": (45, 15), "front": (0, 10), "left": (-90, 8),
-         "back": (180, 15), "high": (60, 40), "low": (30, -15)}
+         "back": (180, 15), "high": (60, 40), "low": (30, -15), "under": (60, -45), "under2": (120, -45)}
 
 def render(stl, out, views, size=(1000, 1000), color=(0.80, 0.62, 0.42)):
     r = vtk.vtkSTLReader(); r.SetFileName(stl)

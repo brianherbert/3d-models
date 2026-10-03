@@ -1,102 +1,151 @@
 # Horse Head with a Secret Compartment
 
-A desk-size horse bust whose lower jaw hinges open to reveal a hidden
-compartment. **One print, one part, no assembly:** the jaw and its hinge pin
-are printed in place inside the head. After printing you snap off one thin
-support strut under the chin, work the jaw a few times, and it's done.
+A desk-size horse bust whose lower jaw swings open to reveal a hidden
+compartment. **One print, one part, no assembly:** the jaw, its hinge pin and
+a click detent are all printed in place. After printing you snap off the
+support pillar under the muzzle, work the jaw a few times, and it's done.
 
 | Closed | Open |
 |---|---|
 | ![closed](images/horse_closed.png) | ![open](images/horse_open.png) |
 
+| Face | Side |
+|---|---|
+| ![face](images/horse_face.png) | ![side](images/horse_side.png) |
+
 ![cutaway](images/horse_cutaway.png)
-*Section through the centre: the hollow jaw is the compartment; the diamond
-hinge pin runs through the jowls; the mouth is a vaulted chamber so every
-surface is self-supporting.*
+*Section through the centre. The jaw (blue) hangs from a pin printed with the
+body. The compartment is the hollow of the jaw plus a chamber above it inside
+the face. The flexible tongue on the jaw's arm clicks into a dimple in the
+slot wall when the mouth is shut.*
 
 ## What it is
 
-- **Size:** 168 mm tall (plinth to ear tips), 121 mm long, 52 mm wide at the
-  jowls, on an 80 × 112 mm oval plinth. Head lowered in a calm, grazing pose.
-- **Compartment:** the lower jaw is a hollow scoop with 2.4 mm walls, open at
-  the tongue: about 19 cm³, a pocket roughly 28 mm wide, 50 mm long and up to
-  42 mm deep. It holds a handful of coins, a ring, a USB stick, a folded note
-  or a small key. The jaw opens to about 35°.
-- **Mechanism:** a diamond-section pin, printed as part of the jaw, sits in a
-  matching socket in the jowls. The jaw's heel is a cylinder around the pin
-  so it turns without binding; the body is carved to the jaw's full swept path.
-  The hinge is slightly tight by design (0.4 mm clearance) so the jaw stays
-  where you put it instead of flopping open.
+- **Size:** __SIZE__.
+- **Sculpt:** an original parametric sculpt, not a downloaded model. It has a
+  realistic, calm head carried low on an arched neck, with:
+  - cupped, leaf-shaped ears;
+  - lidded almond eyes under a bony brow;
+  - flat cheeks with a defined jowl;
+  - comma-shaped nostrils;
+  - separate upper and lower lips and a chin;
+  - a forelock and a mane of draped locks falling to the right.
+- **Compartment:** about __CAV__ cm³. The jaw is a hollow scoop with 2.2 mm
+  walls, and it lines up with a chamber in the face above it. It holds a ring,
+  a few coins, a USB stick, a folded note or a key. The mouth opens 20°,
+  which leaves a gap of about 25 mm at the lips.
+- **Hinge:** the jaw pivots where a real horse's does, just behind and below
+  the eye.
+  - The pin is printed as part of the head, running across an internal slot.
+  - A ring on the end of the jaw's arm turns on the pin.
+  - The visible seams follow the jaw line: from the corner of the mouth back
+    under the cheek, then round the front of the jowl. A closed mouth looks
+    like a closed mouth.
+- **Detent:** the jaw's arm carries a thin flexible tongue on each face with a
+  small nub. The nub clicks into a dimple when the mouth is shut, so the jaw
+  doesn't fall open on its own. Pull the chin down past the click to open;
+  push it up until it clicks to close.
 
 ## Files
 
 | File | What |
 |---|---|
-| `stl/horse_head.stl` | **The part to print.** Body and jaw in one file, already positioned. |
-| `sculpt_horse_head.py` | The parametric sculpt (Python: numpy, scikit-image, trimesh, manifold3d). |
-| `stl/preview_*.stl` | Body, jaw (closed and open) and solid-head meshes separately, for viewing or remixing. |
-| `verify.py` | Re-runs the checks: watertightness, jaw swing, mid-air islands. |
+| `stl/horse_head.stl` | **The part to print.** Body, jaw and support pillar in one file, already positioned. |
+| `horse_sculpt.py` | The sculpt: a signed-distance-field model in Python. |
+| `build_horse.py` | Cuts and hinges the jaw, hollows the compartment, adds the detent and the pillar, and meshes the part. |
+| `verify_horse.py` | Checks: watertight, jaw swing without collisions, no mid-air islands, overhang report, compartment volume. |
+| `stl/preview_*.stl` | Body, closed jaw and open jaw as separate meshes, for viewing. |
+| `tools/` | Renderers and quick-draft scripts used while sculpting. |
 
 ## Printing (Bambu Lab A1, PLA, 0.4 mm nozzle)
 
 - **Orientation:** as exported, standing on the plinth.
-- **Layer height:** 0.2 mm. **Walls:** 3. **Infill:** 15 %.
-- **Supports: none.** The head is posed so the chin and muzzle undersides are
-  at or under 45°, the mouth roof is a vault, the ear fronts are scooped at a
-  printable angle, and the one spot that can't self-support (the tip of the
-  chin, which hangs in front of the neck) has a built-in strut.
-- **Do not enable "detect thin walls" or bridging tricks;** the 0.45 mm gaps
-  between jaw and body are meant to print as air. Keep the default
-  "detect overhang wall" on.
-- Brim optional; the plinth is wide enough without.
+- **Layer height:** 0.2 mm (0.16 mm looks nicer on the face). **Walls:** 3. **Infill:** 10–15 %.
+- **Supports: off.** The model brings its own. A pillar stands under the
+  muzzle with a one-layer air gap under the upper lip and the chin, like a
+  support interface. Everything else is self-supporting:
+  - The head is tilted so the face and jaw undersides lean less than 45°.
+  - The compartment's back walls are slanted.
+  - The cheeks are hollowed to a pitched roof over the hinge arc.
+- **Leave "detect thin walls" off** and keep the default overhang settings.
+  The 0.45 mm gaps between jaw and head are meant to print as air.
+- The plinth is wide enough that a brim isn't needed.
+- The undersides of the cheeks overhang the throat a little steeply. They
+  print fine, but are the roughest surface on the model. You can paint a
+  small support enforcer there if you want them perfect.
 
 ### Estimated print time
 
-Sliced with an A1-like profile (Bambu PLA Basic speeds, 0.2 mm layers,
-3 walls, 15 % gyroid): **about 4 h 30 min and 149 g of PLA**, plus the A1's
-start-up routine. Most of the time is the solid-feeling neck and plinth; 10 %
-infill saves ~20 minutes with no visible difference.
+__TIME__
 
 ## After printing
 
-1. **Snap the strut.** Under the chin there's a thin cross-shaped blade
-   standing on the plinth. Grip it with pliers at its base and twist; it is
-   notched there and comes away clean. Trim any stub flush.
-2. **Free the jaw.** Push the chin down firmly. The first movement breaks the
-   faint bond across the printed gaps; it may need a few firm pushes. Work it
-   through its range a dozen times and it loosens to a smooth, slightly stiff
-   hinge.
-3. If it's too stiff after that, a drop of water-based lubricant (or just time)
-   fixes it. If it's loose and flops open, print again with `PIN_GAP = 0.35`.
+1. **Remove the pillar.** It stands on the plinth under the muzzle and is
+   notched just above the plinth. Twist it off with pliers, then pick off the
+   two small pads under the lips. Sand or trim the contact spots.
+2. **Free the jaw.** Pull the chin down firmly. The first movement breaks the
+   faint bonds across the print-in-place gaps, and you'll feel the detent let
+   go. Work it open and shut a dozen times until it moves smoothly.
+3. The jaw should click shut and stay shut. If the click is too weak or too
+   strong, change `NUB_PROUD` (default 0.75 mm) and reprint.
 
 ## Customising
 
-Everything is parametric in `sculpt_horse_head.py`:
-
 ```sh
-pip install numpy scikit-image trimesh manifold3d
-python3 sculpt_horse_head.py            # final at 0.5 mm resolution (~15 min)
-python3 sculpt_horse_head.py --res 0.8  # quick draft
+pip install numpy scipy scikit-image trimesh manifold3d shapely vtk
+python3 build_horse.py              # final, 0.3 mm grid (about 20 min)
+python3 build_horse.py --res 0.6    # quick draft (about 3 min)
+python3 verify_horse.py             # checks
+python3 tools/make_images.py        # README pictures
 ```
 
-- `L`, `TILT`, `POLL` – head length, nose-down angle, position on the neck.
-- `GAP`, `PIN_GAP` – print-in-place clearances.
-- `WALL` – compartment wall thickness. `OPEN_MAX` – designed opening angle.
-- The sculpt itself is a list of blended ellipsoids, cones and capsules in
-  `horse_sdf()`; move or resize them to change the horse. It is stylised rather
-  than anatomical: recognisably a horse, with the proportions right, but the
-  surface is smooth blends, not muscle and vein detail.
+- `horse_sculpt.py` holds the shape:
+  - `L`, `TILT` and `POLL` set the head length, the nose-down angle and the
+    position of the poll.
+  - `ZT`, `ZB` and `W_ROWS` hold the head's measured profile and widths.
+  - `NECK` and `CREST` define the neck. The features each have their own
+    function: eyes, nostrils, ears, mane.
+- `build_horse.py` holds the mechanism:
+  - `OPEN_MAX` is the opening angle.
+  - `GAP` and `PIN_GAP` are the print-in-place clearances.
+  - `WALL` is the compartment wall.
+  - `NUB_PROUD` sets the detent strength.
+  - `TMJ` and `R_ARC` set the hinge position and the cheek arc.
 
-To scale the whole thing, scale the STL in the slicer; the 0.45 mm gaps scale
-too, so stay within about 80–130 %.
+To scale the whole thing, scale the STL in the slicer. The 0.45 mm gaps scale
+too, so stay within about 85–125 %.
 
 ## How it's made
 
-The bust is a signed distance field: smooth unions of a few dozen primitives,
-meshed with marching cubes. The jaw is cut from the same field (so its
-surface matches the head exactly), given a 0.45 mm offset, hinged on a diamond
-pin whose socket lives in the jowls, and hollowed by eroding the field 2.4 mm.
-The body is carved by the union of the jaw rotated from 0° to 35°, which
-guarantees it can't bind. Every exported part was checked for watertightness,
-for mid-air islands layer by layer in print orientation, and for collisions
-through the full swing.
+The bust is a signed distance field built from simple pieces:
+
+- **Head:** a loft whose top line, bottom line and widths at seven heights
+  were calibrated against a real horse head.
+- **Face features:** sculpted shapes blended onto the loft for the brow,
+  eyes, cheeks, nostrils, lips and ears.
+- **Neck:** an ellipse swept along a spline.
+- **Hair:** locks laid onto the surface by a little gravity simulation.
+
+The field is meshed with marching cubes, evaluating it exactly only near the
+surface.
+
+The jaw is cut from the same field below the mouth line and in front of an
+arc centred on the hinge, so it can turn without opening any visible gap. The
+head is carved by the union of the jaw at every angle from shut to fully
+open, plus 0.45 mm, so it cannot bind.
+
+The checks in `verify_horse.py` show:
+
+- both parts are watertight;
+- the jaw only touches the head at the detent nubs through the whole swing,
+  once the pillar is removed;
+- no layer starts in mid-air.
+
+### Reference
+
+The head's proportions were measured from the **Cyberware horse scan**, a
+public 3D-scanning test model from the Georgia Tech Large Geometric Models
+Archive, obtained via
+[alecjacobson/common-3d-test-models](https://github.com/alecjacobson/common-3d-test-models).
+It was used as a measuring reference only: profile heights, widths and
+landmark positions. No geometry from it is in this model.

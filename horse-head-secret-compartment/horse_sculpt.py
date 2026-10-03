@@ -277,11 +277,11 @@ def head_details(Ph, d):
         dy, dz = Ph[:, 1] - jy, Ph[:, 2] - jz
         rr = np.hypot(dy, dz)
         phi = np.arctan2(dz, dy)
-        active = np.cos(phi - np.radians(-150)) - np.cos(np.radians(75))      # back and underneath only
-        edge = np.abs(rr - 0.170 * L) - 0.007 * L
+        active = np.cos(phi - np.radians(178)) - np.cos(np.radians(48))      # back and underneath only
+        edge = np.abs(rr - 0.170 * L) - 0.008 * L
         side = np.abs(Ph[:, 0]) - (a.jowl_x - 0.004 * L)
         groove = np.maximum.reduce([edge, -side, -active * 0.05 * L])
-        d = smax(d, -groove, 0.010 * L)
+        d = smax(d, -groove, 0.014 * L)
         d = nostril_detail(Ph, d, s)
     for s in (1, -1):
         d = smax(d, -capsule(Ph, H(0.80, -0.085, s * 0.125), H(0.87, -0.068, s * 0.118), 0.008 * L, 0.004 * L), 0.012 * L)
@@ -460,7 +460,7 @@ def locks():
     n = 34
     P0, D0, Ls, R0 = [], [], [], []
     for i in range(n):
-        t = 0.08 + 0.89 * (i + 0.6 * rng.random()) / n
+        t = 0.08 + 0.80 * (i + 0.6 * rng.random()) / n
         p0, tang = _crest_point(t)
         P0.append(p0 + np.array([0.5 + rng.normal(0, 0.8), 0, 0]))
         D0.append(np.array([-1.0, 0, -0.15]) + tang * (0.30 + 0.15 * rng.normal()))
@@ -471,7 +471,7 @@ def locks():
     # a second, shorter layer between them so the roots don't show as ribs
     P0, D0, Ls = [], [], []
     for i in range(n - 1):
-        t = 0.08 + 0.89 * (i + 1.0) / n
+        t = 0.08 + 0.80 * (i + 1.0) / n
         p0, tang = _crest_point(t)
         P0.append(p0 + np.array([-0.5, 0, 0.5])); D0.append(np.array([-1.0, 0, -0.10]) + 0.25 * tang)
         Ls.append(9 + 8 * rng.random())
@@ -517,7 +517,7 @@ def hair(P, d):
 
 # ----------------------------------------------------------------- plinth
 PLINTH_H = 9.0
-PLINTH_C = np.array([0.0, -16.0]); PLINTH_R = np.array([44.0, 76.0])
+PLINTH_C = np.array([0.0, -20.0]); PLINTH_R = np.array([44.0, 79.0])
 def plinth(P):
     e = np.linalg.norm((P[:, :2] - PLINTH_C) / PLINTH_R, axis=1)
     side = (e - 1.0) * min(PLINTH_R)
