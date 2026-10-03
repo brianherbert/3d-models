@@ -166,6 +166,36 @@ one direction, lay it across the cab (the cab is 26 mm wide).
    the button bottoms out without a click, the switch sits lower than expected:
    put one or two `shim.stl` pads under it.
 
+## Speed
+
+There is no speed control; the motor's gear ratio sets it. With 22 mm wheels:
+
+| Power | Motor speed | Loco speed (no load) | Pulling 2–3 wagons |
+|---|---|---|---|
+| 2 × alkaline AAA (≈3.1 V) | ~135 rpm | ~15 cm/s | ~11–13 cm/s |
+| 2 × NiMH AAA (≈2.4 V) | ~105 rpm | ~12 cm/s | ~9–10 cm/s |
+
+For comparison, Brio's standard battery engine runs at roughly 8–10 cm/s
+(measured by eye on a loop; Brio doesn't publish it). So on alkalines this loco
+is a little brisker than Brio's; on NiMH it matches. 15 cm/s is one standard
+straight per second.
+
+**Derailing:** speed isn't the risk. On the tightest Brio curve (R ≈ 182 mm)
+15 cm/s gives a sideways push of about 1 % of the loco's weight; it would need
+to go ~40× faster to tip. What derails wooden trains is a wagon catching on a
+switch or a lumpy joint, and a lighter, slower train helps there too.
+
+**Ways to slow it down, in order of ease:**
+
+1. Use **NiMH rechargeables** — 20 % slower, no changes. Also the safer cell
+   type for a toddler toy.
+2. Set `wheel_d = 20` in the model and re-export the wheels (and body, because
+   the axle height follows the wheel). ~10 % slower. Don't go below 20 mm: the
+   gearbox would get too close to the track.
+3. A speed knob: Bambu's Potentiometer Board plugs into their Power
+   Distribution Board (IA005), but the PDB is 53 mm long and would need a longer
+   body. Not worth it for a toddler's engine.
+
 ## Brio compatibility
 
 - **Wheels:** 22 mm diameter at 26 mm gauge, 4 mm wide, running in the standard
