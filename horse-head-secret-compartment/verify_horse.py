@@ -44,7 +44,12 @@ for deg in [2, 5, 10, 15, B.OPEN_MAX]:
         if len(st) and len(far):
             ds = np.min([np.hypot(far[:, 0] - sx, far[:, 1] - sy) for sx, sy in st], axis=0)
             far = far[ds > B.PAD_R + 3.0]
-        msg = "only at the detent nubs / struts" if len(far) == 0 else f"ELSEWHERE near {np.round(far.mean(0), 1)} ({len(far)} verts)"
+        # the breakaway tabs between cheek and jaw snap on the first opening
+        tb = np.load("stl/.tabs.npy").reshape(-1, 3)
+        if len(tb) and len(far):
+            dt = np.min([np.linalg.norm(far - t, axis=1) for t in tb], axis=0)
+            far = far[dt > 3.0]
+        msg = "only at the detent nubs / breakaway tabs" if len(far) == 0 else f"ELSEWHERE near {np.round(far.mean(0), 1)} ({len(far)} verts)"
     print(f"open {deg:4.0f} deg: overlap {v:7.2f} mm3  {msg}")
     if deg == B.OPEN_MAX: j.export("stl/preview_jaw_open.stl")
 
@@ -82,7 +87,16 @@ for z in np.arange(0.1, both.bounds[1][2], 0.2):
                 else: bad.append(rec)
     hist.append(cur)
 print("regions printed onto the part below across the clearance gap:", gapped if gapped else "none")
-print("mid-air islands (0.2 mm layers):", bad if bad else "none")
+# a mid-air island the slicer can support from the build plate (nothing of the
+# model below it) is fine with "support on build plate only"; anything else is not
+from trimesh.ray.ray_triangle import RayMeshIntersector
+rays = RayMeshIntersector(both)
+plate_ok, trapped = [], []
+for z, area, (x, y) in bad:
+    hits = rays.intersects_location([[x, y, z - 0.3]], [[0, 0, -1]])[0]
+    (plate_ok if len(hits) == 0 or hits[:, 2].max() < 0.5 else trapped).append((z, area, (x, y)))
+print("islands reachable by build-plate supports:", plate_ok if plate_ok else "none")
+print("islands NOT reachable from the plate:", trapped if trapped else "none")
 
 # ---- steep overhangs: downward faces steeper than 55 deg from vertical, grouped
 n = both.face_normals; a = both.area_faces; c = both.triangles_center

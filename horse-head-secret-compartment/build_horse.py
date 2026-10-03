@@ -38,7 +38,9 @@ TONGUE_ROOT = 25.0                         # the tongue is free from NUB_RAD - 3
 SEAM = np.array([[0.16, -0.105], [0.80, -0.085], [0.90, -0.052], [1.10, -0.042]]) * L
 # struts
 STRUT_GAP = 0.2                            # one layer of air between a strut and the part it holds up
-PAD_R = 10.5                               # contact pad radius: covers the steep undersides of both lips
+USE_PILLAR = False                         # the slicer's build-plate supports hold up the lips instead
+TAB = 0.8                                  # breakaway tab cross-section (mm)
+PAD_R = 10.5                              # contact pad radius: covers the steep undersides of both lips
 PLINTH_H = S.PLINTH_H
 
 def seam_z(y):
@@ -244,6 +246,47 @@ def simplify(m, tol=0.02):
     out = trimesh.Trimesh(np.asarray(Y.vert_properties)[:, :3], np.asarray(Y.tri_verts))
     return out if out.is_watertight else m
 
+def add_tabs(B, J, xs, ys, zs):
+    """Find body regions that start in mid-air with the jaw just below them
+    across the clearance gap (the cheek's skin where the hinge arc bottoms out)
+    and tie each down to the jaw with a small breakaway tab, so no region of
+    the print floats.  The tabs snap the first time the mouth is opened.
+    Islands with open air below (the lips) are listed: the slicer's
+    build-plate supports reach those."""
+    from scipy.ndimage import label, binary_dilation
+    res = xs[1] - xs[0]
+    tabs, open_islands = [], []
+    gap_cells = int(np.ceil((GAP + 0.3) / res))
+    for k in range(1, len(zs)):
+        cur, prev = B[:, :, k] < 0, binary_dilation(B[:, :, k - 1] < 0)
+        lab, n = label(cur)
+        for i in range(1, n + 1):
+            comp = lab == i
+            if (comp & prev).any() or comp.sum() < 2: continue
+            ij = np.argwhere(comp)
+            c = ij.mean(0)
+            below = np.zeros_like(comp)
+            for kk in range(max(0, k - gap_cells), k): below |= J[:, :, kk] < 0
+            on_jaw = ij[below[ij[:, 0], ij[:, 1]]]
+            if len(on_jaw):
+                # tab at the island cell nearest its centre that has jaw beneath it
+                a, b = on_jaw[np.argmin(np.hypot(*(on_jaw - c).T))]
+                tabs.append((xs[a], ys[b], zs[k]))
+            else:
+                open_islands.append((round(xs[int(c[0])], 1), round(ys[int(c[1])], 1), round(zs[k], 1), int(comp.sum())))
+    # merge tabs closer than 3 mm (one island seen on consecutive slices)
+    merged = []
+    for t in tabs:
+        if all(np.linalg.norm(np.subtract(t, m)) > 3.0 for m in merged): merged.append(t)
+    X, Y, Z = np.meshgrid(xs, ys, zs, indexing="ij")
+    for tx, ty, tz in merged:
+        box = np.maximum.reduce([np.abs(X - tx) - TAB / 2, np.abs(Y - ty) - TAB / 2,
+                                 np.abs(Z - (tz - GAP / 2)) - (GAP / 2 + 0.35)])
+        B = np.minimum(B, box.astype(np.float32))
+    print("breakaway tabs (cheek to jaw):", [tuple(np.round(t, 1)) for t in merged])
+    print("islands with open air below (left to the slicer's supports):", open_islands[:12])
+    return B, merged
+
 def lowest_point(F, xs, ys, zs, keep):
     """lowest solid sample (world) among those where keep(P) holds"""
     idx = np.argwhere(F < 0)
@@ -261,16 +304,19 @@ def build(res):
     J = narrowband(jaw_fn, xs, ys, zs)
     jaw = mesh_of(J, xs, ys, zs)
     print(f"jaw: watertight={jaw.is_watertight}  {jaw.volume / 1000:.1f} cm3  ({time.time() - t0:.0f} s)")
-    # struts under the lowest points of the jaw and of the muzzle
     global STRUTS
-    pj = lowest_point(J, xs, ys, zs, lambda P: np.ones(len(P), bool))
-    B0 = narrowband(lambda P: np.maximum(S.sculpt(P), GAP - jaw_closed(P)[0]), xs[::2], ys[::2], zs[::2], factor=3)
-    pb = lowest_point(B0, xs[::2], ys[::2], zs[::2],
-                      lambda P: (S.w2h(P)[:, 1] > 0.7 * L) & (P[:, 2] > PLINTH_H + 10) & (S.head_field(S.w2h(P)) < 0.5))
-    STRUTS = [(pj[0], pj[1], pj[2] - STRUT_GAP, "jaw"), (pb[0], pb[1], pb[2] - STRUT_GAP, "muzzle")]
-    print("struts:", [tuple(np.round(s[:3], 1)) for s in STRUTS])
-    np.save("stl/.struts.npy", np.array([s[:3] for s in STRUTS], float))
+    if USE_PILLAR:
+        # struts under the lowest points of the jaw and of the muzzle
+        pj = lowest_point(J, xs, ys, zs, lambda P: np.ones(len(P), bool))
+        B0 = narrowband(lambda P: np.maximum(S.sculpt(P), GAP - jaw_closed(P)[0]), xs[::2], ys[::2], zs[::2], factor=3)
+        pb = lowest_point(B0, xs[::2], ys[::2], zs[::2],
+                          lambda P: (S.w2h(P)[:, 1] > 0.7 * L) & (P[:, 2] > PLINTH_H + 10) & (S.head_field(S.w2h(P)) < 0.5))
+        STRUTS = [(pj[0], pj[1], pj[2] - STRUT_GAP, "jaw"), (pb[0], pb[1], pb[2] - STRUT_GAP, "muzzle")]
+        print("struts:", [tuple(np.round(s[:3], 1)) for s in STRUTS])
+    np.save("stl/.struts.npy", np.array([s[:3] for s in STRUTS], float).reshape(-1, 3))
     Bf = narrowband(body_fn, xs, ys, zs)
+    Bf, tabs = add_tabs(Bf, J, xs, ys, zs)
+    np.save("stl/.tabs.npy", np.array(tabs, float).reshape(-1, 3))
     body = mesh_of(Bf, xs, ys, zs)
     print(f"body: watertight={body.is_watertight}  {body.volume / 1000:.1f} cm3  ({time.time() - t0:.0f} s)")
     # merge coplanar-ish triangles (0.02 mm tolerance, far below print resolution)

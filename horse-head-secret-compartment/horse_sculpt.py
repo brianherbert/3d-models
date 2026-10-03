@@ -466,7 +466,7 @@ def locks():
         D0.append(np.array([-1.0, 0, -0.15]) + tang * (0.30 + 0.15 * rng.normal()))
         Ls.append((18 + 14 * np.sin(np.pi * min(t * 1.4, 1.0))) * (0.8 + 0.4 * rng.random()))
         R0.append((3.6 + 0.8 * np.sin(np.pi * t)) * (0.85 + 0.3 * rng.random()))
-    for pts, r0 in zip(drape(bare, P0, D0, Ls, offset=0.0, gravity=0.06), R0):
+    for pts, r0 in zip(drape(bare, P0, D0, Ls, offset=-0.4, gravity=0.06), R0):
         out.append((pts, r0 * (1 - np.linspace(0, 1, len(pts)) ** 1.6) + 0.5))
     # a second, shorter layer between them so the roots don't show as ribs
     P0, D0, Ls = [], [], []
@@ -475,7 +475,7 @@ def locks():
         p0, tang = _crest_point(t)
         P0.append(p0 + np.array([-0.5, 0, 0.5])); D0.append(np.array([-1.0, 0, -0.10]) + 0.25 * tang)
         Ls.append(9 + 8 * rng.random())
-    for pts in drape(bare, P0, D0, Ls, offset=1.0, gravity=0.04):
+    for pts in drape(bare, P0, D0, Ls, offset=0.6, gravity=0.04):
         out.append((pts, 3.0 * (1 - np.linspace(0, 1, len(pts)) ** 1.4) + 0.6))
     # forelock: from between the ears down the forehead, flat strands
     xs = np.linspace(-5.0, 5.0, 7)
@@ -518,9 +518,11 @@ def hair(P, d):
 # ----------------------------------------------------------------- plinth
 PLINTH_H = 9.0
 PLINTH_C = np.array([0.0, -20.0]); PLINTH_R = np.array([44.0, 79.0])
+PLINTH_FRONT = 22.0      # the plinth stops short of the head so the slicer's supports reach the lips from the plate
 def plinth(P):
     e = np.linalg.norm((P[:, :2] - PLINTH_C) / PLINTH_R, axis=1)
     side = (e - 1.0) * min(PLINTH_R)
+    side = smax(side, P[:, 1] - PLINTH_FRONT, 8.0)          # flat front with rounded corners
     top = P[:, 2] - PLINTH_H
     d = np.maximum(side, top)
     return np.maximum(d, (side + top + 3.0) / np.sqrt(2))

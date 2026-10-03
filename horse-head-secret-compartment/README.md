@@ -2,8 +2,8 @@
 
 A desk-size horse bust whose lower jaw swings open to reveal a hidden
 compartment. **One print, one part, no assembly:** the jaw, its hinge pin and
-a click detent are all printed in place. After printing you snap off the
-support pillar under the muzzle, work the jaw a few times, and it's done.
+a click detent are all printed in place. After printing you pull off the
+slicer's supports under the muzzle, work the jaw a few times, and it's done.
 
 | Closed | Open |
 |---|---|
@@ -21,7 +21,7 @@ slot wall when the mouth is shut.*
 
 ## What it is
 
-- **Size:** 164 mm tall, on an 88 × 158 mm oval plinth.
+- **Size:** 164 mm tall and 151 mm long, on an 88 × 121 mm plinth under the neck.
 - **Sculpt:** an original parametric sculpt, not a downloaded model. It has a
   realistic, calm head carried low on an arched neck, with:
   - cupped, leaf-shaped ears;
@@ -51,9 +51,9 @@ slot wall when the mouth is shut.*
 | File | What |
 |---|---|
 | `horse_head.3mf` | **Open this in Bambu Studio.** A ready-to-print project with the model on an A1 plate and the print settings already chosen. |
-| `stl/horse_head.stl` | The same part as a plain STL, for other slicers. Body, jaw and support pillar in one file, already positioned. |
+| `stl/horse_head.stl` | The same part as a plain STL, for other slicers. Body and jaw in one file, already positioned. |
 | `horse_sculpt.py` | The sculpt: a signed-distance-field model in Python. |
-| `build_horse.py` | Cuts and hinges the jaw, hollows the compartment, adds the detent and the pillar, and meshes the part. |
+| `build_horse.py` | Cuts and hinges the jaw, hollows the compartment, adds the detent and the breakaway tabs, and meshes the part. |
 | `verify_horse.py` | Checks: watertight, jaw swing without collisions, no mid-air islands, overhang report, compartment volume. `tools/skin_steep.py` reports steep visible surfaces. |
 | `stl/preview_*.stl` | Body, closed jaw and open jaw as separate meshes, for viewing. |
 | `tools/make_3mf.py` | Builds `horse_head.3mf` from the STL and the Bambu presets in `tools/bambu_profiles/`. |
@@ -71,8 +71,8 @@ slot wall when the mouth is shut.*
      the changes below
 3. If you're using a different PLA, pick it in the filament list. The
    process settings stay as they are.
-4. **Slice and print.** Nothing needs painting or adjusting: supports stay
-   off, and the model is already placed and turned on the plate.
+4. **Slice and print.** Nothing needs painting or adjusting. Supports are
+   already set up, and the model is already placed and turned on the plate.
 
 The process changes this project makes to Bambu's High Quality preset:
 
@@ -82,18 +82,21 @@ The process changes this project makes to Bambu's High Quality preset:
 | Wall generator | Arachne | Smooth variable-width walls in the thin ears and jaw. |
 | Seam position | Back | The model faces the front of the printer, so seams land on the back of the neck under the mane. |
 | Brim type | No brim | The plinth is wide enough. |
-| Supports | Off | The model carries its own breakaway pillar. |
+| Supports | On: tree (auto), on build plate only | Holds up the lips and chin from the plate. "Build plate only" stops supports from growing inside the hinge, the compartment or the 0.45 mm gaps. |
 
 The High Quality preset itself prints the outer wall slowly (60 mm/s) with
 gyroid infill and 0.16 mm layers, for the smoothest surface on the face and mane.
 
-### Why no supports are needed
+### What's built into the model
 
-Printability is built into the model:
+The only supports are the slicer's, under the lips and chin. Everything else
+is designed to print without help:
 
-- A pillar stands under the muzzle. Its two cone-shaped pads sit one layer
-  below the undersides of both lips, like a support interface, and cover the
-  only steep spots on the face.
+- The plinth stops short of the head, so the space under the muzzle is open
+  plate where the supports can stand.
+- Two tiny breakaway tabs tie the lower edge of each cheek to the jaw just
+  below it. Without them, that edge would start in mid-air at the bottom of
+  the hinge arc. They snap the first time you open the mouth.
 - The jaw line is shaped so the underside of the jaw and cheeks stays within
   about 60° of vertical, which the A1 prints cleanly.
 - The compartment's back walls are slanted.
@@ -109,8 +112,9 @@ leave "detect thin walls" off. It is already off in the project.
 ### Other slicers
 
 Load `stl/horse_head.stl` standing on the plinth. Use 0.16 mm layers, 3
-walls, 15 % gyroid infill, supports off and no brim, with a slow outer wall
-if your slicer allows it.
+walls, 15 % gyroid infill and no brim. Turn supports on, but only from the
+build plate, never on the model, so none grow inside the hinge or the
+compartment. Use a slow outer wall if your slicer allows it.
 
 ### Estimated print time
 
@@ -123,12 +127,11 @@ with slightly more visible layer lines.
 
 ## After printing
 
-1. **Remove the pillar.** It stands on the plinth under the muzzle and is
-   notched just above the plinth. Twist it off with pliers, then pick off the
-   pads under the lips. Sand or trim the contact spots.
-2. **Free the jaw.** Pull the chin down firmly. The first movement breaks the
-   faint bonds across the print-in-place gaps, and you'll feel the detent let
-   go. Work it open and shut a dozen times until it moves smoothly.
+1. **Remove the supports** under the muzzle. They're tree supports from the
+   plate and pull away by hand or with pliers.
+2. **Free the jaw.** Pull the chin down firmly. The first movement snaps the
+   two small tabs inside the cheeks and breaks any faint bonds across the
+   print-in-place gaps, and you'll feel the detent let go. Work it open and shut a dozen times until it moves smoothly.
 3. The jaw should click shut and stay shut. If the click is too weak or too
    strong, change `NUB_PROUD` (default 0.75 mm) and reprint.
 
@@ -180,9 +183,10 @@ open, plus 0.45 mm, so it cannot bind.
 The checks in `verify_horse.py` show:
 
 - both parts are watertight;
-- the jaw only touches the head at the detent nubs through the whole swing,
-  once the pillar is removed;
-- no layer starts in mid-air.
+- the jaw only touches the head at the detent nubs and the breakaway tabs
+  through the whole swing;
+- the only layers that start in mid-air are the lips, and the slicer's
+  build-plate supports reach them.
 
 ### Reference
 

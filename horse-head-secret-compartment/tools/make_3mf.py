@@ -36,7 +36,9 @@ PROCESS_CHANGES = {
     "wall_generator": "arachne",       # smooth variable-width walls in the thin ears and jaw
     "seam_position": "back",           # the plate is rotated so "back" is the back of the neck, under the mane
     "brim_type": "no_brim",            # the plinth is wide enough
-    "enable_support": "0",             # the model carries its own support pillar
+    "enable_support": "1",             # supports under the lips and chin ...
+    "support_type": "tree(auto)",
+    "support_on_build_plate_only": "1",  # ... only from the plate, never inside the hinge, compartment or gaps
 }
 APP_VERSION = "02.00.00.95"           # a 2.x version, so current Bambu Studio opens it without a "newer version" prompt
 FILAMENT_COLOUR = "#E8D3B0"
