@@ -4,10 +4,10 @@ A small electric engine that drives itself on any Brio-style wooden track. A
 toddler presses the big red button on the roof and it goes; pressing it again
 stops it.
 
-- **Two solder joints, no gears to print, one screw.** The motor's double-ended
-  output shaft *is* the drive axle. The on/off button is a 16 mm panel-mount
-  latching switch soldered into the battery lead; everything else plugs
-  together. (A no-solder variant with a plug-in switch cable is included.)
+- **Two solder (or crimp) joints, no gears to print, one screw.** The motor's
+  double-ended output shaft *is* the drive axle. The on/off button is a 16 mm
+  panel-mount latching switch with push-on leads, joined into the battery
+  lead; everything else plugs together. (A no-solder variant with a plug-in switch cable is included.)
 - **Toddler-minded:** batteries under a screwed-down roof hatch; coupler magnets
   sealed inside the plastic; captive roof button; nothing reachable but the wheels.
 - **Brio proportions:** 105 × 30 × 59 mm (L × W × H on the track), 45 mm
@@ -31,7 +31,8 @@ driving the rear wheels. Cables coil in the bunker behind the drive wheels.*
 | 1 | **N20 Dual Shaft Worm Gear Motor, 3 V 130 rpm (LA009)** | [Bambu Lab store](https://us.store.bambulab.com/products/n20-dual-shaft-worm-gear-motor) | The shaft is the drive axle. Rated 2–4 V, so it suits 2×AAA. |
 | 1 | **50 mm PH2.0 to SH1.0 Conversion Wire (XC004)** | [Bambu Lab store](https://us.store.bambulab.com/products/50mm-ph2-0-to-sh1-0-conversion-wire) | Joins the JST-PH switch cable to the motor's SH1.0 socket. |
 | 1 | **2 × AAA Battery Holder with On/Off Switch & JST PH (#4191)** | [Adafruit](https://www.adafruit.com/product/4191) | 62.5 × 25.3 × 15.4 mm. The smallest pack that runs the motor well. Its own switch stays ON inside. |
-| 1 | **16 mm latching pushbutton, red (Adafruit #1442)** | [Adafruit](https://www.adafruit.com/product/1442), also Digi-Key / Mouser / Micro Center | The reference part: published drawing (18 mm bezel, 15.6 mm threaded body, 29.4 mm overall, 5 mm button). Solder to its **NO** and **C** tabs; ignore the LED tabs. Any "16 mm 1NO1NC latching" button is the same part dimensionally. Mounts through the roof with its own nut. |
+| 1 | **16 mm latching pushbutton, red (Adafruit #1442)** | [Adafruit](https://www.adafruit.com/product/1442), also Digi-Key / Mouser / Micro Center | The reference part: published drawing (18 mm bezel, 15.6 mm threaded body, 29.4 mm overall, 5 mm button). Uses its **NO** and **C** tabs; the LED tabs stay empty. Any "16 mm 1NO1NC latching" button is the same part dimensionally. Mounts through the roof with its own nut. |
+| 1 pack | **Quick-Connect Wire Pairs, 0.11" (Adafruit #1152)** | [Adafruit](https://www.adafruit.com/product/1152) | Push-on spade leads for the switch tabs, so the switch end needs no soldering and the roof unplugs for service. You use 2 of the 10. |
 | 4 | **D6 × 2 mm round magnets** (2 per coupler) | [Bambu Lab store – magnets](https://us.store.bambulab.com/collections/magnets) | Sealed inside the couplers during printing. |
 | 1 | M3 × 10 mm screw (countersunk or button head) | Any hardware store / Bambu Maker's Supply | Holds the roof hatch closed. It self-taps into the plastic. |
 | 2 | AAA batteries | — | Alkaline (fastest, ~1.5–2 h running) or NiMH (a little slower). |
@@ -49,8 +50,9 @@ List prices at the time of writing, US stores:
 | Bambu D6×2 magnets, pack of 20 | $1.75 | Already ~9¢ each; bulk Amazon/eBay packs of 50–100 cost about the same per magnet. Any 6 × 2 mm N35 disc works (or set `mag_t` for a single 6 × 4 mm). |
 | Adafruit #4191 battery holder | ~$3 | Amazon "2×AAA holder with switch and JST-PH" packs of 5 for ~$8, if you'll build several. |
 | Adafruit #1442 16 mm latching button | $2.50 | Generic 16 mm latching buttons are ~$1 each in packs. A 12 mm PBS-11A (~$1) fits the `12mm-switch-variant` files. Adafruit's #3064 plug-in switch cable ($2.95) is the no-solder alternative. |
+| Adafruit #1152 quick-connect wires (10) | $4.95 | Optional; skip it and solder straight to the switch tabs. |
 | M3 screw, AAA cells, ~40 g PLA | <$2 | — |
-| **Parts total** | **~$17** | |
+| **Parts total** | **~$17** (~$22 with the quick-connect wires) | |
 
 The parts are cheap; **shipping from two vendors is the real cost**. Bambu
 and Adafruit each charge several dollars for a small envelope unless you
@@ -172,11 +174,13 @@ OpenSCAD preview is drawn from the same numbers.
    (through the floor at the front of the battery bay), then press a plain
    wheel onto each end, again leaving a paper-thin gap.
 5. **Switch:** push the 16 mm button through the hole in the roof hatch from
-   the top and tighten its nut underneath. Cut the battery holder's **red**
-   wire about 60 mm from the holder, strip both ends, and solder one to the
-   switch's **NO** tab and the other to its **C** tab (the LED tabs stay
-   unused). Slip heat-shrink or tape over the joints. The switch body hangs
-   into a closed well in the front cab.
+   the top and tighten its nut underneath. Push a #1152 quick-connect lead
+   onto the switch's **NO** tab and another onto its **C** tab (the LED tabs
+   stay empty). Cut the battery holder's **red** wire about 60 mm from the
+   holder, strip both ends, and join each to one of the quick-connect leads:
+   solder and heat-shrink, or a crimped butt splice. Those two joints are the
+   only ones in the build. The switch body hangs into a closed well in the
+   front cab, and the roof can be unplugged from the switch for service.
 6. **Wiring:** plug battery holder → Bambu conversion wire → motor. Each plug
    only fits one way. Feed the conversion wire down through the front of the
    floor opening to the motor's lead; the spare motor lead lies on top of the
