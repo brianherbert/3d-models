@@ -34,7 +34,7 @@ driving the rear wheels. Cables coil in the bunker behind the drive wheels.*
 | 1 | **16 mm latching pushbutton, red (Adafruit #1442)** | [Adafruit](https://www.adafruit.com/product/1442), also Digi-Key / Mouser / Micro Center | The reference part: published drawing (18 mm bezel, 15.6 mm threaded body, 29.4 mm overall, 5 mm button). Uses its **NO** and **C** tabs; the LED tabs stay empty. Any "16 mm 1NO1NC latching" button is the same part dimensionally. Mounts through the roof with its own nut. |
 | 1 pack | **Quick-Connect Wire Pairs, 0.11" (Adafruit #1152)** | [Adafruit](https://www.adafruit.com/product/1152) | Push-on spade leads for the switch tabs, so the switch end needs no soldering and the roof unplugs for service. You use 2 of the 10. |
 | 4 | **D6 × 2 mm round magnets** (2 per coupler) | [Bambu Lab store – magnets](https://us.store.bambulab.com/collections/magnets) | Sealed inside the couplers during printing. |
-| 1 | M3 × 10 mm flat-head (countersunk) Phillips screw | Any M3 assortment kit | Holds the roof hatch closed, flush with the roof. It self-taps into the plastic. For a socket cap head, set `screw_head = "cap"` and use M3 × 12. |
+| 1 | **M3 × 10 mm flat-head Phillips screw** (from the Fgruh M3 flat-head assortment) | [Amazon](https://a.co/d/09Z5iRX5) | Holds the roof hatch closed, flush with the roof. It self-taps into the plastic. The kit's nuts and washers aren't needed. For a socket cap head instead, set `screw_head = "cap"` and use M3 × 12. |
 | 2 | AAA batteries | — | Alkaline (fastest, ~1.5–2 h running) or NiMH (a little slower). |
 | — | PLA filament, ~40 g | Bambu Lab | Body, hatch, wheels, button. Three colours look great. |
 | 2 | *Optional:* nitrile O-rings, 22 mm ID × 2.5 mm section | Hardware store / assortment box, cents each | Traction tyres; the drive wheels are grooved for them, so they can go on any time. |
@@ -52,7 +52,7 @@ List prices at the time of writing, US stores:
 | Adafruit #4191 battery holder | ~$3 | Amazon "2×AAA holder with switch and JST-PH" packs of 5 for ~$8, if you'll build several. |
 | Adafruit #1442 16 mm latching button | $2.50 | Generic 16 mm latching buttons are ~$1 each in packs. A 12 mm PBS-11A (~$1) fits the `12mm-switch-variant` files. Adafruit's #3064 plug-in switch cable ($2.95) is the no-solder alternative. |
 | Adafruit #1152 quick-connect wires (10) | $4.95 | Optional; skip it and solder straight to the switch tabs. |
-| M3 screw, AAA cells, ~40 g PLA | <$2 | — |
+| M3 screw (one from the assortment kit), AAA cells, ~40 g PLA | <$2 per loco | The kit is ~$10 once and covers every future project. |
 | **Parts total** | **~$17** (~$22 with the quick-connect wires) | |
 
 The parts are cheap; **shipping from two vendors is the real cost**. Bambu
