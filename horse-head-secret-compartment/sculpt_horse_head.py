@@ -82,7 +82,7 @@ def horse_sdf(P):
     jaw     = Fh.cone([0, 0.22*L, -36], [0, 0.88*L, -26], 15, 10)
     muzzle  = Fh.ellipsoid([0, 0.92*L, -14], [13.5, 13, 13])
     lipU    = Fh.ellipsoid([0, 0.99*L, -16], [11, 7, 7.5])
-    chin    = Fh.ellipsoid([0, 0.95*L, -27], [10, 10, 7])
+    chin    = Fh.ellipsoid([0, 0.97*L, -27], [10, 10, 7])
     throat  = Fh.ellipsoid([0, 0.04*L, -36], [15, 16, 12])
 
     d = skull
@@ -131,7 +131,7 @@ def horse_sdf(P):
 
 # ----------------------------------------------------------------- jaw definition
 GAP     = 0.45            # print-in-place clearance
-PIN_GAP = 0.40            # hinge pin clearance (a touch tighter: friction holds the jaw)
+PIN_GAP = 0.45            # hinge pin clearance, measured normal to the diamond's faces
 WALL    = 2.4             # compartment wall
 Z0      = -21.0           # mouth line (head frame z)
 HY, HZ  = 20.0, -29.0     # hinge axis (head frame y, z); runs along x
@@ -148,7 +148,7 @@ def lower_jaw_parts(Ph):
     Fh = Field(Ph)
     jaw    = Fh.cone([0, 0.22*L, -36], [0, 0.88*L, -26], 15, 10)
     muzzle = Fh.ellipsoid([0, 0.92*L, -14], [13.5, 13, 13])
-    chin   = Fh.ellipsoid([0, 0.95*L, -27], [10, 10, 7])
+    chin   = Fh.ellipsoid([0, 0.97*L, -27], [10, 10, 7])
     return smin(smin(jaw, muzzle, 7), chin, 6) - 3.0
 
 def jaw_sdf(d_head, Ph):
@@ -242,7 +242,7 @@ def build(res, preview=False):
             blade = np.maximum(blade, -notch)
             b = np.minimum(b, np.maximum(blade, j - 0.2))    # never closer than 0.2 mm (one layer) to the jaw
         return b
-        b = np.maximum(b, -(pin_sdf(Ph, PIN_R + PIN_GAP, XP + 0.6)))
+        b = np.maximum(b, -(pin_sdf(Ph, PIN_R + PIN_GAP * np.sqrt(2), XP + 0.6)))
         return b
     def jaw_fn(P):
         Ph = world_to_head(P); dh = horse_sdf(P)
