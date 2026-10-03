@@ -50,41 +50,76 @@ slot wall when the mouth is shut.*
 
 | File | What |
 |---|---|
-| `stl/horse_head.stl` | **The part to print.** Body, jaw and support pillar in one file, already positioned. |
+| `horse_head.3mf` | **Open this in Bambu Studio.** A ready-to-print project with the model on an A1 plate and the print settings already chosen. |
+| `stl/horse_head.stl` | The same part as a plain STL, for other slicers. Body, jaw and support pillar in one file, already positioned. |
 | `horse_sculpt.py` | The sculpt: a signed-distance-field model in Python. |
 | `build_horse.py` | Cuts and hinges the jaw, hollows the compartment, adds the detent and the pillar, and meshes the part. |
 | `verify_horse.py` | Checks: watertight, jaw swing without collisions, no mid-air islands, overhang report, compartment volume. `tools/skin_steep.py` reports steep visible surfaces. |
 | `stl/preview_*.stl` | Body, closed jaw and open jaw as separate meshes, for viewing. |
+| `tools/make_3mf.py` | Builds `horse_head.3mf` from the STL and the Bambu presets in `tools/bambu_profiles/`. |
 | `tools/` | Renderers and quick-draft scripts used while sculpting. |
 
-## Printing (Bambu Lab A1, PLA, 0.4 mm nozzle)
+## Printing in Bambu Studio
 
-- **Orientation:** as exported, standing on the plinth.
-- **Layer height:** 0.2 mm (0.16 mm looks nicer on the face). **Walls:** 3. **Infill:** 10–15 %.
-- **Supports: off.** Printability is built into the model, so there is
-  nothing to paint or tune in Bambu Studio:
-  - A pillar stands under the muzzle. Its two cone-shaped pads sit one layer
-    below the undersides of both lips, like a support interface, and cover
-    the only steep spots on the face.
-  - The jaw line is shaped so the underside of the jaw and cheeks stays
-    within about 60° of vertical, which the A1 prints cleanly.
-  - The compartment's back walls are slanted.
-  - The cheeks are hollowed to a pitched roof over the hinge arc.
-  - The opening angle is limited so the clearance carved behind the jaw
-    doesn't leave a flat ceiling under the throat.
-  - The only remaining steep spots are the tops of the nostril openings,
-    which are short 2 mm bridges.
-- **Leave "detect thin walls" off** and keep the default overhang settings.
-  The 0.45 mm gaps between jaw and head are meant to print as air.
-- The plinth is wide enough that a brim isn't needed.
+1. **Open `horse_head.3mf`** (File > Open Project, or drag it onto Bambu
+   Studio). If it asks, choose to open it as a project, not to import
+   geometry only.
+2. **Check the presets it selected:**
+   - Printer: **Bambu Lab A1 0.4 nozzle**
+   - Filament: **Bambu PLA Basic @BBL A1**
+   - Process: **0.16mm High Quality @BBL A1**, shown as modified because of
+     the changes below
+3. If you're using a different PLA, pick it in the filament list. The
+   process settings stay as they are.
+4. **Slice and print.** Nothing needs painting or adjusting: supports stay
+   off, and the model is already placed and turned on the plate.
+
+The process changes this project makes to Bambu's High Quality preset:
+
+| Setting | Value | Why |
+|---|---|---|
+| Wall loops | 3 | A stronger shell around the hollow jaw and the hinge. |
+| Wall generator | Arachne | Smooth variable-width walls in the thin ears and jaw. |
+| Seam position | Back | The model faces the front of the printer, so seams land on the back of the neck under the mane. |
+| Brim type | No brim | The plinth is wide enough. |
+| Supports | Off | The model carries its own breakaway pillar. |
+
+The High Quality preset itself prints the outer wall slowly (60 mm/s) with
+gyroid infill and 0.16 mm layers, for the smoothest surface on the face and mane.
+
+### Why no supports are needed
+
+Printability is built into the model:
+
+- A pillar stands under the muzzle. Its two cone-shaped pads sit one layer
+  below the undersides of both lips, like a support interface, and cover the
+  only steep spots on the face.
+- The jaw line is shaped so the underside of the jaw and cheeks stays within
+  about 60° of vertical, which the A1 prints cleanly.
+- The compartment's back walls are slanted.
+- The cheeks are hollowed to a pitched roof over the hinge arc.
+- The opening angle is limited so the clearance carved behind the jaw
+  doesn't leave a flat ceiling under the throat.
+- The only remaining steep spots are the tops of the nostril openings, which
+  are short 2 mm bridges.
+
+The 0.45 mm gaps between the jaw and the head are meant to print as air, so
+leave "detect thin walls" off. It is already off in the project.
+
+### Other slicers
+
+Load `stl/horse_head.stl` standing on the plinth. Use 0.16 mm layers, 3
+walls, 15 % gyroid infill, supports off and no brim, with a slow outer wall
+if your slicer allows it.
 
 ### Estimated print time
 
-Sliced with an A1-like PrusaSlicer profile: **about 6 h 50 min and 200 g of PLA**,
-plus the A1's start-up routine. That used Bambu PLA Basic speeds, 0.2 mm layers,
-3 walls and 15 % gyroid infill. Bambu Studio's own estimate is usually a
-little shorter. Most of the time goes into the solid neck and plinth, so 10 %
-infill saves about half an hour with no visible difference.
+**About 9 h 30 min and 200 g of PLA** at the project's settings, plus the A1's
+start-up routine. That's an estimate from an A1-like PrusaSlicer profile;
+Bambu Studio shows its own estimate after slicing. If you'd rather print
+faster, switch the process to **0.20mm Standard @BBL A1** and choose to
+transfer your changes when Bambu Studio asks. It finishes in about 7 hours,
+with slightly more visible layer lines.
 
 ## After printing
 
