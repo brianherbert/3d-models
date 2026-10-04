@@ -38,7 +38,7 @@ TONGUE_ROOT = 25.0                         # the tongue is free from NUB_RAD - 3
 SEAM = np.array([[0.16, -0.105], [0.80, -0.085], [0.90, -0.052], [1.10, -0.042]]) * L
 # struts
 STRUT_GAP = 0.2                            # one layer of air between a strut and the part it holds up
-USE_PILLAR = False                         # the slicer's build-plate supports hold up the lips instead
+USE_PILLAR = True                          # a built-in post holds up the lips (the slicer's supports stay off)
 TAB = 0.8                                  # breakaway tab cross-section (mm)
 PAD_R = 10.5                              # contact pad radius: covers the steep undersides of both lips
 PLINTH_H = S.PLINTH_H
@@ -160,17 +160,27 @@ def swept_jaw(P, n=12):
     return best
 
 STRUTS = []          # filled by build(): (x, y, z_top, which) for the lowest points of body and jaw
+POST_R0, POST_R1 = 7.5, 5.0                # support post radius at the plinth and just under the face
+GROOVE_DEPTH = 2.5                         # V-groove just above the plinth where the post snaps off
 def strut_sdf(P):
-    d = np.full(len(P), 1e9)
-    for sx, sy, ztop, _ in STRUTS:
-        x, y, z = P[:, 0] - sx, P[:, 1] - sy, P[:, 2]
-        h = np.clip((z - PLINTH_H) / max(ztop - PLINTH_H, 1), 0, 1)
-        arm = 6.0 - 2.0 * h                                     # cross-shaped blade, narrowing upward
-        blade = np.minimum(np.maximum(np.abs(x) - arm, np.abs(y) - 0.6), np.maximum(np.abs(x) - 0.6, np.abs(y) - arm))
-        pad = np.hypot(x, y) - np.clip(PAD_R - (ztop - z), 0, PAD_R)  # a 45-degree cone widening to the contact
-        s = np.maximum(np.minimum(blade, pad), np.maximum(PLINTH_H - 0.5 - z, z - ztop - 3.0))
-        notch = np.maximum(np.abs(z - (PLINTH_H + 1.2)) - 0.6, 0.35 - np.minimum(np.abs(x), np.abs(y)))
-        d = np.minimum(d, np.maximum(s, -notch))
+    """One sturdy post fused into the plinth, tapering up to 45-degree cone
+    pads that stop one layer under the lowest points of both lips."""
+    if not STRUTS: return np.full(len(P), 1e9)
+    cx = np.mean([s[0] for s in STRUTS]); cy = np.mean([s[1] for s in STRUTS])
+    ztop = min(s[2] for s in STRUTS)
+    x, y, z = P[:, 0] - cx, P[:, 1] - cy, P[:, 2]
+    rho = np.hypot(x, y)
+    h = np.clip((z - PLINTH_H) / max(ztop - PLINTH_H, 1), 0, 1)
+    r = POST_R0 + (POST_R1 - POST_R0) * h
+    post = np.maximum(rho - r, np.maximum(PLINTH_H - 1.0 - z, z - (ztop - 1.0)))
+    zg = PLINTH_H + 1.8
+    groove = (r - GROOVE_DEPTH + np.abs(z - zg)) - rho          # 45-degree V-groove all round
+    post = np.maximum(post, -groove)
+    d = post
+    for sx, sy, zt, _ in STRUTS:
+        px, py = P[:, 0] - sx, P[:, 1] - sy
+        pad = np.hypot(px, py) - np.clip(PAD_R - (zt - z), 0, PAD_R)   # cone widening to the contact
+        d = np.minimum(d, np.maximum(pad, np.maximum(ztop - 1.0 - PAD_R - z, z - zt - 3.0)))
     return d
 
 def body_fn(P):
@@ -186,7 +196,8 @@ def body_fn(P):
     b = np.minimum(b, pin_sdf(Ph))                              # the pin bridges the arm slot
     if STRUTS:
         j, _, _ = jaw_closed(P, dh)
-        b = np.minimum(b, np.maximum(strut_sdf(P), np.maximum(STRUT_GAP - j, STRUT_GAP - d)))
+        # one layer of air between the post and the head and jaw; fused into the plinth
+        b = np.minimum(b, np.maximum(strut_sdf(P), np.maximum(STRUT_GAP - j, STRUT_GAP - dh)))
     return b
 
 # ----------------------------------------------------------------- narrow-band evaluation and meshing

@@ -518,7 +518,7 @@ def hair(P, d):
 # ----------------------------------------------------------------- plinth
 PLINTH_H = 9.0
 PLINTH_C = np.array([0.0, -20.0]); PLINTH_R = np.array([44.0, 79.0])
-PLINTH_FRONT = 22.0      # the plinth stops short of the head so the slicer's supports reach the lips from the plate
+PLINTH_FRONT = 200.0     # no cut: the plinth runs under the head and carries the support post
 def plinth(P):
     e = np.linalg.norm((P[:, :2] - PLINTH_C) / PLINTH_R, axis=1)
     side = (e - 1.0) * min(PLINTH_R)

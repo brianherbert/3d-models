@@ -15,7 +15,7 @@ where needed, and assembly notes.
 |---|---|---|
 | ![signal](brio-train-tripped-semaphore-signal/images/signal_rest.png) | [Train-tripped semaphore signal](brio-train-tripped-semaphore-signal/) | A straight piece of Brio-compatible wooden-railway track with a signal that the train works by itself. A passing wheel presses a hidden treadle and the arm swings to *clear*. No batteries, springs or glue. |
 | ![locomotive](brio-battery-box-cab-locomotive/images/loco_iso.png) | [Battery box-cab locomotive](brio-battery-box-cab-locomotive/) | A small electric engine that drives itself on Brio-style track, with a big on/off button on the roof. It uses off-the-shelf parts (motor, batteries, switch, magnets, O-rings), and the README has the full parts list and links. |
-| ![horse](horse-head-secret-compartment/images/horse_closed.png) | [Horse head with a secret compartment](horse-head-secret-compartment/) | A realistic desk-size horse bust whose lower jaw swings open to reveal a hidden compartment. It prints in one piece with no assembly: the hinge and a click detent are built in, and the Bambu Studio project has the supports and settings ready. |
+| ![horse](horse-head-secret-compartment/images/horse_closed.png) | [Horse head with a secret compartment](horse-head-secret-compartment/) | A realistic desk-size horse bust whose lower jaw swings open to reveal a hidden compartment. It prints in one piece with no assembly: the hinge, a click detent and a snap-off support post are built in, and the Bambu Studio project has the settings ready. |
 
 ## What's in each folder
 
