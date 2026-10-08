@@ -135,7 +135,23 @@ python3 make_3mf.py private                          # Bambu Studio projects -> 
 python3 scan_test.py "https://your-link-here"        # optional: the simulated scan test for your link
 ```
 
-**Test before you print the big parts.**
+**Test prints before the big parts.** Two quick ones:
+
+- **The tile.** It has the exact code and lettering, so it shows how they come
+  out on your printer. If it's good, it's the tile that goes in the gift.
+- **`stl/fit_test.3mf`,** a 54 × 8 × 14 mm block with magnet pockets made the
+  same way as the wheel's, printed the same way up. It takes about ten
+  minutes.
+  - The left three pockets are for 4 × 2 mm magnets and the right three for
+    6 × 2 mm. The notch on top marks the left end.
+  - In each group, left to right, the pockets are tight, the current setting,
+    and loose (pocket radius 0.06, 0.12 or 0.18 mm over the magnet's).
+  - The best fit presses in by hand, sits flush or just below the surface,
+    and stays put when you turn the block over. Set `MAGNET_FIT` (and
+    `MAGNET_D` / `MAGNET_H` for 6 × 2 mm magnets) in `build_wheel.py` to
+    match, and rebuild.
+
+**Before you print, check the scan.**
 1. Scan `private/wheel_reveal.png` on screen with your phone. It should open
    the right page.
 2. Print the tile first. It's small and quick.
@@ -203,5 +219,6 @@ As a rough estimate, all three parts take about 100 g of PLA in total.
 | `stl/*.stl` | The same parts as STLs. `tile_plate` and `tile_qr` are the tile's two colours, and they line up. |
 | `build_wheel.py` | Builds everything from a link. Its parameters are at the top. |
 | `scan_test.py` | The simulated scan test behind the module size. |
+| `fit_test.py` | Builds `stl/fit_test.stl`, the magnet pocket test block. |
 | `make_3mf.py`, `bambu_profiles/` | The project builder and the A1 presets. |
 | `render.py` | Renders, including the exploded and section views. |

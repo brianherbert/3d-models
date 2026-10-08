@@ -43,6 +43,8 @@ PROJECTS = {
               "The wedge. Print in cheese yellow."),
     "tile": ([("tile_plate", 1), ("tile_qr", 2)], ["#F7C64A", "#2B1D14"], COMMON, "wheel_open.png",
              "The QR tile: yellow plate, dark code. One filament change at the top of the plate."),
+    "fit_test": ([("fit_test", 1)], ["#F7C64A"], dict(COMMON, seam_position="back"), "fit_test.png",
+                 "Magnet pocket fit test: 4 mm and 6 mm pockets, tight to loose."),
 }
 APP_VERSION = "02.00.00.95"
 BED = 256.0
@@ -219,5 +221,6 @@ if __name__ == "__main__":
     d = os.path.abspath(sys.argv[1]) if len(sys.argv) > 1 else os.path.join(HERE, "stl")
     # thumbnails from that build's renders if you made them, else the sample's
     images = d if os.path.exists(os.path.join(d, "wheel_open.png")) else os.path.join(HERE, "images")
-    for name in PROJECTS:
-        build(name, d, images)
+    for name, (parts, *_) in PROJECTS.items():
+        if all(os.path.exists(os.path.join(d, p + ".stl")) for p, _ in parts):   # the fit test only lives in stl/
+            build(name, d, images)

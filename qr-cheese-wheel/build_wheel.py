@@ -159,16 +159,17 @@ def magnet_spots(R):
             spots.append((c, along, into_wheel))
     return spots
 
-def magnet_pocket(c, along, normal, start):
+def magnet_pocket(c, along, normal, start, d=None, h=None, fit=None):
     """A teardrop-section hole for one magnet: round where the magnet sits, with
     a 45-degree peak on top so it prints in a vertical wall without support.
     It starts `start` mm along `normal` from the wall plane, opens 0.2 mm short
     of that (so it cuts cleanly through the face) and runs MAGNET_SINK +
-    MAGNET_H deep."""
-    r = MAGNET_D / 2 + MAGNET_FIT
+    MAGNET_H deep.  d, h and fit default to the MAGNET_* settings."""
+    d, h, fit = d or MAGNET_D, h or MAGNET_H, MAGNET_FIT if fit is None else fit
+    r = d / 2 + fit
     tip = mf.CrossSection([[(-0.01, r * np.sqrt(2)), (0.01, r * np.sqrt(2)), (0, r * np.sqrt(2) + 0.01)]])
     section = mf.CrossSection.batch_hull([mf.CrossSection.circle(r, 64), tip])
-    depth = 0.2 + MAGNET_SINK + MAGNET_H
+    depth = 0.2 + MAGNET_SINK + h
     p = section.extrude(depth)                  # local x: along the wall, local y: up, local z: into the part
     o = c + normal * (start - 0.2)
     return p.transform([[along[0], 0, normal[0], o[0]],

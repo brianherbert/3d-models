@@ -84,6 +84,8 @@ def render(d, out_dir):
            actor(halved(f("tile_plate"), BASE), TILE), actor(halved(f("tile_qr"), BASE), INK)]
     shot(cut, o("wheel_section"), (R - 22, 0, 11), 90, 6, scale=19)          # close-up at the rim
     shot([wheel()] + tile(), o("wheel_reveal"), (R * 0.5, 0, BASE), 0, 90, scale=R * 0.62)
+    if os.path.exists(f("fit_test")):
+        shot([actor(f("fit_test"), CHEESE)], o("fit_test"), (0, 0, 7), -90, 12, 1.1)
 
 if __name__ == "__main__":
     render(sys.argv[1] if len(sys.argv) > 1 else os.path.join(HERE, "stl"),
