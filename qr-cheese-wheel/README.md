@@ -34,15 +34,20 @@ The model has three parts, from the bottom up:
    - The notch walls are at right angles and open at the rim, so the wedge
      comes free as soon as you slide it outward. The finger dimple on top is
      for that pull.
-   - **Magnets hold it in.** Each notch wall has two pockets for 4 × 2 mm
-     disc magnets. Matching pockets in the wedge's sides face them across a
-     0.5 mm gap, making four pairs in all.
-     - The wedge clicks home and stays put when the wheel is tilted or
+   - **Magnets hold it in.** Behind each notch wall, two 6 × 2 mm disc
+     magnets are sealed inside the wheel, standing on edge in slots. Two more
+     sit in each of the wedge's sides, facing them, making four pairs in all.
+     - The magnets go in during printing: the printer pauses at the layer that
+       closes the slots, you drop them in, and it prints over them. There's
+       no glue, and nothing shows.
+     - A 0.6 mm skin of plastic covers each magnet, so the faces of a pair end
+       up about 1.75 mm apart.
+     - The wedge snaps home and stays put when the wheel is tilted or
        carried, and a finger in the dimple still slides it out.
-     - With the wedge out, the pockets look like a few more small cheese
-       holes.
      - Without magnets, only gravity holds the wedge, and it slides out as
        soon as the wheel tips.
+     - Set `MAGNET_MODE = "glued"` in `build_wheel.py` for open pockets you
+       glue magnets into after printing.
 
 ![section](images/wheel_section.png)
 *A cut through the middle of the wedge at the rim. From the top: the wedge
@@ -139,17 +144,16 @@ python3 scan_test.py "https://your-link-here"        # optional: the simulated s
 
 - **The tile.** It has the exact code and lettering, so it shows how they come
   out on your printer. If it's good, it's the tile that goes in the gift.
-- **`stl/fit_test.3mf`,** a 54 × 8 × 14 mm block with magnet pockets made the
-  same way as the wheel's, printed the same way up. It takes about ten
-  minutes.
-  - The left three pockets are for 4 × 2 mm magnets and the right three for
-    6 × 2 mm. The notch on top marks the left end.
-  - In each group, left to right, the pockets are tight, the current setting,
-    and loose (pocket radius 0.06, 0.12 or 0.18 mm over the magnet's).
-  - The best fit presses in by hand, sits flush or just below the surface,
-    and stays put when you turn the block over. Set `MAGNET_FIT` (and
-    `MAGNET_D` / `MAGNET_H` for 6 × 2 mm magnets) in `build_wheel.py` to
-    match, and rebuild.
+- **`stl/fit_test.3mf`,** a 53 × 8 × 9 mm block that rehearses the
+  embedded magnets in about ten minutes. It has six slots built like the
+  wheel's, and it pauses the same way.
+  - The left three slots are for 4 × 2 mm magnets and the right three for
+    6 × 2 mm. The notch on the back top edge marks the left end.
+  - In each group, left to right, the slots are snug, the current setting,
+    and loose (0.15, 0.25 or 0.35 mm thicker than the magnet).
+  - The best slot takes its magnet without forcing and holds it upright, and
+    the nozzle doesn't drag it out when printing resumes. Set `EMBED_SIDE`
+    in `build_wheel.py` to that value and rebuild.
 
 **Before you print, check the scan.**
 1. Scan `private/wheel_reveal.png` on screen with your phone. It should open
@@ -174,37 +178,54 @@ no brim.
      the text, so there's exactly one colour change.
    - **Without an AMS:** import `tile.stl` instead and add a pause at the
      first layer above **1.60 mm**. Swap to the dark filament and resume.
-2. **Wheel** (`wheel.3mf`), in yellow, with lightning infill at 10%. The
-   infill only has to hold up the top.
-3. **Wedge** (`wedge.3mf`), in yellow, with the same settings.
+2. **Wheel** (`wheel.3mf`), in yellow.
+   - It uses lightning infill at 10%, because the infill only has to hold up
+     the top.
+   - It uses Arachne walls, so the thin skin over each magnet prints as one
+     clean line.
+   - **It pauses partway up for the magnets** (see below).
+3. **Wedge** (`wedge.3mf`), in yellow, with the same settings and its own
+   magnet pause.
 
 Use a matte yellow and a black or dark brown for the code. Glare from silk or
 shiny filament can stop phones reading it.
 
-**You'll need** eight 4 × 2 mm neodymium disc magnets (N35 or stronger) and
-super glue (CA gel is easiest).
-- The pockets are 4.25 mm across and hold each magnet 0.1 mm below the
-  surface.
-- They have a pointed top so they print without support, and the magnet sits
-  in the round part.
-- For other magnets, change the `MAGNET_*` settings at the top of
-  `build_wheel.py`.
+### Magnets, dropped in mid-print
 
-**Assembly:** the magnets have to attract in pairs. This order sets the
-polarity for you:
+**You'll need** eight 6 × 2 mm neodymium disc magnets (N35 or stronger). No
+glue.
 
-1. **Wheel magnets.** Put a small dot of glue in each pocket on the notch
-   walls and press a magnet in. Let it set.
-2. **Tape.** Put a scrap of thin tape over each wheel magnet, so any glue
-   squeeze-out can't glue the wedge to the wheel.
-3. **Wedge magnets.** Snap a wedge magnet onto each taped wheel magnet. It
-   flips itself to the attracting side.
-4. **Glue the wedge.** Put a dot of glue in each of the wedge's pockets,
-   drop the tile in, and slide the wedge home. Its pockets swallow the
-   waiting magnets. Leave it to set, then slide the wedge out and peel off
-   the tape.
-5. **Check it.** The wedge should now click in and hold when you tilt the
-   wheel.
+**Before you print, mark them.** Stack all eight into one column, then draw
+a dot on the top face of each magnet with a marker. Every dot is then the
+same pole.
+
+**The pause.** `wheel.3mf` and `wedge.3mf` each carry a pause before the
+layer that closes the slots: z = 21.48 mm for the wheel and 17.00 mm for the
+wedge, in every build.
+- Bambu Studio shows the pause as a marker on the layer slider after
+  slicing. If it isn't there, add it yourself: slice, drag the slider to
+  that height, right-click the layer and choose **Add pause**.
+- When it pauses, the printer holds the print and waits. With notifications
+  on in Bambu Handy, your phone should tell you, so you don't need to watch
+  it. Come back whenever, drop the magnets in, and press **Resume** on the
+  printer or in the app.
+- A very long pause can leave a faint line around the outside at that
+  height, so don't leave it for hours.
+
+**Dropping them in.** You'll see four open slots, two along each notch wall.
+- Drop a magnet into each one, standing on its edge. Mind the nozzle, which
+  is still hot.
+- **Wheel:** dot toward the notch, the thin side of the slot.
+- **Wedge:** dot away from its side face, toward the middle of the wedge.
+- That way each wheel magnet shows the wedge the dotted pole, and each wedge
+  magnet shows the wheel the undotted one, so every pair attracts.
+- Each magnet should sit upright on the slot floor, below the top. Press it
+  down with something non-magnetic if it leans.
+
+**If the nozzle pulls a magnet out** when printing resumes: if it's still
+paused, push it back in. Otherwise the slot is too loose, so try the next
+snugger value from the fit test. The A1's nozzle is steel, which is why the
+slots are snug and leave 0.3 mm of headroom above the magnet.
 
 To assemble it as a gift: drop the tile into the notch, code up, with the
 plate's curved edge against the lip, then slide the wedge in on top.
@@ -219,6 +240,6 @@ As a rough estimate, all three parts take about 100 g of PLA in total.
 | `stl/*.stl` | The same parts as STLs. `tile_plate` and `tile_qr` are the tile's two colours, and they line up. |
 | `build_wheel.py` | Builds everything from a link. Its parameters are at the top. |
 | `scan_test.py` | The simulated scan test behind the module size. |
-| `fit_test.py` | Builds `stl/fit_test.stl`, the magnet pocket test block. |
+| `fit_test.py` | Builds `stl/fit_test.stl`, the embedded-magnet test block. |
 | `make_3mf.py`, `bambu_profiles/` | The project builder and the A1 presets. |
 | `render.py` | Renders, including the exploded and section views. |

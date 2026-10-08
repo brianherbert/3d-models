@@ -34,7 +34,7 @@ private/ and never into git.  The sample is built for a 41 x 41 code (any link
 up to 106 characters), so the committed wheel and wedge suit most links; a
 shorter link makes a smaller code and, built privately, a smaller wheel.
 """
-import os, sys
+import json, os, sys
 import numpy as np, qrcode, trimesh
 import manifold3d as mf
 
@@ -57,13 +57,25 @@ WEDGE_CLEAR = 0.3     # gap between the wedge and the notch walls
 TILE_CLEAR = 0.25     # gap around the tile in its bay
 EDGE = 0.5            # extra margin from the tile edge to the code's border
 DIMPLE_R = 10         # finger dimple on the wedge
-# Magnets hold the wedge in: pairs across each notch wall, a pocket in the
-# wall facing a pocket in the wedge's side.  Glued in after printing.
-MAGNET_D = 4.0        # 4 x 2 mm neodymium discs
+# Magnets hold the wedge in: pairs across each notch wall, one in the wheel
+# facing one in the wedge's side.
+#   "embedded": each magnet stands on edge in a slot sealed inside the print.
+#               The print pauses at the layer that closes the slots, you drop
+#               the magnets in and resume.  No glue, nothing visible.
+#   "glued":    open pockets in the walls; magnets glued in after printing.
+MAGNET_MODE = "embedded"
+MAGNET_D = 6.0        # 6 x 2 mm neodymium discs
 MAGNET_H = 2.0
+MAGNET_AT = (0.38, 0.72)  # pairs per wall, along it as fractions of the radius
+# glued pockets
 MAGNET_FIT = 0.12     # extra on the pocket radius; PLA holes print a little small
 MAGNET_SINK = 0.1     # magnet face below the surface: small magnets lose grip fast with distance
-MAGNET_AT = (0.38, 0.72)  # pairs per wall, along it as fractions of the radius
+# embedded slots
+EMBED_SKIN = 0.6      # plastic between the magnet and the notch face (Arachne prints it as one clean wall)
+EMBED_SIDE = 0.25     # slot thicker than the magnet: snug, so the nozzle can't lift it out
+EMBED_END = 0.4       # slot longer than the magnet
+EMBED_TOP = 0.3       # headroom above the magnet, under the layer that closes the slot
+LAYER0, LAYER = 0.2, 0.16  # first layer and layer height of the project's process (0.16mm High Quality)
 SEED = 11
 THANKS = "ありがとう"   # on the tile beside the code; "" to omit
 TEXT_H = 6.0          # letter height, shrunk if it doesn't fit
@@ -176,6 +188,28 @@ def magnet_pocket(c, along, normal, start, d=None, h=None, fit=None):
                         [along[1], 0, normal[1], o[1]],
                         [0,        1, 0,         o[2]]])
 
+def layer_top(z):
+    """The nearest layer top to z, for the print's layer heights."""
+    return LAYER0 + round((z - LAYER0) / LAYER) * LAYER
+
+def magnet_slot(c, along, normal, start, z0, d=None, h=None, side=None):
+    """An upright slot for a magnet standing on edge, sealed inside the part.
+    Its face is parallel to the wall, EMBED_SKIN behind the face that sits
+    `start` mm along `normal` from the wall plane.  z0 is the height of the
+    part's own bottom in these coordinates, so the slot's top lands exactly on
+    one of that part's layer tops.  Returns (slot, z in the part's own
+    coordinates of the layer to pause before)."""
+    d, h = d or MAGNET_D, h or MAGNET_H
+    side = EMBED_SIDE if side is None else side
+    top = layer_top(c[2] + (d + EMBED_TOP) / 2 - z0) + z0
+    tall, long_, thick = d + EMBED_TOP, d + EMBED_END, h + side
+    box = mf.Manifold.cube([long_, thick, tall]).translate([-long_ / 2, 0, 0])
+    o = c + normal * (start + EMBED_SKIN)
+    slot = box.transform([[along[0], normal[0], 0, o[0]],
+                          [along[1], normal[1], 0, o[1]],
+                          [0,        0,         1, top - tall]])
+    return slot, round(top - z0 + LAYER, 3)
+
 def bubbles(R):
     """Holes: (centre, radius, kind).  'cut' bubbles sit on the two notch
     walls and are shared by wheel and wedge; 'rind' and 'top' are outside."""
@@ -239,11 +273,18 @@ def build_wheel_and_wedge(R):
         wheel = wheel - c
         wedge = wedge - c
     wedge = wedge - mf.Manifold.sphere(DIMPLE_R, 64).translate([R - 20, 0, HEIGHT + 4.5])
+    pauses = {"wheel": set(), "wedge": set()}
     for c, along, into_wheel in magnet_spots(R):
-        wheel = wheel - magnet_pocket(c, along, into_wheel, 0)
         # the wedge's face is WEDGE_CLEAR in from the wall plane
-        wedge = wedge - magnet_pocket(c, along, -into_wheel, WEDGE_CLEAR)
-    return wheel, wedge
+        if MAGNET_MODE == "embedded":
+            s, p = magnet_slot(c, along, into_wheel, 0, 0)
+            wheel = wheel - s; pauses["wheel"].add(p)
+            s, p = magnet_slot(c, along, -into_wheel, WEDGE_CLEAR, TILE_TOP)
+            wedge = wedge - s; pauses["wedge"].add(p)
+        else:
+            wheel = wheel - magnet_pocket(c, along, into_wheel, 0)
+            wedge = wedge - magnet_pocket(c, along, -into_wheel, WEDGE_CLEAR)
+    return wheel, wedge, {k: sorted(v) for k, v in pauses.items() if v}
 
 def build_tile(M, L):
     n, m = M.shape[0], MODULE
@@ -313,12 +354,16 @@ def build(url, out_dir, version=None):
     L = layout(M.shape[0])
     print(f"code: {M.shape[0]}x{M.shape[0]}, error correction {level}")
     print(f"wheel {2 * L['R']:.0f} mm across, {HEIGHT} mm tall; quarter wedge")
-    wheel, wedge = build_wheel_and_wedge(L["R"])
+    wheel, wedge, pauses = build_wheel_and_wedge(L["R"])
+    for part, zs in pauses.items():
+        print(f"{part}: pause before the layer at z = {', '.join(f'{z:.2f}' for z in zs)} mm to drop in the magnets")
     plate, ink = build_tile(M, L)
     export([("wheel", wheel), ("wedge", wedge.translate([0, 0, -TILE_TOP])),     # each part sits on z = 0
             ("tile_plate", plate), ("tile_qr", ink), ("tile", plate + ink)], out_dir)
     with open(os.path.join(out_dir, "layout.txt"), "w") as f:                  # read by render.py
         f.write(f"{L['R']}\n")
+    with open(os.path.join(out_dir, "pauses.json"), "w") as f:                 # read by make_3mf.py
+        json.dump(pauses, f)
 
 if __name__ == "__main__":
     url = sys.argv[1] if len(sys.argv) > 1 else SAMPLE_URL

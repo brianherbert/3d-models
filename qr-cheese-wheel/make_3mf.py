@@ -34,6 +34,7 @@ SOLID_PARTS = dict(COMMON, **{
     "seam_position": "back",           # the plate is turned so the seam runs down the back of the rind
     "sparse_infill_pattern": "lightning",  # only holds up the top: these are mostly air inside
     "sparse_infill_density": "10%",
+    "wall_generator": "arachne",       # the 0.6 mm skin over each embedded magnet prints as one clean wall
 })
 PROJECTS = {
     # name: (parts [(stl, extruder)], colours, process changes, thumbnail, description)
@@ -43,8 +44,8 @@ PROJECTS = {
               "The wedge. Print in cheese yellow."),
     "tile": ([("tile_plate", 1), ("tile_qr", 2)], ["#F7C64A", "#2B1D14"], COMMON, "wheel_open.png",
              "The QR tile: yellow plate, dark code. One filament change at the top of the plate."),
-    "fit_test": ([("fit_test", 1)], ["#F7C64A"], dict(COMMON, seam_position="back"), "fit_test.png",
-                 "Magnet pocket fit test: 4 mm and 6 mm pockets, tight to loose."),
+    "fit_test": ([("fit_test", 1)], ["#F7C64A"], SOLID_PARTS, "fit_test.png",
+                 "Embedded magnet test: six sealed slots, pauses to drop magnets in."),
 }
 APP_VERSION = "02.00.00.95"
 BED = 256.0
@@ -115,8 +116,20 @@ def part_settings(pid, name, extruder, m):
     </part>
 '''
 
+def pause_xml(zs):
+    """Pauses baked into the project, as Bambu Studio stores the ones you add
+    from the layer slider (type 1 = pause).  Each pauses before the layer
+    whose top is at z, and runs the printer's pause command (M400 U1)."""
+    layers = "".join(f'<layer top_z="{z:.3f}" type="1" extruder="1" color="" extra="Drop in the magnets" gcode="M400 U1"/>\n'
+                     for z in zs)
+    return ('<?xml version="1.0" encoding="utf-8"?>\n<custom_gcodes_per_layer>\n<plate>\n<plate_info id="1"/>\n'
+            f'{layers}<mode value="SingleExtruder"/>\n</plate>\n</custom_gcodes_per_layer>\n')
+
 def build(name, stl_dir, image_dir):
     parts, colours, changes, thumb, description = PROJECTS[name]
+    pauses = {}
+    if os.path.exists(os.path.join(stl_dir, "pauses.json")):
+        pauses = json.load(open(os.path.join(stl_dir, "pauses.json")))
     meshes = [(p, e, trimesh.load(os.path.join(stl_dir, p + ".stl"))) for p, e in parts]
     lo, hi = meshes[0][2].bounds
     # turned 180 degrees so the rind (and the seam) faces the back of the printer
@@ -213,9 +226,12 @@ def build(name, stl_dir, image_dir):
         z.writestr("3D/Objects/object_1.model", sub)
         z.writestr("Metadata/model_settings.config", model_settings)
         z.writestr("Metadata/project_settings.config", json.dumps(project_settings(colours, changes), indent=4))
+        if pauses.get(name):
+            z.writestr("Metadata/custom_gcode_per_layer.xml", pause_xml(pauses[name]))
         z.writestr("Metadata/plate_1.png", png(512))
         z.writestr("Metadata/plate_1_small.png", png(128))
-    print(f"wrote {out} ({os.path.getsize(out) / 1e6:.1f} MB)")
+    note = f", pause before z = {', '.join(f'{p:.2f}' for p in pauses[name])} mm" if pauses.get(name) else ""
+    print(f"wrote {out} ({os.path.getsize(out) / 1e6:.1f} MB){note}")
 
 if __name__ == "__main__":
     d = os.path.abspath(sys.argv[1]) if len(sys.argv) > 1 else os.path.join(HERE, "stl")
