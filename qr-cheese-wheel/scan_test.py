@@ -90,10 +90,9 @@ def decodes(img, url):
     return z, o
 
 def run(url, sizes, trials=60, seed=1):
-    q = qrcode.QRCode(error_correction=qrcode.constants.ERROR_CORRECT_M, border=0)
-    q.add_data(url); q.make(fit=True)
-    M = np.array(q.get_matrix(), bool)
-    print(f"{M.shape[0]}x{M.shape[0]} code, ECC M, {trials} trials per size")
+    from build_wheel import qr_code                 # the same code the build makes
+    M, level = qr_code(url)
+    print(f"{M.shape[0]}x{M.shape[0]} code, ECC {level}, {trials} trials per size")
     print(" module   code     ZXing   OpenCV   either")
     for m in sizes:
         rng = np.random.default_rng(seed)

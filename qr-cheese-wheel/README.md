@@ -85,7 +85,9 @@ you see their dark sides.
   nothing more.
 
 **Error correction.** At the same printed size, levels L, M and Q scan about
-the same. M also survives a blob or a string across the code, so it's M.
+the same in the test. M is the floor, because it survives a blob or a string
+across the code. The build then raises it to Q or H whenever that fits in the
+same size code, since the stronger level costs nothing.
 
 **Diamond layout.** The code is turned 45° so it sits square in the notch's
 right-angled corner.
@@ -94,13 +96,22 @@ right-angled corner.
   clearances and the lip.
 - The lip is yellow, so it counts toward the border.
 
-**Shorter links make smaller wheels.** A 41 × 41 code (links up to 106
-characters at level M) gives a 156 mm wheel. A 37 × 37 code (up to 84
-characters) gives 143 mm.
-- `build_wheel.py` sizes the wheel to your link, so if your link has a
-  shorter form that opens the same page, use that.
-- For example, if a gift-card link still works without `www.`, it may drop to
-  the smaller code. Check that it opens the right page first.
+**Shorter links make smaller wheels.** `build_wheel.py` sizes the wheel to
+your link:
+
+| Link length | Code | Wheel |
+|---|---|---|
+| up to 106 characters, like a raw gift-card link | 41 × 41 | 156 mm |
+| up to 84 | 37 × 37 | 143 mm |
+| up to 62, like a link from your own shortener | 33 × 33 | 129 mm |
+| up to 42 | 29 × 29 | 116 mm |
+
+These lengths are for lowercase links. A link that is all capitals, digits and
+`$%*+-./:` packs tighter, which only helps if every part of it is
+case-insensitive, including the path.
+
+A short link that redirects to a gift card is as good as the gift card, so
+keep it out of git too.
 
 ## Making yours
 

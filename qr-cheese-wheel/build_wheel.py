@@ -43,7 +43,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 # ---- parameters (mm) -------------------------------------------------------
 SAMPLE_URL = "https://www.olympiaprovisions.com/"
 SAMPLE_VERSION = 6    # 41 x 41: what a ~90-character gift-card link needs
-ECC = qrcode.constants.ERROR_CORRECT_M
+ECC = qrcode.constants.ERROR_CORRECT_M          # the minimum; raised to Q or H when that doesn't grow the code
 MODULE = 1.2          # see scan_test.py
 QUIET = 2             # light border on the tile, in modules; the lip and the rest of the floor add to it
 QR_HEIGHT = 0.48      # three 0.16 mm layers: dark enough to hide the yellow, low enough not to fatten at an angle
@@ -103,10 +103,29 @@ def text_2d(text, height):
     s = height / (b[3] - b[1])
     return cs.translate([-(b[0] + b[2]) / 2, -(b[1] + b[3]) / 2]).scale([s, s]).offset(0.15, mf.JoinType.Round)
 
-def qr_matrix(url, version=None):
-    q = qrcode.QRCode(version=version, error_correction=ECC, border=0)
+ECC_NAMES = {qrcode.constants.ERROR_CORRECT_L: "L", qrcode.constants.ERROR_CORRECT_M: "M",
+             qrcode.constants.ERROR_CORRECT_Q: "Q", qrcode.constants.ERROR_CORRECT_H: "H"}
+
+def qr_code(url, version=None, ecc=ECC):
+    """The smallest code for url at error correction ECC or better; then the
+    strongest correction that still fits that size, which is free."""
+    q = qrcode.QRCode(version=version, error_correction=ecc, border=0)
     q.add_data(url); q.make(fit=version is None)
-    return np.array(q.get_matrix(), bool)
+    best = (q, ecc)
+    for stronger in (qrcode.constants.ERROR_CORRECT_Q, qrcode.constants.ERROR_CORRECT_H):
+        if list(ECC_NAMES).index(stronger) <= list(ECC_NAMES).index(ecc):
+            continue
+        t = qrcode.QRCode(version=q.version, error_correction=stronger, border=0)
+        t.add_data(url)
+        try:
+            t.make(fit=False)
+            best = (t, stronger)
+        except qrcode.exceptions.DataOverflowError:
+            break
+    return np.array(best[0].get_matrix(), bool), ECC_NAMES[best[1]]
+
+def qr_matrix(url, version=None):
+    return qr_code(url, version)[0]
 
 # ---- layout ----------------------------------------------------------------
 def layout(n):
@@ -249,8 +268,9 @@ def export(parts, out_dir):
         print(f"  {name}.stl  {t.volume / 1000:.0f} cm3")
 
 def build(url, out_dir, version=None):
-    M = qr_matrix(url, version)
+    M, level = qr_code(url, version)
     L = layout(M.shape[0])
+    print(f"code: {M.shape[0]}x{M.shape[0]}, error correction {level}")
     print(f"wheel {2 * L['R']:.0f} mm across, {HEIGHT} mm tall; quarter wedge")
     wheel, wedge = build_wheel_and_wedge(L["R"])
     plate, ink = build_tile(M, L)
