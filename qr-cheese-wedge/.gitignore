@@ -1,0 +1,3 @@
+# real builds with a live link (gift cards!) go here and never get committed
+private/
+__pycache__/
