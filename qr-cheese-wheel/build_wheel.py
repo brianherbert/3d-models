@@ -3,25 +3,36 @@
 A Swiss-cheese wheel with a wedge you slide out to find a QR code hidden
 underneath, for handing over a digital gift card (or any link).
 
-    python3 build_wheel.py                                 sample: wheel, wedge and a placeholder tile in stl/
-    python3 build_wheel.py "https://your-link" [out_dir]   your tile, in private/ (git-ignored) by default
+    python3 build_wheel.py                                 sample in stl/ (placeholder link)
+    python3 build_wheel.py "https://your-link" [out_dir]   your build, in private/ (git-ignored) by default
 
 Three parts:
 
-    wheel.stl     the wheel with a wedge-shaped notch.  At the bottom of the
-                  notch is a shallow bay, closed at the rim by a lip, that
-                  holds the tile.
-    wedge.stl     slides into the notch, flush with the top and the rind.
-                  A finger dimple on top lets you slide it out toward you.
-    tile_*.stl    a thin plate that drops into the bay: the QR code and
-                  ありがとう in a dark colour on cheese yellow.
+    wheel.stl     the wheel with a quarter-wedge notch.  The notch has a floor
+                  2.4 mm thick; on it sits the tile, and a low lip at the rim
+                  stops the tile sliding out with the wedge.
+    wedge.stl     a quarter of the wheel that sits on the tile, flush with the
+                  wheel's top and rind.  A finger dimple on top lets you slide
+                  it out toward you.
+    tile_*.stl    a thin plate in the notch floor: the QR code and ありがとう
+                  in a dark colour on cheese yellow.
 
-Only the tile carries the link, so the wheel and wedge are the same for every
-build and live in stl/.  If the link is a gift card the tile *is* the money,
-so a real tile goes to private/ and never into git.
+The wheel is as small as the code allows.  The code is turned 45 degrees so it
+sits square in the notch's right-angled corner (a diamond, seen from the rim),
+which is the tightest fit of a square in a wedge; the wheel's radius is then
+the code's diagonal plus its light border, the lip and clearances.  The lip is
+yellow too, so it counts toward that border.
 
-Holes that cross the cut are shared: a bubble on the notch wall leaves half a
-dent in the wheel and half in the wedge, and they line up when it's closed.
+Module size, error correction and relief height come from scan_test.py: 1.2 mm
+modules at ECC M, standing 0.48 mm proud, decoded in about 94% of simulated
+single camera frames across tilts up to 35 degrees, wall shadows and print
+spread.  Below 1.2 mm reliability drops off quickly; above it the wheel grows
+for little gain.
+
+If the link is a gift card the tile *is* the money: real builds go to
+private/ and never into git.  The sample is built for a 41 x 41 code (any link
+up to 106 characters), so the committed wheel and wedge suit most links; a
+shorter link makes a smaller code and, built privately, a smaller wheel.
 """
 import os, sys
 import numpy as np, qrcode, trimesh
@@ -31,41 +42,48 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 
 # ---- parameters (mm) -------------------------------------------------------
 SAMPLE_URL = "https://www.olympiaprovisions.com/"
+SAMPLE_VERSION = 6    # 41 x 41: what a ~90-character gift-card link needs
 ECC = qrcode.constants.ERROR_CORRECT_M
-MAX_MODULE = 1.6      # cap for short links
-MIN_MODULE = 1.1      # refuse links that would print finer than this
-QUIET = 2             # light border around the code, in modules
+MODULE = 1.2          # see scan_test.py
+QUIET = 2             # light border on the tile, in modules; the lip and the rest of the floor add to it
+QR_HEIGHT = 0.48      # three 0.16 mm layers: dark enough to hide the yellow, low enough not to fatten at an angle
 
-WHEEL_D = 210         # fits the A1's 256 mm bed
-HEIGHT = 36
-ANGLE = 80            # the wedge, degrees
-BASE = 2.4            # wheel floor under the tile
+HEIGHT = 32
+ANGLE = 90            # the wedge; the code's diamond fit needs exactly 90
+BASE = 2.4            # notch floor under the tile
 TILE_T = 1.6          # tile plate
-QR_HEIGHT = 0.8       # dark modules and letters above the plate
-LIP = 3.0             # wall at the rim that keeps the tile from sliding out with the wedge
+LIP = 2.5             # wall at the rim that holds the tile in
 WEDGE_CLEAR = 0.3     # gap between the wedge and the notch walls
 TILE_CLEAR = 0.25     # gap around the tile in its bay
-DIMPLE_R = 11         # finger dimple on the wedge
+EDGE = 0.5            # extra margin from the tile edge to the code's border
+DIMPLE_R = 10         # finger dimple on the wedge
 SEED = 11
-THANKS = "ありがとう"   # on the tile above the code; "" to omit
+THANKS = "ありがとう"   # on the tile beside the code; "" to omit
+TEXT_H = 6.0          # letter height, shrunk if it doesn't fit
 THANKS_FONT = ["/usr/share/fonts/opentype/ipafont-gothic/ipag.ttf",
                "/usr/share/fonts/truetype/fonts-japanese-gothic.ttf",
                "/System/Library/Fonts/ヒラギノ角ゴシック W6.ttc",
                "C:/Windows/Fonts/msgothic.ttc"]
 
-R = WHEEL_D / 2
 HALF = np.radians(ANGLE / 2)
 TILE_TOP = BASE + TILE_T + QR_HEIGHT          # the wedge rests here, on the code and the lip
 WEDGE_H = HEIGHT - TILE_TOP
+# the notch's two walls run along these directions from the centre; (u, v) are
+# distances along them, and (u, v) -> (x, y) is a rotation, so nothing is mirrored
+E_U = np.array([np.cos(-HALF), np.sin(-HALF)])
+E_V = np.array([np.cos(HALF), np.sin(HALF)])
 
 # ---- helpers ---------------------------------------------------------------
 def to_trimesh(m):
     g = m.to_mesh()
     return trimesh.Trimesh(np.asarray(g.vert_properties)[:, :3], np.asarray(g.tri_verts), process=False)
 
-def sector(radius, n=128, angle=ANGLE):
-    a = np.radians(np.linspace(-angle / 2, angle / 2, n))
+def sector(radius, n=128):
+    a = np.radians(np.linspace(-ANGLE / 2, ANGLE / 2, n))
     return mf.CrossSection([[(0.0, 0.0)] + [(radius * np.cos(t), radius * np.sin(t)) for t in a]])
+
+def uv(u, v):
+    return u * E_U + v * E_V
 
 def teardrop(r):
     """A sphere with a 45-degree roof, so a hole in a wall needs no support."""
@@ -85,79 +103,73 @@ def text_2d(text, height):
     s = height / (b[3] - b[1])
     return cs.translate([-(b[0] + b[2]) / 2, -(b[1] + b[3]) / 2]).scale([s, s]).offset(0.15, mf.JoinType.Round)
 
-def tile_outline():
-    """The bay floor: the notch sector inside the lip, shrunk by the clearance."""
-    return (sector(R - LIP) ).offset(-TILE_CLEAR, mf.JoinType.Miter)
+def qr_matrix(url, version=None):
+    q = qrcode.QRCode(version=version, error_correction=ECC, border=0)
+    q.add_data(url); q.make(fit=version is None)
+    return np.array(q.get_matrix(), bool)
 
-def qr_square():
-    """The largest square (code + quiet zone) that fits on the tile, pushed
-    toward the rim to leave room for the text in front of it.
-    Returns (side, x of the edge nearest the centre)."""
-    inset = TILE_CLEAR + 1.5
-    lo, hi = 20.0, 120.0
-    for _ in range(50):
-        s = (lo + hi) / 2
-        x_front = (s / 2 + inset / np.cos(HALF)) / np.tan(HALF)
-        ok = np.hypot(x_front + s, s / 2) <= R - LIP - inset
-        lo, hi = (s, hi) if ok else (lo, s)
-    s = lo
-    x_back = np.sqrt((R - LIP - inset) ** 2 - (s / 2) ** 2)
-    return s, x_back - s
+# ---- layout ----------------------------------------------------------------
+def layout(n):
+    """Everything sized from the code: n modules a side."""
+    inset = TILE_CLEAR + EDGE + QUIET * MODULE          # wall to the first dark module
+    far = inset + n * MODULE                            # wall to the last
+    corner = far * np.sqrt(2)                           # centre to the code's far corner
+    # the tile must hold the code with EDGE to spare; the border beyond the
+    # corner may run onto the lip, but must stay on the wheel
+    r_tile_edge = corner + EDGE                         # tile radius needed (to the tile's edge)
+    R = max(r_tile_edge + TILE_CLEAR + LIP, corner + QUIET * MODULE * np.sqrt(2) + 0.5)
+    R = np.ceil(R * 2) / 2
+    return dict(n=n, inset=inset, far=far, R=R, tile_r=R - LIP - TILE_CLEAR)
 
 # ---- parts -----------------------------------------------------------------
-def bubbles():
-    """Holes: (centre, radius, kind).  kind is 'cut' for bubbles on the two
-    notch walls (shared by wheel and wedge), 'rind' / 'top' for the outside."""
+def bubbles(R):
+    """Holes: (centre, radius, kind).  'cut' bubbles sit on the two notch
+    walls and are shared by wheel and wedge; 'rind' and 'top' are outside."""
     rng = np.random.default_rng(SEED)
     out = []
 
     def free(p, r):
         return all(np.linalg.norm(p - q) > r + rq + 3 for q, rq, _ in out)
 
-    # on the notch walls: the planes at +/-HALF through the axis
     for sgn in (1, -1):
         along = np.array([np.cos(HALF), sgn * np.sin(HALF), 0])
         n = 0
         for _ in range(500):
-            if n >= 4: break
-            r = rng.uniform(3.5, 7.5)
-            d = rng.uniform(20, R - 12)
+            if n >= 3: break
+            r = rng.uniform(3, 6.5)
+            d = rng.uniform(16, R - 10)
             z = rng.uniform(TILE_TOP + r + 2, HEIGHT - r * 1.5 - 2)
             # centred in the 0.3 mm gap, not on either face, which would leave slivers
             p = along * d + np.array([np.sin(HALF), -sgn * np.cos(HALF), 0]) * WEDGE_CLEAR / 2; p[2] = z
             if free(p, r): out.append((p, r, "cut")); n += 1
-    # around the rind, the wheel's and the wedge's
     n = 0
     for _ in range(800):
-        if n >= 16: break
-        r = rng.uniform(3, 7)
+        if n >= 13: break
+        r = rng.uniform(2.8, 6)
         t = rng.uniform(-np.pi, np.pi)
         if abs(abs(t) - HALF) * R < r + 2: continue                 # not across the seam
-        z = rng.uniform(r + 2, HEIGHT - r * 1.5 - 2)
-        if abs(t) < HALF: z = max(z, TILE_TOP + r + 2)              # wedge: keep clear of its bottom edge
-        if z > HEIGHT - r * 1.5 - 2: continue
+        lo = TILE_TOP + r + 2 if abs(t) < HALF else r + 2           # wedge: clear of its bottom edge
+        if lo > HEIGHT - r * 1.5 - 2: continue
+        z = rng.uniform(lo, HEIGHT - r * 1.5 - 2)
         rr = R + rng.uniform(-0.4, 0.4) * r
         p = np.array([rr * np.cos(t), rr * np.sin(t), z])
         if free(p, r): out.append((p, r, "rind")); n += 1
-    # craters on top
     n = 0
     for _ in range(800):
-        if n >= 9: break
-        r = rng.uniform(2.5, 5)
-        rad = rng.uniform(15, R - r - 4); t = rng.uniform(-np.pi, np.pi)
+        if n >= 7: break
+        r = rng.uniform(2.5, 4.5)
+        rad = rng.uniform(12, R - r - 4); t = rng.uniform(-np.pi, np.pi)
         p = np.array([rad * np.cos(t), rad * np.sin(t), HEIGHT + rng.uniform(-0.2, 0.3) * r])
-        # off the seam, and on the wedge not where the finger dimple goes
         da = abs(abs(t) - HALF)
-        seam = rad * np.sin(da) if da < np.pi / 2 else rad
-        if seam < r + 3: continue
-        if abs(t) < HALF and np.hypot(p[0] - (R - 24), p[1]) < DIMPLE_R + r + 4: continue
+        if (rad * np.sin(da) if da < np.pi / 2 else rad) < r + 3: continue
+        if abs(t) < HALF and np.hypot(p[0] - (R - 20), p[1]) < DIMPLE_R + r + 4: continue
         if free(p, r): out.append((p, r, "top")); n += 1
     return out
 
 def cutter(p, r, kind):
     return (mf.Manifold.sphere(r, 48) if kind == "top" else teardrop(r)).translate(p.tolist())
 
-def build_wheel_and_wedge(holes):
+def build_wheel_and_wedge(R):
     tall = mf.CrossSection.circle(R, 256).extrude(HEIGHT)
     notch = sector(R + 2).extrude(HEIGHT).translate([0, 0, TILE_TOP])
     bay = sector(R - LIP).extrude(TILE_TOP).translate([0, 0, BASE])
@@ -166,30 +178,16 @@ def build_wheel_and_wedge(holes):
     wedge2d = sector(R + 2).offset(-WEDGE_CLEAR, mf.JoinType.Miter) ^ mf.CrossSection.circle(R, 256)
     wedge = wedge2d.extrude(WEDGE_H).translate([0, 0, TILE_TOP])
 
-    for p, r, kind in holes:
+    for p, r, kind in bubbles(R):
         c = cutter(p, r, kind)
         wheel = wheel - c
         wedge = wedge - c
-    dimple = mf.Manifold.sphere(DIMPLE_R, 64).translate([R - 24, 0, HEIGHT + 5])
-    wedge = wedge - dimple
+    wedge = wedge - mf.Manifold.sphere(DIMPLE_R, 64).translate([R - 20, 0, HEIGHT + 4.5])
     return wheel, wedge
 
-def qr_matrix(url):
-    q = qrcode.QRCode(error_correction=ECC, border=0)
-    q.add_data(url); q.make(fit=True)
-    return np.array(q.get_matrix(), bool)
-
-def build_tile(url):
-    M = qr_matrix(url); n = M.shape[0]
-    side, x_front = qr_square()
-    m = min(MAX_MODULE, side / (n + 2 * QUIET))
-    if m < MIN_MODULE:
-        sys.exit(f"the link needs a {n}x{n} code: {m:.2f} mm modules, too fine to print. Use a shorter link or a bigger wheel.")
-    code = n * m
-    # The code reads upright for someone at the rim looking in (where the wedge
-    # comes out): page-down is +x (toward the rim), page-right is +y.
-    cx = x_front + side / 2
-    x0, y0 = cx - code / 2, -code / 2
+def build_tile(M, L):
+    n, m = M.shape[0], MODULE
+    a = L["inset"]
     rects = []
     for i in range(n):
         j = 0
@@ -197,32 +195,47 @@ def build_tile(url):
             if M[i, j]:
                 k = j
                 while k < n and M[i, k]: k += 1
-                xa, xb = x0 + i * m, x0 + (i + 1) * m
-                ya, yb = y0 + j * m, y0 + k * m
-                rects.append([(xa, ya), (xb, ya), (xb, yb), (xa, yb)])
+                # in (u, v), columns along u and rows along -v: the code as seen from above, unmirrored
+                u0, u1 = a + j * m, a + k * m
+                v0, v1 = a + (n - 1 - i) * m, a + (n - i) * m
+                rects.append([(u0, v0), (u1, v0), (u1, v1), (u0, v1)])
                 j = k
             else:
                 j += 1
-    ink = mf.CrossSection(rects, mf.FillRule.NonZero).offset(0.02, mf.JoinType.Miter)   # corner-touching modules overlap
-    text_h = 0
+    # union and grow in the axis-aligned (u, v) frame, where corner-touching
+    # modules meet exactly, then turn the outline into place: (u, v) -> (x, y)
+    # is a rotation by -ANGLE/2
+    ink = (mf.CrossSection(rects, mf.FillRule.NonZero).offset(0.03, mf.JoinType.Miter)
+           .rotate(-ANGLE / 2))
+
+    placed = ""
     if THANKS:
-        t = text_2d(THANKS, 7.5)
+        # In the strip beyond the code along one wall (large u): letters run
+        # along v with their tops toward the code, like a caption under it.
+        t = text_2d(THANKS, TEXT_H)
         if t is not None:
-            # text x -> +y, text y -> -x: upright for the same viewer, in front of the code
-            gap = 3.0
             b = t.bounds(); w, h = b[2] - b[0], b[3] - b[1]
-            tx = x_front + QUIET * m - gap - h / 2
-            t = t.transform([[0, -1, tx], [1, 0, 0]])
-            width_there = 2 * ((tx - h / 2) * np.tan(HALF) - TILE_CLEAR - 1.5)
-            if w > width_there:
-                s = width_there / w                     # shrink about its centre to fit
-                t = t.translate([-tx, 0]).scale([s, s]).translate([tx, 0])
-            ink = ink + t
-            text_h = h
-    plate = tile_outline().extrude(TILE_T)
+            u_lo = L["far"] + QUIET * m                     # keep the code's border clear
+            for scale in np.linspace(1, 0.6, 9):
+                hh, ww = h * scale, w * scale
+                u_hi = u_lo + hh
+                v_max = np.sqrt(max(L["tile_r"] - EDGE, 0) ** 2 - u_hi ** 2) if u_hi < L["tile_r"] else 0
+                v_lo = TILE_CLEAR + EDGE + 1
+                if v_max - v_lo >= ww:
+                    uc, vc = u_lo + hh / 2, v_lo + (v_max - v_lo) / 2
+                    # text x -> +v, text y -> -u (a rotation), then into x, y
+                    Mt = np.column_stack([E_V, -E_U])
+                    c = uv(uc, vc)
+                    t2 = t.scale([scale, scale]).transform([[Mt[0, 0], Mt[0, 1], c[0]], [Mt[1, 0], Mt[1, 1], c[1]]])
+                    ink = ink + t2
+                    placed = f", {THANKS} at {hh:.1f} mm"
+                    break
+            else:
+                print(f"  {THANKS} doesn't fit beside this code; leaving it off")
+    plate = sector(L["R"] - LIP).offset(-TILE_CLEAR, mf.JoinType.Miter).extrude(TILE_T)
     ink3 = ink.extrude(QR_HEIGHT).translate([0, 0, TILE_T])
-    print(f"tile: {n}x{n} code at {m:.2f} mm modules = {code:.1f} mm square"
-          f"{', with ' + THANKS if text_h else ''}; colour change at z = {TILE_T:.2f} mm")
+    print(f"tile: {n}x{n} code at {m:.2f} mm = {n * m:.1f} mm square, set diagonally{placed}; "
+          f"colour change at z = {TILE_T:.2f} mm")
     return plate, ink3
 
 # ---- output ----------------------------------------------------------------
@@ -230,24 +243,24 @@ def export(parts, out_dir):
     os.makedirs(out_dir, exist_ok=True)
     for name, m in parts:
         path = os.path.join(out_dir, name + ".stl")
-        to_trimesh(m).export(path)
+        t = to_trimesh(m)
+        t.export(path)
         assert trimesh.load(path).is_watertight, name + " is not watertight once written as STL"
-        print(f"  {name}.stl  {to_trimesh(m).volume / 1000:.0f} cm3")
+        print(f"  {name}.stl  {t.volume / 1000:.0f} cm3")
 
-def build(url, out_dir, with_wheel):
-    os.makedirs(out_dir, exist_ok=True)
-    parts = []
-    if with_wheel:
-        wheel, wedge = build_wheel_and_wedge(bubbles())
-        # each part sits on z = 0 as printed
-        parts += [("wheel", wheel), ("wedge", wedge.translate([0, 0, -TILE_TOP]))]
-    plate, ink = build_tile(url)
-    parts += [("tile_plate", plate), ("tile_qr", ink), ("tile", plate + ink)]
-    export(parts, out_dir)
+def build(url, out_dir, version=None):
+    M = qr_matrix(url, version)
+    L = layout(M.shape[0])
+    print(f"wheel {2 * L['R']:.0f} mm across, {HEIGHT} mm tall; quarter wedge")
+    wheel, wedge = build_wheel_and_wedge(L["R"])
+    plate, ink = build_tile(M, L)
+    export([("wheel", wheel), ("wedge", wedge.translate([0, 0, -TILE_TOP])),     # each part sits on z = 0
+            ("tile_plate", plate), ("tile_qr", ink), ("tile", plate + ink)], out_dir)
+    with open(os.path.join(out_dir, "layout.txt"), "w") as f:                  # read by render.py
+        f.write(f"{L['R']}\n")
 
 if __name__ == "__main__":
     url = sys.argv[1] if len(sys.argv) > 1 else SAMPLE_URL
     sample = url == SAMPLE_URL
     out = sys.argv[2] if len(sys.argv) > 2 else os.path.join(HERE, "stl" if sample else "private")
-    print(f"wheel {WHEEL_D} x {HEIGHT} mm, wedge {ANGLE} deg")
-    build(url, out, with_wheel=sample)
+    build(url, out, SAMPLE_VERSION if sample else None)

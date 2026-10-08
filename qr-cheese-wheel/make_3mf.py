@@ -3,8 +3,8 @@
 Build Bambu Studio projects for the wheel, the wedge and the tile, each on its
 own A1 plate with the print settings chosen.
 
-    python3 make_3mf.py                 wheel.3mf, wedge.3mf and the sample tile.3mf, in stl/
-    python3 make_3mf.py private         tile.3mf for your own tile, in private/
+    python3 make_3mf.py                 wheel.3mf, wedge.3mf and tile.3mf for the sample, in stl/
+    python3 make_3mf.py private         the same for your own build, in private/
 
 Same approach as the other models' make_3mf.py: the projects select Bambu's
 own system presets
@@ -216,9 +216,8 @@ def build(name, stl_dir, image_dir):
     print(f"wrote {out} ({os.path.getsize(out) / 1e6:.1f} MB)")
 
 if __name__ == "__main__":
-    if len(sys.argv) > 1:                 # your own tile: thumbnail from your renders if you made them
-        d = os.path.abspath(sys.argv[1])
-        build("tile", d, d if os.path.exists(os.path.join(d, "wheel_open.png")) else os.path.join(HERE, "images"))
-    else:
-        for name in PROJECTS:
-            build(name, os.path.join(HERE, "stl"), os.path.join(HERE, "images"))
+    d = os.path.abspath(sys.argv[1]) if len(sys.argv) > 1 else os.path.join(HERE, "stl")
+    # thumbnails from that build's renders if you made them, else the sample's
+    images = d if os.path.exists(os.path.join(d, "wheel_open.png")) else os.path.join(HERE, "images")
+    for name in PROJECTS:
+        build(name, d, images)
