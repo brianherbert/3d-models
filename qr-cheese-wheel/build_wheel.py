@@ -57,13 +57,13 @@ WEDGE_CLEAR = 0.3     # gap between the wedge and the notch walls
 TILE_CLEAR = 0.25     # gap around the tile in its bay
 EDGE = 0.5            # extra margin from the tile edge to the code's border
 DIMPLE_R = 10         # finger dimple on the wedge
-# Magnets hold the wedge in: one pair across each notch wall, a pocket in the
+# Magnets hold the wedge in: pairs across each notch wall, a pocket in the
 # wall facing a pocket in the wedge's side.  Glued in after printing.
-MAGNET_D = 6.0        # 6 x 3 mm neodymium discs
-MAGNET_H = 3.0
-MAGNET_FIT = 0.15     # extra on the pocket radius; PLA holes print a little small
-MAGNET_SINK = 0.2     # magnet face below the surface, so a glue bead can't stand proud
-MAGNET_AT = 0.55      # along each wall, as a fraction of the radius
+MAGNET_D = 4.0        # 4 x 2 mm neodymium discs
+MAGNET_H = 2.0
+MAGNET_FIT = 0.12     # extra on the pocket radius; PLA holes print a little small
+MAGNET_SINK = 0.1     # magnet face below the surface: small magnets lose grip fast with distance
+MAGNET_AT = (0.38, 0.72)  # pairs per wall, along it as fractions of the radius
 SEED = 11
 THANKS = "ありがとう"   # on the tile beside the code; "" to omit
 TEXT_H = 6.0          # letter height, shrunk if it doesn't fit
@@ -149,13 +149,14 @@ def layout(n):
 
 # ---- parts -----------------------------------------------------------------
 def magnet_spots(R):
-    """(centre on the wall plane, along-wall unit vector, unit normal into the wheel) for each wall."""
+    """(centre on the wall plane, along-wall unit vector, unit normal into the wheel) for each magnet pair."""
     spots = []
     for sgn in (1, -1):
         along = np.array([np.cos(HALF), sgn * np.sin(HALF), 0])
         into_wheel = np.array([-np.sin(HALF), sgn * np.cos(HALF), 0])
-        c = along * R * MAGNET_AT; c[2] = TILE_TOP + WEDGE_H / 2
-        spots.append((c, along, into_wheel))
+        for f in MAGNET_AT:
+            c = along * R * f; c[2] = TILE_TOP + WEDGE_H / 2
+            spots.append((c, along, into_wheel))
     return spots
 
 def magnet_pocket(c, along, normal, start):

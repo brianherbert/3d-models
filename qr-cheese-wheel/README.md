@@ -34,12 +34,13 @@ The model has three parts, from the bottom up:
    - The notch walls are at right angles and open at the rim, so the wedge
      comes free as soon as you slide it outward. The finger dimple on top is
      for that pull.
-   - **Magnets hold it in.** Each notch wall has a pocket for a 6 × 3 mm disc
-     magnet, and a matching pocket in the wedge's side faces it across a
-     0.7 mm gap.
+   - **Magnets hold it in.** Each notch wall has two pockets for 4 × 2 mm
+     disc magnets. Matching pockets in the wedge's sides face them across a
+     0.5 mm gap, making four pairs in all.
      - The wedge clicks home and stays put when the wheel is tilted or
        carried, and a finger in the dimple still slides it out.
-     - With the wedge out, the pockets look like two more small cheese holes.
+     - With the wedge out, the pockets look like a few more small cheese
+       holes.
      - Without magnets, only gravity holds the wedge, and it slides out as
        soon as the wheel tips.
 
@@ -164,10 +165,14 @@ no brim.
 Use a matte yellow and a black or dark brown for the code. Glare from silk or
 shiny filament can stop phones reading it.
 
-**You'll need** four 6 × 3 mm neodymium disc magnets (N35 or stronger) and
-super glue (CA gel is easiest). The pockets are 6.3 mm across and hold the
-magnet 0.2 mm below the surface. They have a pointed top so they print without
-support, and the magnet sits in the round part.
+**You'll need** eight 4 × 2 mm neodymium disc magnets (N35 or stronger) and
+super glue (CA gel is easiest).
+- The pockets are 4.25 mm across and hold each magnet 0.1 mm below the
+  surface.
+- They have a pointed top so they print without support, and the magnet sits
+  in the round part.
+- For other magnets, change the `MAGNET_*` settings at the top of
+  `build_wheel.py`.
 
 **Assembly:** the magnets have to attract in pairs. This order sets the
 polarity for you:
