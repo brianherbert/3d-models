@@ -34,6 +34,14 @@ The model has three parts, from the bottom up:
    - The notch walls are at right angles and open at the rim, so the wedge
      comes free as soon as you slide it outward. The finger dimple on top is
      for that pull.
+   - **Magnets hold it in.** Each notch wall has a pocket for a 6 × 3 mm disc
+     magnet, and a matching pocket in the wedge's side faces it across a
+     0.7 mm gap.
+     - The wedge clicks home and stays put when the wheel is tilted or
+       carried, and a finger in the dimple still slides it out.
+     - With the wedge out, the pockets look like two more small cheese holes.
+     - Without magnets, only gravity holds the wedge, and it slides out as
+       soon as the wheel tips.
 
 ![section](images/wheel_section.png)
 *A cut through the middle of the wedge at the rim. From the top: the wedge
@@ -156,8 +164,29 @@ no brim.
 Use a matte yellow and a black or dark brown for the code. Glare from silk or
 shiny filament can stop phones reading it.
 
-**Assembly:** drop the tile into the notch, code up, with the plate's curved
-edge against the lip. Slide the wedge in on top.
+**You'll need** four 6 × 3 mm neodymium disc magnets (N35 or stronger) and
+super glue (CA gel is easiest). The pockets are 6.3 mm across and hold the
+magnet 0.2 mm below the surface. They have a pointed top so they print without
+support, and the magnet sits in the round part.
+
+**Assembly:** the magnets have to attract in pairs. This order sets the
+polarity for you:
+
+1. **Wheel magnets.** Put a small dot of glue in each pocket on the notch
+   walls and press a magnet in. Let it set.
+2. **Tape.** Put a scrap of thin tape over each wheel magnet, so any glue
+   squeeze-out can't glue the wedge to the wheel.
+3. **Wedge magnets.** Snap a wedge magnet onto each taped wheel magnet. It
+   flips itself to the attracting side.
+4. **Glue the wedge.** Put a dot of glue in each of the wedge's pockets,
+   drop the tile in, and slide the wedge home. Its pockets swallow the
+   waiting magnets. Leave it to set, then slide the wedge out and peel off
+   the tape.
+5. **Check it.** The wedge should now click in and hold when you tilt the
+   wheel.
+
+To assemble it as a gift: drop the tile into the notch, code up, with the
+plate's curved edge against the lip, then slide the wedge in on top.
 
 As a rough estimate, all three parts take about 100 g of PLA in total.
 

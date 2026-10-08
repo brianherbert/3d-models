@@ -57,6 +57,13 @@ WEDGE_CLEAR = 0.3     # gap between the wedge and the notch walls
 TILE_CLEAR = 0.25     # gap around the tile in its bay
 EDGE = 0.5            # extra margin from the tile edge to the code's border
 DIMPLE_R = 10         # finger dimple on the wedge
+# Magnets hold the wedge in: one pair across each notch wall, a pocket in the
+# wall facing a pocket in the wedge's side.  Glued in after printing.
+MAGNET_D = 6.0        # 6 x 3 mm neodymium discs
+MAGNET_H = 3.0
+MAGNET_FIT = 0.15     # extra on the pocket radius; PLA holes print a little small
+MAGNET_SINK = 0.2     # magnet face below the surface, so a glue bead can't stand proud
+MAGNET_AT = 0.55      # along each wall, as a fraction of the radius
 SEED = 11
 THANKS = "ありがとう"   # on the tile beside the code; "" to omit
 TEXT_H = 6.0          # letter height, shrunk if it doesn't fit
@@ -141,14 +148,42 @@ def layout(n):
     return dict(n=n, inset=inset, far=far, R=R, tile_r=R - LIP - TILE_CLEAR)
 
 # ---- parts -----------------------------------------------------------------
+def magnet_spots(R):
+    """(centre on the wall plane, along-wall unit vector, unit normal into the wheel) for each wall."""
+    spots = []
+    for sgn in (1, -1):
+        along = np.array([np.cos(HALF), sgn * np.sin(HALF), 0])
+        into_wheel = np.array([-np.sin(HALF), sgn * np.cos(HALF), 0])
+        c = along * R * MAGNET_AT; c[2] = TILE_TOP + WEDGE_H / 2
+        spots.append((c, along, into_wheel))
+    return spots
+
+def magnet_pocket(c, along, normal, start):
+    """A teardrop-section hole for one magnet: round where the magnet sits, with
+    a 45-degree peak on top so it prints in a vertical wall without support.
+    It starts `start` mm along `normal` from the wall plane, opens 0.2 mm short
+    of that (so it cuts cleanly through the face) and runs MAGNET_SINK +
+    MAGNET_H deep."""
+    r = MAGNET_D / 2 + MAGNET_FIT
+    tip = mf.CrossSection([[(-0.01, r * np.sqrt(2)), (0.01, r * np.sqrt(2)), (0, r * np.sqrt(2) + 0.01)]])
+    section = mf.CrossSection.batch_hull([mf.CrossSection.circle(r, 64), tip])
+    depth = 0.2 + MAGNET_SINK + MAGNET_H
+    p = section.extrude(depth)                  # local x: along the wall, local y: up, local z: into the part
+    o = c + normal * (start - 0.2)
+    return p.transform([[along[0], 0, normal[0], o[0]],
+                        [along[1], 0, normal[1], o[1]],
+                        [0,        1, 0,         o[2]]])
+
 def bubbles(R):
     """Holes: (centre, radius, kind).  'cut' bubbles sit on the two notch
     walls and are shared by wheel and wedge; 'rind' and 'top' are outside."""
     rng = np.random.default_rng(SEED)
     out = []
+    keep_clear = [(c, MAGNET_D) for c, _, _ in magnet_spots(R)]     # leave room round the magnets
 
     def free(p, r):
-        return all(np.linalg.norm(p - q) > r + rq + 3 for q, rq, _ in out)
+        return (all(np.linalg.norm(p - q) > r + rq + 3 for q, rq, _ in out) and
+                all(np.linalg.norm(p - q) > r + rq + 2 for q, rq in keep_clear))
 
     for sgn in (1, -1):
         along = np.array([np.cos(HALF), sgn * np.sin(HALF), 0])
@@ -202,6 +237,10 @@ def build_wheel_and_wedge(R):
         wheel = wheel - c
         wedge = wedge - c
     wedge = wedge - mf.Manifold.sphere(DIMPLE_R, 64).translate([R - 20, 0, HEIGHT + 4.5])
+    for c, along, into_wheel in magnet_spots(R):
+        wheel = wheel - magnet_pocket(c, along, into_wheel, 0)
+        # the wedge's face is WEDGE_CLEAR in from the wall plane
+        wedge = wedge - magnet_pocket(c, along, -into_wheel, WEDGE_CLEAR)
     return wheel, wedge
 
 def build_tile(M, L):
