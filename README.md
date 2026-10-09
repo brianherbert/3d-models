@@ -16,6 +16,8 @@ where needed, and assembly notes.
 | ![signal](brio-train-tripped-semaphore-signal/images/signal_rest.png) | [Train-tripped semaphore signal](brio-train-tripped-semaphore-signal/) | A straight piece of Brio-compatible wooden-railway track with a signal that the train works by itself. A passing wheel presses a hidden treadle and the arm swings to *clear*. No batteries, springs or glue. |
 | ![locomotive](brio-battery-box-cab-locomotive/images/loco_iso.png) | [Battery box-cab locomotive](brio-battery-box-cab-locomotive/) | A small electric engine that drives itself on Brio-style track, with a big on/off button on the roof. It uses off-the-shelf parts (motor, batteries, switch, magnets, O-rings), and the README has the full parts list and links. |
 | ![horse](horse-head-secret-compartment/images/horse_closed.png) | [Horse head with a secret compartment](horse-head-secret-compartment/) | A realistic desk-size horse bust whose lower jaw swings open to reveal a hidden compartment. It prints in one piece with no assembly: the hinge, a click detent and a snap-off support post are built in, and the Bambu Studio project has the settings ready. |
+| ![cheese](qr-cheese-wedge/images/wedge_iso.png) | [QR cheese wedge](qr-cheese-wedge/) | A Swiss-cheese wedge with a scannable QR code on top, for handing over a digital gift card in person. Two colours with one filament change, holes that need no support, and ありがとう on the side. The build script takes your link, and the real build stays out of the repo. |
+| ![wheel](qr-cheese-wheel/images/wheel_open.png) | [QR cheese wheel](qr-cheese-wheel/) | The bigger version: a whole wheel with one quarter wedge cut, sized to the link (116 mm across for a short link). Slide the wedge out to find the QR code and ありがとう on a tile underneath. Magnets sealed inside the print hold the wedge in: the printer pauses so you can drop them in. Only the tile carries the link, so the wheel and wedge are reusable for the next gift. |
 
 ## What's in each folder
 
@@ -35,8 +37,9 @@ Each model folder follows the same layout:
 - **OpenSCAD models** (the signal and the locomotive): open the `.scad` file in
   [OpenSCAD](https://openscad.org) and export an STL, or run it from the
   command line.
-- **Python models** (the horse head): install the packages listed in that
-  model's README and run its build script.
+- **Python models** (the horse head, the cheese wedge and the cheese wheel):
+  install the packages listed in that model's README and run its build
+  script.
 
 ## A note on AI-generated designs
 
