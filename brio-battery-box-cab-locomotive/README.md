@@ -79,6 +79,35 @@ you'd order from regardless.
   the same reason. A 22 × 2 mm nitrile O-ring from an assortment box does
   the job for pennies; printed TPU tyres are the alternative if you have TPU.
 
+## Printing in Bambu Studio
+
+Open **`box_cab_locomotive.3mf`** (File > Open Project). If Bambu Studio
+asks, open it as a project rather than importing geometry only. It holds
+everything for the default build on one A1 plate:
+
+- the body, the hatch, two front wheels, two O-ring drive wheels and the
+  front axle, already laid out;
+- printer **Bambu Lab A1 0.4 nozzle**, filament **Bambu PLA Basic**, and
+  process **0.20mm Standard @BBL A1** with the changes below;
+- the **pause for the coupler magnets** at 34.6 mm (see below).
+
+| Setting | Value | Why |
+|---|---|---|
+| Wall loops | 3 | Stiff walls and bearing frames. |
+| Sparse infill | 20 % | Body and hatch. |
+| Infill on wheels and axle | 100 % (per object) | Small parts that are pressed onto the shaft, so they need to be stiff. |
+| Brim | Body only, 5 mm (per object) | The body stands on the thin rim of its walls. |
+| Supports | Off | Every overhang is a short bridge. |
+
+Slice, then print. When the printer pauses, drop in the magnets as described
+in "Sealing the coupler magnets" below, and resume. Everything prints in one go,
+about 1 h 20 min plus start-up.
+
+To print in several colours, assign filaments to the parts in Bambu Studio
+before slicing. The variant builds (12 mm button, no-solder switch) aren't in
+the project; load their STLs from the folders below instead.
+`make_3mf.py` rebuilds the project from the STLs.
+
 ## Printed parts (`stl/`)
 
 | File | Qty | Orientation | Notes |
@@ -90,10 +119,10 @@ you'd order from regardless.
 | `wheel.stl` | 2 | As exported | Front wheels |
 | `wheel_drive_oring.stl` | 2 | As exported | Drive wheels, grooved for a 22 × 2 mm nitrile O-ring. Runs fine bare on its tread lands; add the O-rings later if you want more grip. |
 | `wheel_drive.stl` + `tyre.stl` | optional | As exported | Drive wheel and printed **TPU** tyre, if you have TPU instead of O-rings |
+| `axle.stl` | 1 | As exported (on its flat) | Front axle |
 
 Wheels are 26 mm (Brio's are 22–24 mm) so the motor body clears the track by
 4 mm; the lowest printed point is 2.6 mm above the rails.
-| `axle.stl` | 1 | As exported (on its flat) | Front axle |
 
 Print settings for the Bambu Lab A1, PLA, 0.4 mm nozzle:
 
@@ -121,9 +150,10 @@ accelerations, settings as above). Add the A1's ~5–6 min start routine per pla
 
 ### Sealing the coupler magnets (body print)
 
-1. In Bambu Studio, slice `body.stl`. In the layer slider, find the first layer
-   **above 34.55 mm** (34.6 mm at 0.2 mm layers). Right-click it and choose
-   **Add Pause**.
+1. **With the project file, the pause is already set.** If you're printing
+   from the STLs instead, slice `body.stl` in Bambu Studio. In the layer
+   slider, find the first layer **above 34.55 mm** (34.6 mm at 0.2 mm layers),
+   right-click it and choose **Add Pause**.
 2. Before printing, work out the magnet polarity so the loco couples to your
    existing Brio wagons. Make two stacks of two D6×2 magnets.
    - Let one stack jump onto the **front** coupler of a Brio wagon. Mark the face

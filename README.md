@@ -41,6 +41,14 @@ Each model folder follows the same layout:
   install the packages listed in that model's README and run its build
   script.
 
+## Shared tools
+
+`tools/bambu3mf.py` builds the Bambu Studio project files. It lays parts out
+on an A1 plate and selects Bambu's own A1, PLA Basic and process presets
+(saved in `tools/bambu_profiles/`). It also records per-object settings and
+pauses. The locomotive's `make_3mf.py` uses it; the horse head and the
+cheese models have their own builders with the same approach.
+
 ## A note on AI-generated designs
 
 These are experiments. Each design was checked in software for fit and
