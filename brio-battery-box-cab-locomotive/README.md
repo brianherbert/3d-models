@@ -31,7 +31,7 @@ driving the rear wheels. Cables coil in the bunker behind the drive wheels.*
 | 1 | **N20 Dual Shaft Worm Gear Motor, 3 V 130 rpm (LA009)** | [Bambu Lab store](https://us.store.bambulab.com/products/n20-dual-shaft-worm-gear-motor) | The shaft is the drive axle. Rated 2–4 V, so it suits 2×AAA. |
 | 1 | **50 mm PH2.0 to SH1.0 Conversion Wire (XC004)** | [Bambu Lab store](https://us.store.bambulab.com/products/50mm-ph2-0-to-sh1-0-conversion-wire) | Joins the JST-PH switch cable to the motor's SH1.0 socket. |
 | 1 | **2 × AAA Battery Holder with On/Off Switch & JST PH (#4191)** | [Adafruit](https://www.adafruit.com/product/4191) | 62.5 × 25.3 × 15.4 mm. The smallest pack that runs the motor well. Its own switch stays ON inside. |
-| 1 | **16 mm latching pushbutton, red (Adafruit #1442)** | [Adafruit](https://www.adafruit.com/product/1442), also Digi-Key / Mouser / Micro Center | The reference part: published drawing (18 mm bezel, 15.6 mm threaded body, 29.4 mm overall, 5 mm button). Uses its **NO** and **C** tabs; the LED tabs stay empty. Any "16 mm 1NO1NC latching" button is the same part dimensionally. Mounts through the roof with its own nut. |
+| 1 | **16 mm latching pushbutton, red (Adafruit #1442)** | [Adafruit](https://www.adafruit.com/product/1442), also Digi-Key / Mouser / Micro Center | The reference part: published drawing (18 mm bezel, 15.6 mm threaded body, 29.4 mm overall, 5 mm button). Four tabs: two for the switch and two (marked + and −) for the LED inside the button. The switch tabs are the ones that matter; lighting the LED is optional (see assembly step 5). Any "16 mm 1NO1NC latching" button is the same part dimensionally. Mounts through the roof with its own nut. |
 | 1 pack | **Quick-Connect Wire Pairs, 0.11" (Adafruit #1152)** | [Adafruit](https://www.adafruit.com/product/1152) | Push-on spade leads for the switch tabs, so the switch end needs no soldering and the roof unplugs for service. You use 2 of the 10. |
 | 4 | **D6 × 2 mm round magnets** (2 per coupler) | [Bambu Lab store – magnets](https://us.store.bambulab.com/collections/magnets) | Sealed inside the couplers during printing. |
 | 1 | **M3 × 10 mm flat-head Phillips screw** (from the Fgruh M3 flat-head assortment) | [Amazon](https://a.co/d/09Z5iRX5) | Holds the roof hatch closed, flush with the roof. It self-taps into the plastic. The kit's nuts and washers aren't needed. For a socket cap head instead, set `screw_head = "cap"` and use M3 × 12. |
@@ -210,13 +210,22 @@ OpenSCAD preview is drawn from the same numbers.
    wheel onto each end, again leaving a paper-thin gap.
 5. **Switch:** push the 16 mm button through the hole in the roof hatch from
    the top and tighten its nut underneath. Push a #1152 quick-connect lead
-   onto the switch's **NO** tab and another onto its **C** tab (the LED tabs
-   stay empty), and trim both leads to about 40 mm; the switch sits right next
-   to the holder. Cut the battery holder's **red** wire about 60 mm from the
-   holder, strip both ends, and join each to one of the quick-connect leads:
-   solder and heat-shrink, or a crimped butt splice. Those two joints are the
-   only ones in the build. The switch body hangs into a closed well in the
-   front cab, and the roof can be unplugged from the switch for service.
+   onto each of the two **switch** tabs (the unmarked ones; the tabs marked
+   **+** and **−** are the LED), and trim both leads to about 40 mm; the switch
+   sits right next to the holder. Cut the battery holder's **red** wire about
+   60 mm from the holder, strip both ends, and join each to one of the
+   quick-connect leads (either way round): solder and heat-shrink, or a
+   crimped butt splice. Those two joints are the only ones in the build. The
+   switch body hangs into a closed well in the front cab, and the roof can be
+   unplugged from the switch for service.
+
+   *Optional light:* the button glows while the loco is running if you also
+   wire its LED. Join the **+** tab to the **motor side** of the switch (the
+   red wire running on to the plug, not the end from the holder), and the
+   **−** tab through a **220 Ω** resistor to the holder's **black** wire
+   (spliced the same way, about 60 mm from the holder). The LED needs about
+   2.2 V, so it is bright on alkaline cells and dimmer on NiMH (use 100 Ω
+   there). It draws only a few mA, a small fraction of the motor's draw.
 6. **Wiring:** plug battery holder → Bambu conversion wire → motor. Each plug
    only fits one way. Feed the holder's lead down through the front of the
    floor opening; the conversion wire, both plug pairs and the spare lengths
