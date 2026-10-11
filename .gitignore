@@ -1,2 +1,52 @@
-horse-head-secret-compartment/build_final.log
+# ---------------------------------------------------------------- operating systems
+# macOS
+.DS_Store
+._*
+.AppleDouble
+.LSOverride
+.Spotlight-V100
+.Trashes
+.fseventsd
+.TemporaryItems
+.VolumeIcon.icns
+Icon?
+# Windows
+Thumbs.db
+ehthumbs.db
+desktop.ini
+$RECYCLE.BIN/
+*.lnk
+# Linux
+*~
+.directory
+.Trash-*
+.nfs*
+
+# ---------------------------------------------------------------- editors and IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*.sublime-workspace
+
+# ---------------------------------------------------------------- Python
 __pycache__/
+*.py[cod]
+.venv/
+venv/
+.ipynb_checkpoints/
+.pytest_cache/
+
+# ---------------------------------------------------------------- slicer and printer output
+# sliced files are made per printer and filament; the repo keeps the models
+# and the Bambu Studio projects (*.3mf), not the G-code
+*.gcode
+*.gcode.3mf
+*.bgcode
+*.ufp
+
+# ---------------------------------------------------------------- scratch
+*.log
+*.tmp
+*.bak
+*.orig
