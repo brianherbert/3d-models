@@ -35,7 +35,8 @@
 //
 //  Parts (select with `part`):
 //    "body"         main body / chassis (exported upside down - print as is)
-//    "hatch"        roof hatch          (exported upside down - print as is)
+//    "hatch"        roof hatch: smoke stack, boiler and cab (exported the
+//                   right way up; flat and upside down for "inline") - print as is
 //    "button"       roof push button (inline switch variant only)
 //    "wheel"        plain front wheel - print 2
 //    "wheel_drive"  drive wheel with a groove for a TPU tyre - print 2 (optional)
@@ -151,15 +152,20 @@ body_x1   = tray_x1 + rwall;                       // outer rear
 floor_z0  = batt_z0 - 2;                           // battery floor underside
 top_z     = batt_z0 + batt_h + 2.5;                // top of the walls
 hatch_t   = 2.0;
-// raised roof: a panel-mount button hangs pbs_below under the roof, plus
-// about 8 mm of push-on connector on its tabs (32 mm measured for the
-// #1442).  The roof is raised until the connectors end just inside the top
-// of the well, so their wires turn up into the cab instead of being trapped
-// in the well.  The extra height also stows the spare wire above the battery.
-clip_len   = 8;
-roof_raise = switch_type == "inline" ? 0
-           : max(0, ceil(pbs_below + clip_len - (top_z - batt_z0) - 2.5));
-roof_z     = top_z + roof_raise;                   // underside of the roof plate
+// Steam-engine roof (panel-mount buttons): the button sits on top of a
+// smoke stack at the front, a boiler runs back to a driver's cab over the
+// rear.  A panel-mount button hangs pbs_below under its panel, plus about
+// 8 mm of push-on connector on its tabs (32 mm measured for the #1442), so
+// the stack lifts the panel until the connectors end just inside the top of
+// the well and their wires turn up into the cab.  The boiler and the cab
+// are hollow and open to the battery bay, for the spare wire.
+clip_len    = 8;
+stack_raise = switch_type == "inline" ? 0
+            : max(10, ceil(pbs_below + clip_len - (top_z - batt_z0) - 2.5));
+roof_z      = top_z + stack_raise;                 // underside of the button panel
+cab_h       = 16;                                  // cab walls above the deck
+cab_len_s   = 28;                                  // cab length (back wall 2 mm past the body)
+ring_nut_d  = p16 ? 22.4 : pbs_nut;                // the #1442 has a round knurled ring nut
 brg_z0    = 2.6;                                   // bottom of the bearing walls and can saddle
 bunk_z0   = 6;  bunk_t = 1.5;                      // cable bunker floor
 
@@ -371,20 +377,15 @@ module body() { difference() { body_solid(); body_cuts(); } }
 // =====================================================================
 //  hatch (roof) - modelled in place
 // =====================================================================
-module hatch() {
+module hatch() { if (switch_type == "inline") hatch_flat(); else hatch_steam(); }
+
+module hatch_flat() {
+    // flat roof hatch (inline switch variant)
     lip_gap = 0.3;
     lip_x0  = cab_x0 + 2.5;            // lip stops short of the tongue end
-    lid_in  = in_w/2 - lip_gap - 1.2;  // inner face of the raised walls (lip continues it)
-    eave    = roof_raise > 0 ? 1.2 : 0;   // a raised roof overhangs the ends, so the screw pocket stays closed
     difference() {
         union() {
-            rounded_box([body_x0 - eave, -out_w/2, roof_z], [body_x1 + eave, out_w/2, roof_z + hatch_t], 2);
-            // raised roof: sides flush with the body, thick enough inside
-            // to carry the lip, solid over the rear wall for the screw
-            if (roof_raise > 0) difference() {
-                rounded_box([body_x0 - eave, -out_w/2, top_z], [body_x1 + eave, out_w/2, roof_z + 0.01], 2);
-                translate([cab_x0, -lid_in, top_z - 1]) cube([tray_x1 - lip_gap - 1.2 - cab_x0, 2*lid_in, roof_raise + 1]);
-            }
+            rounded_box([body_x0, -out_w/2, top_z], [body_x1, out_w/2, top_z + hatch_t], 2);
             // locating lip just inside the walls
             difference() {
                 translate([lip_x0, -in_w/2 + lip_gap, top_z - 2]) cube([tray_x1 - lip_gap - lip_x0, in_w - 2*lip_gap, 2.01]);
@@ -394,8 +395,6 @@ module hatch() {
             // roof by a web just inside the wall
             translate([body_x0, -7.5, top_z - 2.2]) cube([cab_x0 + 0.3 - body_x0 + 0.01, 15, 1.0]);
             translate([cab_x0 + 0.3, -7.5, top_z - 2.2]) cube([lip_x0 - cab_x0 - 0.3 + 0.01, 15, 2.21]);
-            if (roof_raise > 0)
-                translate([cab_x0 - 0.01, -7.5, top_z]) cube([lip_x0 - cab_x0 + 0.01, 15, roof_raise + 0.01]);
         }
         if (switch_type == "inline") {
             // keep the lip clear of the button flange
@@ -404,24 +403,117 @@ module hatch() {
             translate([btn_x, 0, top_z - 5]) cylinder(d = btn_hole, h = 20);
             translate([btn_x, 0, top_z + hatch_t - 0.6]) cylinder(d1 = btn_hole, d2 = btn_hole + 1.2, h = 0.61);
         } else {
-            // panel hole for the button, nut clearance below
-            translate([btn_x, 0, top_z - 5]) cylinder(d = pbs_hole, h = roof_raise + 20);
-            translate([btn_x, 0, top_z - 3]) cylinder(d = pbs_nut + 1.5, h = roof_raise + 3);
+            // panel hole for the PBS-11A, nut clearance below
+            translate([btn_x, 0, top_z - 5]) cylinder(d = pbs_hole, h = 20);
+            translate([btn_x, 0, top_z - 3]) cylinder(d = pbs_nut + 1.5, h = 3);
         }
         // M3 screw hole over the rear wall: countersunk for a flat head
-        // (flush, M3 x 10) or counterbored for a socket cap head (M3 x 12).
-        // Under a raised roof the head sits at the bottom of a pocket, at
-        // the same height as on a flat roof, so the same screw fits.
-        seat_z = top_z + hatch_t;
-        translate([screw_x, 0, top_z - 5]) cylinder(d = 3.4, h = roof_raise + 20);
+        // (flush, M3 x 10) or counterbored for a socket cap head (M3 x 12)
+        translate([screw_x, 0, top_z - 5]) cylinder(d = 3.4, h = 20);
         if (screw_head == "flat")
-            translate([screw_x, 0, seat_z - 1.7]) cylinder(d1 = 3.4, d2 = 6.8, h = 1.71);
+            translate([screw_x, 0, top_z + hatch_t - 1.7]) cylinder(d1 = 3.4, d2 = 6.8, h = 1.71);
         else
-            translate([screw_x, 0, seat_z - 1.2]) cylinder(d = 6.2, h = 1.21);
-        if (roof_raise > 0)
-            translate([screw_x, 0, seat_z]) cylinder(d = 7.2, h = roof_raise + hatch_t);
+            translate([screw_x, 0, top_z + hatch_t - 1.2]) cylinder(d = 6.2, h = 1.21);
         // engraved roof panel lines
-        for (x = [tray_x0 + 6, tray_x1 - 10]) translate([x, -out_w/2 + 3, roof_z + hatch_t - 0.5]) cube([0.8, out_w - 6, 1]);
+        for (x = [tray_x0 + 6, tray_x1 - 10]) translate([x, -out_w/2 + 3, top_z + hatch_t - 0.5]) cube([0.8, out_w - 6, 1]);
+    }
+}
+
+module hatch_steam() {
+    // Printed the right way up, standing on its locating rails, tongue and
+    // back skirt.  The deck bridges rail to rail, the boiler and cab
+    // ceilings are straight bridges, and every other overhang is under 2 mm.
+    lip_gap = 0.3;
+    lid_in  = in_w/2 - lip_gap - 1.0;     // inner face of the rails
+    rail_x0 = cab_x0 + 0.3;
+    apr_x0  = body_x0 - 1.5;              // front apron: carries the tongue from outside
+    deck1   = top_z + hatch_t;            // top of the running boards
+    rear    = body_x1 + 2;                // cab back wall overhangs the body
+    cab_c0  = rear - cab_len_s;           // cab front face
+    cab_r   = deck1 + cab_h;              // underside of the cab roof
+    rb      = ring_nut_d/2 + 0.4;         // stack bore: the ring nut passes up it
+    rs      = rb + 1.2;                   // stack outside
+    bz      = top_z - 1;  br = 9;         // boiler axis and radius
+    bri     = br - 1.6;  bceil = top_z + 5;   // boiler bore, flat ceiling
+    bx1     = cab_c0 + 0.8;               // boiler ends inside the cab front wall
+    dome_x  = (btn_x + rs + cab_c0)/2;
+    Rr      = 82;                         // cab roof camber
+    footprint = [[body_x0, -out_w/2], [rear, out_w/2]];
+    difference() {
+        union() {
+            // deck / running boards, out to the cab back
+            rounded_box([body_x0, -out_w/2, top_z], [rear, out_w/2, deck1], 2);
+            // locating rails just inside the side walls and across the back
+            difference() {
+                translate([rail_x0, -in_w/2 + lip_gap, top_z - 2.2]) cube([tray_x1 - lip_gap - rail_x0, in_w - 2*lip_gap, 2.21]);
+                translate([rail_x0 - 1, -lid_in, top_z - 3]) cube([tray_x1 - lip_gap - 1.2 - rail_x0 + 1, 2*lid_in, 4]);
+            }
+            // front apron over the top of the front wall, hiding the slot;
+            // the tongue runs from it through the slot
+            translate([apr_x0, -9.5, top_z - 2.2]) cube([1.2, 19, 2.21]);
+            translate([apr_x0, -9.5, top_z]) cube([body_x0 - apr_x0 + 0.01, 19, hatch_t]);
+            translate([apr_x0 + 1.19, -7.5, top_z - 2.2]) cube([cab_x0 + 0.3 - apr_x0 - 1.19, 15, 1.0]);
+            // cab back wall carries on down outside the body's rear face
+            intersection() {
+                translate([body_x1 + 0.4, -out_w/2, top_z - 2.2]) cube([rear - body_x1 - 0.4, out_w, 2.21]);
+                rounded_box([body_x0, -out_w/2, top_z - 2.2], [rear, out_w/2, top_z + 0.01], 2);
+            }
+            // smoke stack with a capped top and a flared foot
+            translate([btn_x, 0, top_z]) cylinder(r = rs, h = roof_z + hatch_t - top_z);
+            translate([btn_x, 0, roof_z + hatch_t - 3.5]) cylinder(r1 = rs, r2 = rs + 1, h = 1);
+            translate([btn_x, 0, roof_z + hatch_t - 2.5]) cylinder(r = rs + 1, h = 2.5);
+            intersection() {
+                translate([btn_x, 0, deck1 - 0.01]) cylinder(r1 = rs + 1.5, r2 = rs, h = 3);
+                translate([apr_x0, -out_w/2, deck1 - 1]) cube([rear - apr_x0, out_w, 5]);
+            }
+            // boiler, two bands and a steam dome
+            intersection() {
+                union() {
+                    translate([btn_x, 0, bz]) rotate([0, 90, 0]) cylinder(r = br, h = bx1 - btn_x);
+                    for (x = [btn_x + rs + 3, cab_c0 - 5])
+                        translate([x, 0, bz]) rotate([0, 90, 0]) cylinder(r = br + 0.5, h = 1.6);
+                }
+                translate([btn_x, -br - 1, deck1 - 0.01]) cube([bx1 - btn_x, 2*br + 2, br + 2]);
+            }
+            translate([dome_x, 0, bz + br - 1]) {
+                cylinder(r = 4, h = 2.5);
+                translate([0, 0, 2.5]) scale([1, 1, 0.6]) sphere(r = 4);
+            }
+            // cab: walls with recessed windows, cambered roof with eaves
+            difference() {
+                rounded_box([cab_c0, -out_w/2, deck1 - 0.01], [rear, out_w/2, cab_r + 0.01], 2);
+                translate([cab_c0 + 1.6, -out_w/2 + 1.6, deck1 - 1]) cube([cab_len_s - 3.2, out_w - 3.2, cab_h + 1]);
+                for (s = [-1, 1]) {
+                    translate([cab_c0 + 4, s > 0 ? out_w/2 - 0.8 : -out_w/2 - 0.01, deck1 + 6]) cube([10, 0.81, 7]);
+                    translate([cab_c0 - 0.01, s > 0 ? 8 : -12, deck1 + 8]) cube([0.81, 4, 5]);
+                }
+            }
+            intersection() {
+                rounded_box([cab_c0 - 1, -out_w/2 - 1, cab_r], [rear + 1, out_w/2 + 1, cab_r + 3], 2);
+                translate([cab_c0 - 2, 0, cab_r + 3 - Rr]) rotate([0, 90, 0]) cylinder(r = Rr, h = cab_len_s + 4, $fn = 360);
+            }
+            // tube round the screw, so the cab stays closed
+            translate([screw_x, 0, top_z]) cylinder(r = 4.65, h = cab_r - top_z + 0.01);
+        }
+        // stack bore (the ring nut goes up it from below), panel hole
+        translate([btn_x, 0, top_z - 3]) cylinder(r = rb, h = roof_z - (top_z - 3));
+        translate([btn_x, 0, roof_z - 1]) cylinder(d = pbs_hole, h = hatch_t + 5);
+        // boiler bore above the deck (the deck under it bridges rail to
+        // rail), open to the stack and the cab
+        intersection() {
+            translate([btn_x, 0, bz]) rotate([0, 90, 0]) cylinder(r = bri, h = bx1 - btn_x + 2);
+            translate([btn_x, -bri, deck1]) cube([bx1 - btn_x + 2, 2*bri, bceil - deck1]);
+        }
+        // cab floor open to the battery bay
+        translate([cab_c0 + 1.6, -lid_in, top_z - 3]) cube([tray_x1 - lip_gap - 1.2 - (cab_c0 + 1.6), 2*lid_in, 5.02]);
+        // M3 screw: countersunk (or counterbored) at deck height, as on the
+        // flat roof, at the bottom of a pocket through the cab roof
+        translate([screw_x, 0, top_z - 5]) cylinder(d = 3.4, h = 10);
+        if (screw_head == "flat")
+            translate([screw_x, 0, deck1 - 1.7]) cylinder(d1 = 3.4, d2 = 6.8, h = 1.71);
+        else
+            translate([screw_x, 0, deck1 - 1.2]) cylinder(d = 6.2, h = 1.21);
+        translate([screw_x, 0, deck1]) cylinder(d = 7.2, h = cab_h + 5);
     }
 }
 
@@ -487,7 +579,8 @@ mag_pause = top_z - (mag_z - mag_d/2);
 echo(str("BODY: add a pause at layer height ", mag_pause, " mm to drop in the magnets"));
 echo(str("Overall: length ", body_x1 + cpl_len - (body_x0 - cpl_len), " mm, width ",
          max(out_w, 2*(wheel_y0 + wheel_w)), " mm, height above table ",
-         (switch_type == "inline" ? btn_top_z : roof_z + hatch_t + 1.5 + pbs_cap_h) + 12, " mm"));
+         (switch_type == "inline" ? btn_top_z
+          : max(roof_z + hatch_t + 1.5 + pbs_cap_h, top_z + hatch_t + cab_h + 3)) + 12, " mm"));
 echo(str("Overhang beyond the axles: front ", front_x - (body_x0 - cpl_len), " mm, rear ", body_x1 + cpl_len, " mm"));
 
 module wheels(drive = false) {
@@ -507,7 +600,11 @@ module assembly() {
 }
 
 if (part == "body") translate([0, 0, top_z]) rotate([180, 0, 0]) body();
-else if (part == "hatch") translate([0, 0, roof_z + hatch_t]) rotate([180, 0, 0]) hatch();
+else if (part == "hatch") {
+    // flat hatch prints upside down, the steam roof the right way up
+    if (switch_type == "inline") translate([0, 0, top_z + hatch_t]) rotate([180, 0, 0]) hatch();
+    else translate([0, 0, -(top_z - 2.2)]) hatch();
+}
 else if (part == "button") translate([-btn_x, 0, -btn_rest_z]) button();
 else if (part == "wheel") wheel_flat(false);
 else if (part == "wheel_drive") wheel_flat(true);

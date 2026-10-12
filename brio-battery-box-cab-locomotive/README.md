@@ -1,8 +1,9 @@
-# Battery Box-Cab Locomotive (Brio-compatible) — v6
+# Battery Box-Cab Locomotive (Brio-compatible) — v7
 
 A small electric engine that drives itself on any Brio-style wooden track. A
-toddler presses the big red button on the roof and it goes; pressing it again
-stops it.
+toddler presses the big red button on top of the smoke stack and it goes;
+pressing it again stops it. Since v7 the roof is a little steam engine: smoke
+stack at the front, boiler with a steam dome, and a driver's cab at the back.
 
 - **Two solder (or crimp) joints, no gears to print, one screw.** The motor's
   double-ended output shaft *is* the drive axle. The on/off button is a 16 mm
@@ -20,9 +21,10 @@ stops it.
 | ![iso](images/loco_iso.png) | ![underside](images/loco_underside.png) |
 
 ![cutaway](images/loco_side_cutaway.png)
-*Cut-away: latching push button through the roof at the front, 2×AAA holder in the
-middle, worm-gear motor under it with the can pointing forward and the shaft
-driving the rear wheels. Cables coil in the bunker behind the drive wheels.*
+*Cut-away: latching push button on top of the smoke stack at the front, 2×AAA
+holder in the middle, worm-gear motor under it with the can pointing forward and
+the shaft driving the rear wheels. Spare wire goes on top of the motor and up into
+the hollow cab.*
 
 ## Bill of materials
 
@@ -36,7 +38,7 @@ driving the rear wheels. Cables coil in the bunker behind the drive wheels.*
 | 4 | **D6 × 2 mm round magnets** (2 per coupler) | [Bambu Lab store – magnets](https://us.store.bambulab.com/collections/magnets) | Sealed inside the couplers during printing. |
 | 1 | **M3 × 10 mm flat-head Phillips screw** (from the Fgruh M3 flat-head assortment) | [Amazon](https://a.co/d/09Z5iRX5) | Holds the roof hatch closed, flush with the roof. It self-taps into the plastic. The kit's nuts and washers aren't needed. For a socket cap head instead, set `screw_head = "cap"` and use M3 × 12. |
 | 2 | AAA batteries | — | Alkaline (fastest, ~1.5–2 h running) or NiMH (a little slower). |
-| — | PLA filament, ~40 g | Bambu Lab | Body, hatch, wheels, button. Three colours look great. |
+| — | PLA filament, ~50 g | Bambu Lab | Body, hatch, wheels, button. Three colours look great. |
 | 2 | *Optional:* nitrile O-rings, **22 × 2 mm** (ID × section) | [ZDBB 1010-piece metric O-ring kit, Amazon](https://a.co/d/0eY7CVIx) (~$10), or any metric assortment with 22 × 2 | Traction tyres; the drive wheels are grooved for them, so they can go on any time. 20 × 2 also fits (tighter), as does the SAE AS568-118 (21.9 × 2.62) from an inch-sized kit, sitting a little prouder. |
 | — | *Optional:* TPU 95A HF filament, ~1 g | Bambu Lab | Printed tyres instead of O-rings, if you have TPU anyway. |
 
@@ -91,21 +93,21 @@ everything for the default build on one A1 plate:
   process **0.20mm Standard @BBL A1** with the changes below;
 - the **pause for the coupler magnets** at 34.6 mm (see below).
 
-To reprint only the roof (for example to upgrade a v5 build to the raised
-roof), open **`box_cab_locomotive_roof.3mf`** instead: the hatch alone, same
-settings, no pause.
+To reprint only the roof (for example to upgrade an earlier build to the
+steam roof), open **`box_cab_locomotive_roof.3mf`** instead: the roof alone,
+same settings, no pause. The body hasn't changed since v5.
 
 | Setting | Value | Why |
 |---|---|---|
 | Wall loops | 3 | Stiff walls and bearing frames. |
 | Sparse infill | 20 % | Body and hatch. |
 | Infill on wheels and axle | 100 % (per object) | Small parts that are pressed onto the shaft, so they need to be stiff. |
-| Brim | Body only, 5 mm (per object) | The body stands on the thin rim of its walls. |
-| Supports | Off | Every overhang is a short bridge. |
+| Brim | Body and roof, 5 mm (per object) | The body stands on the thin rim of its walls, the roof on its thin locating rails. |
+| Supports | Off | Every overhang is a short bridge. Bambu Studio may still warn about a "floating cantilever" on the roof (its deck bridges 23 mm from rail to rail); print anyway. |
 
 Slice, then print. When the printer pauses, drop in the magnets as described
 in "Sealing the coupler magnets" below, and resume. Everything prints in one go,
-roughly 1½ hours plus start-up (v5 took 1 h 20 min; the taller roof adds a little).
+about 1 h 45 min plus start-up.
 
 To print in several colours, assign filaments to the parts in Bambu Studio
 before slicing. The variant builds (12 mm button, no-solder switch) aren't in
@@ -117,7 +119,7 @@ the project; load their STLs from the folders below instead.
 | File | Qty | Orientation | Notes |
 |---|---|---|---|
 | `body.stl` | 1 | As exported (upside down) | **Pause for magnets** (below) |
-| `hatch.stl` | 1 | As exported (upside down) | |
+| `hatch.stl` | 1 | As exported (the right way up, on its rails) | Steam roof: smoke stack, boiler, cab. Brim. |
 | `stl/12mm-switch-variant/` | — | — | Body and hatch for a 12 mm PBS-11A button instead of the 16 mm one |
 | `stl/inline-switch-variant/` | — | — | Body, hatch, button and shim for the no-solder Adafruit #3064 variant |
 | `wheel.stl` | 2 | As exported | Front wheels |
@@ -131,11 +133,13 @@ Wheels are 26 mm (Brio's are 22–24 mm) so the motor body clears the track by
 Print settings for the Bambu Lab A1, PLA, 0.4 mm nozzle:
 
 - **Layer height:** 0.2 mm. **Walls:** 3. **Infill:** 20 %.
-- **Supports:** none. The body and hatch print upside down so every floor,
-  shelf and fence is a short bridge between walls.
+- **Supports:** none. The body prints upside down so every floor, shelf and
+  fence is a short bridge between walls. The roof prints the right way up,
+  standing on its locating rails, front apron and back skirt; its deck and
+  the boiler and cab ceilings are bridges.
 - **Wheels, axle and button:** 100 % infill. They're tiny, and stiff wheels
   press on more securely.
-- A brim on the body helps, because it stands on the thin rim of its walls.
+- A brim on the body and the roof helps, because they stand on thin walls and rails.
 - **Tyres (TPU 95A HF):** print from the external spool holder (not the AMS
   Lite), slow (30–40 mm/s), 100 % infill.
 
@@ -147,10 +151,10 @@ accelerations, settings as above). Add the A1's ~5–6 min start routine per pla
 | Plate | Time | Filament |
 |---|---|---|
 | Body (20 % infill, brim) | ~47 min | 22 g |
-| Hatch | ~11 min | 6 g |
+| Roof | ~34 min | 16 g |
 | 2 front wheels + 2 drive wheels + axle (100 % infill) | ~22 min | 9 g |
 | 2 TPU tyres (optional) | ~3 min | 1 g |
-| **Total** | **~1 h 25 min** (~1.5 h with start-up and the magnet pause) | **~40 g** |
+| **Total** | **~1 h 45 min** (~1 h 55 min with start-up and the magnet pause) | **~50 g** |
 
 ### Sealing the coupler magnets (body print)
 
@@ -212,18 +216,21 @@ OpenSCAD preview is drawn from the same numbers.
 4. **Front wheels:** drop the printed axle into the front slots the same way
    (through the floor at the front of the battery bay), then press a plain
    wheel onto each end, again leaving a paper-thin gap.
-5. **Switch:** push the 16 mm button through the hole in the roof hatch from
-   the top and tighten its nut underneath. Push a #1152 quick-connect lead
+5. **Switch:** push the 16 mm button down through the hole in the top of the
+   smoke stack. From underneath, pass the round ring nut up inside the stack,
+   start it on the thread with a fingertip, then hold it there and turn the
+   button from the top until it's snug. (Pull the quick-connects off the tabs
+   first if they're already on; they push back on afterwards.) Push a #1152 quick-connect lead
    onto each of the two **switch** tabs (the unmarked ones; the tabs marked
    **+** and **−** are the LED), and trim both leads to about 40 mm; the switch
    sits right next to the holder. Cut the battery holder's **red** wire about
    60 mm from the holder, strip both ends, and join each to one of the
    quick-connect leads (either way round): solder and heat-shrink, or a
    crimped butt splice. Those two joints are the only ones in the build. The
-   roof is raised 12 mm so the button and its push-on connectors sit above
-   the cab floor (32 mm from the underside of the roof to the end of the
-   connectors); the joints and spare lead tuck into the cab around the
-   button. The roof can be unplugged from the switch for service.
+   stack lifts the button so it and its push-on connectors end just inside
+   the cab floor (32 mm from the underside of the stack top to the end of
+   the connectors); the joints and spare lead tuck into the front cab around
+   the button. The roof can be unplugged from the switch for service.
 
    *Optional light:* the button glows while the loco is running if you also
    wire its LED. Join the **+** tab to the **motor side** of the switch (the
@@ -236,17 +243,24 @@ OpenSCAD preview is drawn from the same numbers.
    only fits one way. Feed the holder's lead down through the front of the
    floor opening; the conversion wire, both plug pairs and the spare lengths
    of holder and motor lead coil flat on top of the motor, under the
-   battery, and whatever doesn't fit there lies on top of the battery under
-   the raised roof. Keep wire out of the open underside in front of and
-   behind the motor.
+   battery. Whatever doesn't fit there goes up into the hollow cab at the
+   back of the roof, which is open underneath. Keep wire out of the open
+   underside in front of and behind the motor.
 7. **Batteries:** put 2×AAA in the holder and slide its own switch to **ON**.
    Lay it in the battery bay with the lead toward the **front**; the switch
    wires reach the hatch over the low fence.
-8. **Roof:** hold the hatch tilted, push its front tongue through the slot in
-   the front wall, lower the back, and fit the M3 × 10 screw at the rear, at
-   the bottom of the pocket in the roof. Snug, not tight: it's threading into
+8. **Roof:** hold the roof with the back tilted up and slide its front tongue
+   into the slot at the top of the front wall, from the front, so the little
+   apron sits over the front face. Lower the back, then fit the M3 × 10 screw
+   down the hole in the cab roof. Snug, not tight: it's threading into
    plastic.
 9. **Test:** press the button: the motor starts. Press again: it stops.
+   **If it drives backwards** (cab first), the motor's polarity is reversed;
+   the plugs only fit one way, so swap the two wires inside the battery
+   holder's white plug: lift each pin's tiny latch through the window on the
+   side of the plug with a pin or a craft-knife tip, pull the wire out,
+   and push it back into the other position until it clicks. Cutting the
+   conversion wire and rejoining its two wires crossed over works too.
 
 ### 12 mm button variant
 
@@ -365,6 +379,17 @@ preview everything, `"cutaway"` for the section view. Useful parameters:
 - `wheelbase` – 45 mm default.
 - `mag_z` – coupler height. `bore_d` / `bore_flat` – wheel press fit.
 - `groove_dp`, `tyre_t` – tyre groove depth and tyre thickness.
+
+## Changes in v7
+
+- Steam-engine roof: the button sits on top of a smoke stack at the front, a
+  boiler with two bands and a steam dome runs back to a driver's cab over the
+  rear, with recessed windows and a cambered roof. The stack lifts the button
+  as v6's raised roof did; the ring nut goes up inside the stack. The cab is
+  hollow and open underneath for spare wire. The roof now prints the right
+  way up, so the front tongue hangs from a small apron outside the front
+  wall instead of a web inside, leaving the stack bore clear for the nut.
+  The body is unchanged since v5.
 
 ## Changes in v6
 

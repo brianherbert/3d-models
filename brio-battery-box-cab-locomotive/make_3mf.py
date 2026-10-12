@@ -26,6 +26,7 @@ PROCESS_CHANGES = {
 }
 SOLID = {"sparse_infill_density": "100%"}          # wheels and axle: small, stiff, press-fit
 BODY = {"brim_type": "outer_only", "brim_width": "5"}   # the body stands on the thin rim of its walls
+ROOF = BODY                                             # the roof stands on its thin locating rails
 
 def scad_value(name):
     """read a value the model echoes, so the pause follows the design"""
@@ -47,7 +48,7 @@ def main():
     cx = BED / 2
     parts = [
         Part("body", load("body"), cx, 175, settings=BODY),
-        Part("hatch", load("hatch"), cx, 133),
+        Part("hatch", load("hatch"), cx, 131, settings=ROOF),
         Part("wheel_front_1", load("wheel"), cx - 49.5, 92, settings=SOLID),
         Part("wheel_front_2", load("wheel"), cx - 16.5, 92, settings=SOLID),
         Part("wheel_drive_1", load("wheel_drive_oring"), cx + 16.5, 92, settings=SOLID),
@@ -63,9 +64,9 @@ def main():
     print(f"wrote {out}: magnet pause before the layer at {pause:.2f} mm (pocket top {pocket_top} mm)")
     # the roof on its own, for reprinting just the hatch
     out = write_project(os.path.join(HERE, "box_cab_locomotive_roof.3mf"),
-                        [Part("hatch", load("hatch"), cx, BED / 2)], PROCESS, PROCESS_CHANGES,
-                        title="Battery Box-Cab Locomotive: roof hatch",
-                        description="The roof hatch on its own, to reprint it without the body.",
+                        [Part("hatch", load("hatch"), cx, BED / 2, settings=ROOF)], PROCESS, PROCESS_CHANGES,
+                        title="Battery Box-Cab Locomotive: steam roof",
+                        description="The roof (smoke stack, boiler and cab) on its own, to reprint it without the body.",
                         thumbnail_png=os.path.join(HERE, "images", "loco_iso.png"),
                         filament_colour="#2E6DB4")
     print(f"wrote {out}")
