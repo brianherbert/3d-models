@@ -239,6 +239,9 @@ OpenSCAD preview is drawn from the same numbers.
    (spliced the same way, about 60 mm from the holder). The LED needs about
    2.2 V, so it is bright on alkaline cells and dimmer on NiMH (use 100 Ω
    there). It draws only a few mA, a small fraction of the motor's draw.
+
+   ![wiring](images/wiring.svg)
+
 6. **Wiring:** plug battery holder → Bambu conversion wire → motor. Each plug
    only fits one way. Feed the holder's lead down through the front of the
    floor opening; the conversion wire, both plug pairs and the spare lengths
@@ -256,8 +259,8 @@ OpenSCAD preview is drawn from the same numbers.
    plastic.
 9. **Test:** press the button: the motor starts. Press again: it stops.
    **If it drives backwards** (cab first), the motor's polarity is reversed;
-   the plugs only fit one way, so swap the two wires inside the battery
-   holder's white plug: lift each pin's tiny latch through the window on the
+   the plugs only fit one way, so swap the two wires inside one half of the
+   big white plug (the battery holder's or the conversion wire's): lift each pin's tiny latch through the window on the
    side of the plug with a pin or a craft-knife tip, pull the wire out,
    and push it back into the other position until it clicks. Cutting the
    conversion wire and rejoining its two wires crossed over works too.
