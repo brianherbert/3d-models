@@ -5,23 +5,20 @@ across, 36.6 mm tall including the flame).
 
 Two parts, each its own plate:
 
-    base      white.  A low faceted stone with the tea light pocket, two
+    base      white.  A low hexagon with the tea light pocket, two
               finger notches and a socket the crystal drops into
-    crystal   translucent blue.  One irregular hexagonal crystal: uneven
-              facets, a slight lean and an off-centre point.  A hollow shell
-              two lines thick, open underneath
+    crystal   translucent blue.  One regular hexagonal crystal with a
+              six-sided point.  A hollow shell two lines thick, open underneath
 
-The shapes are random but repeatable: change SEED for a different crystal.
+The base is a hexagon too, lined up with the crystal.
 
     python3 build_crystal.py            -> stl/base.stl, crystal.stl, assembled.stl
-    python3 build_crystal.py 7          the same with seed 7
 """
-import math, os, sys
+import math, os
 import numpy as np, trimesh
 import manifold3d as mf
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-SEED = 3
 
 # ---------------------------------------------------------------- tea light
 TEA_D, TEA_H = 37.2, 36.6
@@ -32,22 +29,18 @@ TEA_GAP = 1.0                       # least gap between the tea light and the in
 
 # ---------------------------------------------------------------- base
 BASE_H = 16.0
-BASE_R = (46.0, 51.0)               # radius range of the stone's bottom outline
-BASE_SIDES = 9
-BASE_INSET = (3.0, 6.0)             # how far each top corner sits in from the bottom one
+BASE_R = 50.0                       # corner radius of the hexagon at the bottom
+BASE_INSET = 4.0                    # the sides slope in by this much to the top
 SOCKET_DEPTH = 5.0
 SOCKET_FIT = 0.4                    # gap all round between the crystal and its socket
 
 # ---------------------------------------------------------------- crystal
 TOTAL_H = 152.0                     # assembled height (6 in)
 CRYSTAL_H = TOTAL_H - (BASE_H - SOCKET_DEPTH)
-CRYSTAL_R = 32.0                    # nominal corner radius of the hexagon
-RADIUS_JITTER = 0.12                # each corner 88-112 % of that
-ANGLE_JITTER = 12.0                 # degrees
-SHOULDER_H = (84.0, 108.0)          # where each corner's prism edge ends and the point begins
+CRYSTAL_R = 32.0                    # corner radius of the hexagon
+SHOULDER_H = 98.0                   # where the prism ends and the point begins
 TOP_SCALE = 0.95                    # the prism narrows slightly towards the point
-APEX_OFFSET = 9.0                   # the point sits up to this far off-centre
-LEAN = 5.0                          # degrees
+ROTATION = 0.0                      # degrees; 0 puts a flat face (crystal and base) at the front
 WALL = 0.9                          # two 0.45 mm lines
 FOOT_H, FOOT_W = SOCKET_DEPTH, 1.6  # thicker band inside the bottom, hidden in the socket
 MIN_SLOPE = 50.0                    # every roof facet at least this steep (the inside of the roof is an overhang)
@@ -83,24 +76,17 @@ def shrink(t, by, keep_bottom_open=True):
         if keep_bottom_open and n[2] < -0.999:
             continue
         m = m.trim_by_plane((-n).tolist(), -(d - by))
-    return m
+    # where four planes meet in one point, trimming leaves near-duplicate
+    # corners; the hull of the (convex) result merges them cleanly
+    return m.hull()
 
 # ---------------------------------------------------------------- crystal
-def crystal_points(rng):
-    rot = rng.uniform(0, 60)
-    ang = np.radians(rot + 60 * np.arange(6) + rng.uniform(-ANGLE_JITTER, ANGLE_JITTER, 6))
-    rad = CRYSTAL_R * rng.uniform(1 - RADIUS_JITTER, 1 + RADIUS_JITTER, 6)
-    sh = rng.uniform(*SHOULDER_H, 6)
-    lean_dir = rng.uniform(0, 2 * math.pi)
-    a = rng.uniform(0, 2 * math.pi); off = APEX_OFFSET * math.sqrt(rng.uniform(0.3, 1))
-    pts = [(r * math.cos(t), r * math.sin(t), 0.0) for r, t in zip(rad, ang)]
-    pts += [(TOP_SCALE * r * math.cos(t), TOP_SCALE * r * math.sin(t), h) for r, t, h in zip(rad, ang, sh)]
-    pts.append((off * math.cos(a), off * math.sin(a), CRYSTAL_H))
-    pts = np.array(pts)
-    k = math.tan(math.radians(LEAN))                       # lean: shear, so every layer stays a flat slice
-    pts[:, 0] += pts[:, 2] * k * math.cos(lean_dir)
-    pts[:, 1] += pts[:, 2] * k * math.sin(lean_dir)
-    return pts
+def crystal_points():
+    ang = np.radians(ROTATION + 60 * np.arange(6))
+    pts = [(CRYSTAL_R * math.cos(t), CRYSTAL_R * math.sin(t), 0.0) for t in ang]
+    pts += [(TOP_SCALE * CRYSTAL_R * math.cos(t), TOP_SCALE * CRYSTAL_R * math.sin(t), SHOULDER_H) for t in ang]
+    pts.append((0.0, 0.0, CRYSTAL_H))
+    return np.array(pts)
 
 def min_slope(t):
     """steepness (degrees from horizontal) of the shallowest upward facet"""
@@ -120,36 +106,27 @@ def clearance(inner, z0, z1):
             best = min(best, np.linalg.norm(p + e * s[:, None], axis=1).min())
     return best
 
-def crystal(seed):
-    rng = np.random.default_rng(seed)
-    for attempt in range(500):
-        outer_t = to_trimesh(hull(crystal_points(rng)))
-        if min_slope(outer_t) < MIN_SLOPE:
-            continue
-        inner = shrink(outer_t, WALL)
-        foot_inner = shrink(outer_t, WALL + FOOT_W)
-        tea_top = POCKET_FLOOR + TEA_H - SOCKET_FLOOR            # crystal z is 0 at the socket floor
-        need = TEA_D / 2 + TEA_GAP
-        if clearance(foot_inner, 0, FOOT_H) < need or clearance(inner, FOOT_H, tea_top + 2) < need:
-            continue
-        outer = to_manifold(outer_t)
-        slab = mf.Manifold.cube([400, 400, FOOT_H]).translate([-200, -200, 0])
-        shell = (outer - inner) + ((outer ^ slab) - foot_inner)
-        return shell, outer_t, foot_inner, attempt
-    raise SystemExit("no crystal met the constraints; loosen them or change SEED")
+def crystal():
+    outer_t = to_trimesh(hull(crystal_points()))
+    assert min_slope(outer_t) >= MIN_SLOPE, f"the point is too flat ({min_slope(outer_t):.0f} deg)"
+    inner = shrink(outer_t, WALL)
+    foot_inner = shrink(outer_t, WALL + FOOT_W)
+    tea_top = POCKET_FLOOR + TEA_H - SOCKET_FLOOR            # crystal z is 0 at the socket floor
+    need = TEA_D / 2 + TEA_GAP
+    assert clearance(foot_inner, 0, FOOT_H) >= need and clearance(inner, FOOT_H, tea_top + 2) >= need, \
+        "the crystal is too narrow for the tea light"
+    outer = to_manifold(outer_t)
+    slab = mf.Manifold.cube([400, 400, FOOT_H]).translate([-200, -200, 0])
+    shell = (outer - inner) + ((outer ^ slab) - foot_inner)
+    return shell, outer_t, foot_inner
 
 # ---------------------------------------------------------------- base
-def base(seed, crystal_outer, foot_inner):
-    rng = np.random.default_rng(seed + 1000)
-    ang = np.radians(360 * np.arange(BASE_SIDES) / BASE_SIDES + rng.uniform(-12, 12, BASE_SIDES))
-    rad = rng.uniform(*BASE_R, BASE_SIDES)
-    ins = rng.uniform(*BASE_INSET, BASE_SIDES)
-    pts = [(r * math.cos(t), r * math.sin(t), 0.0) for r, t in zip(rad, ang)]
-    pts += [((r - i) * math.cos(t), (r - i) * math.sin(t), BASE_H - rng.uniform(0, 2.5))
-            for r, t, i in zip(rad, ang, ins)]
+def base(crystal_outer, foot_inner):
+    ang = np.radians(ROTATION + 60 * np.arange(6))
+    pts = [(BASE_R * math.cos(t), BASE_R * math.sin(t), 0.0) for t in ang]
+    pts += [((BASE_R - BASE_INSET) * math.cos(t), (BASE_R - BASE_INSET) * math.sin(t), BASE_H) for t in ang]
     stone = hull(pts)
-    stone = stone ^ mf.Manifold.cube([400, 400, BASE_H]).translate([-200, -200, 0])
-    # socket: the crystal's footprint over the socket depth (it leans), plus the fit gap
+    # socket: the crystal's footprint over the socket depth, plus the fit gap
     sl = [to_manifold(crystal_outer).slice(z) for z in (0.01, SOCKET_DEPTH)]
     foot = mf.CrossSection.batch_hull(sl).offset(SOCKET_FIT, mf.JoinType.Round)
     socket = foot.extrude(SOCKET_DEPTH + 1).translate([0, 0, SOCKET_FLOOR])
@@ -183,11 +160,10 @@ def _reach(section, a):
     return best
 
 def main():
-    seed = int(sys.argv[1]) if len(sys.argv) > 1 else SEED
     out = os.path.join(HERE, "stl")
     os.makedirs(out, exist_ok=True)
-    shell, outer_t, foot_inner, tries = crystal(seed)
-    stone, notch_a = base(seed, outer_t, foot_inner)
+    shell, outer_t, foot_inner = crystal()
+    stone, notch_a = base(outer_t, foot_inner)
     meshes = {}
     for name, m in (("base", stone), ("crystal", shell)):
         t = to_trimesh(m)
@@ -199,7 +175,7 @@ def main():
     asm = trimesh.util.concatenate([meshes["base"], meshes["crystal"].copy().apply_translation([0, 0, SOCKET_FLOOR])])
     asm.export(os.path.join(out, "assembled.stl"))
     tea_top = POCKET_FLOOR + TEA_H - SOCKET_FLOOR
-    print(f"seed {seed} (accepted after {tries + 1} tries): shallowest roof facet {min_slope(outer_t):.0f} deg, "
+    print(f"shallowest roof facet {min_slope(outer_t):.0f} deg, "
           f"tea-light clearance {clearance(foot_inner, 0, FOOT_H) - TEA_D / 2:.1f} mm at the foot, "
           f"notches at {notch_a:.0f} deg; overall height {asm.bounds[1][2]:.1f} mm")
 
