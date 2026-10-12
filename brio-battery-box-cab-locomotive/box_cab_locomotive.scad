@@ -437,7 +437,7 @@ module hatch_steam() {
     rb      = ring_nut_d/2 + 0.4;         // stack bore: the ring nut passes up it
     rs      = rb + 1.2;                   // stack outside
     bz      = top_z - 1;  br = 9;         // boiler axis and radius
-    bri     = br - 1.6;  bceil = top_z + 5;   // boiler bore, flat ceiling
+    bri     = br - 1.6;  bceil = top_z + 6;   // boiler bore, flat ceiling
     bx1     = cab_c0 + 0.8;               // boiler ends inside the cab front wall
     dome_x  = (btn_x + rs + cab_c0)/2;
     Rr      = 82;                         // cab roof camber
@@ -515,11 +515,11 @@ module hatch_steam() {
         // stack bore (the ring nut goes up it from below), panel hole
         translate([btn_x, 0, top_z - 3]) cylinder(r = rb, h = roof_z - (top_z - 3));
         translate([btn_x, 0, roof_z - 1]) cylinder(d = pbs_hole, h = hatch_t + 5);
-        // boiler bore above the deck (the deck under it bridges rail to
-        // rail), open to the stack and the cab
+        // boiler bore, open underneath to the space above the battery and
+        // through to the stack and the cab: a wire channel ~15 mm wide
         intersection() {
             translate([btn_x, 0, bz]) rotate([0, 90, 0]) cylinder(r = bri, h = bx1 - btn_x + 2);
-            translate([btn_x, -bri, deck1]) cube([bx1 - btn_x + 2, 2*bri, bceil - deck1]);
+            translate([btn_x, -bri, top_z - 3]) cube([bx1 - btn_x + 2, 2*bri, bceil - (top_z - 3)]);
         }
         // cab floor open to the battery bay
         translate([cab_c0 + 1.6, -lid_in, top_z - 3]) cube([tray_x1 - lip_gap - rail_t - (cab_c0 + 1.6), 2*lid_in, 5.02]);

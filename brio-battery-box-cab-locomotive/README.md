@@ -23,8 +23,8 @@ stack at the front, boiler with a steam dome, and a driver's cab at the back.
 ![cutaway](images/loco_side_cutaway.png)
 *Cut-away: latching push button on top of the smoke stack at the front, 2×AAA
 holder in the middle, worm-gear motor under it with the can pointing forward and
-the shaft driving the rear wheels. Spare wire goes on top of the motor and up into
-the hollow cab.*
+the shaft driving the rear wheels. Spare wire goes on top of the motor, and up into
+the hollow boiler and cab, which are open underneath.*
 
 ## Bill of materials
 
@@ -156,7 +156,7 @@ accelerations, settings as above). Add the A1's ~5–6 min start routine per pla
 | Plate | Time | Filament |
 |---|---|---|
 | Body (20 % infill, brim) | ~47 min | 22 g |
-| Roof (with supports) | ~42 min | 20 g |
+| Roof (with supports) | ~44 min | 20 g |
 | 2 front wheels + 2 drive wheels + axle (100 % infill) | ~22 min | 9 g |
 | 2 TPU tyres (optional) | ~3 min | 1 g |
 | **Total** | **~1 h 50 min** (~2 h with start-up and the magnet pause) | **~55 g** |
@@ -251,9 +251,10 @@ OpenSCAD preview is drawn from the same numbers.
    only fits one way. Feed the holder's lead down through the front of the
    floor opening; the conversion wire, both plug pairs and the spare lengths
    of holder and motor lead coil flat on top of the motor, under the
-   battery. Whatever doesn't fit there goes up into the hollow cab at the
-   back of the roof, which is open underneath. Keep wire out of the open
-   underside in front of and behind the motor.
+   battery. The rest goes up into the roof: the hollow boiler is open
+   underneath, a channel about 15 mm wide and 8 mm tall above the battery,
+   running back into the hollow cab. Keep wire out of the open underside in
+   front of and behind the motor.
 7. **Batteries:** put 2×AAA in the holder and slide its own switch to **ON**.
    Lay it in the battery bay with the lead toward the **front**; the switch
    wires reach the hatch over the low fence.
@@ -398,7 +399,8 @@ preview everything, `"cutaway"` for the section view. Useful parameters:
   chamfered first layer and are 0.8 mm thick; the apron and back skirt
   stand 0.5–0.6 mm off the body; the tongue is 0.9 mm thick in its 1.2 mm
   slot. Window tops and cab eaves are bevelled so no support lands on the
-  outside.
+  outside. The boiler is open underneath, so spare wire can lie above the
+  battery (a channel ~15 × 8 mm) as well as in the cab.
 
 ## Changes in v7
 
