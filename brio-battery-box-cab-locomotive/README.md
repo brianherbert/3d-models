@@ -1,4 +1,4 @@
-# Battery Box-Cab Locomotive (Brio-compatible) — v2
+# Battery Box-Cab Locomotive (Brio-compatible) — v6
 
 A small electric engine that drives itself on any Brio-style wooden track. A
 toddler presses the big red button on the roof and it goes; pressing it again
@@ -10,7 +10,7 @@ stops it.
   lead; everything else plugs together. (A no-solder variant with a plug-in switch cable is included.)
 - **Toddler-minded:** batteries under a screwed-down roof hatch; coupler magnets
   sealed inside the plastic; captive roof button; nothing reachable but the wheels.
-- **Brio proportions:** 105 × 30 × 59 mm (L × W × H on the track), 45 mm
+- **Brio proportions:** 105 × 30 × 74 mm (L × W × H on the track), 45 mm
   wheelbase with the axles near the ends, so the couplers stay close to the
   track centreline on curves. Narrower than the 40 mm track, so it clears
   platforms, signals and tunnels.
@@ -91,6 +91,10 @@ everything for the default build on one A1 plate:
   process **0.20mm Standard @BBL A1** with the changes below;
 - the **pause for the coupler magnets** at 34.6 mm (see below).
 
+To reprint only the roof (for example to upgrade a v5 build to the raised
+roof), open **`box_cab_locomotive_roof.3mf`** instead: the hatch alone, same
+settings, no pause.
+
 | Setting | Value | Why |
 |---|---|---|
 | Wall loops | 3 | Stiff walls and bearing frames. |
@@ -101,7 +105,7 @@ everything for the default build on one A1 plate:
 
 Slice, then print. When the printer pauses, drop in the magnets as described
 in "Sealing the coupler magnets" below, and resume. Everything prints in one go,
-about 1 h 20 min plus start-up.
+roughly 1½ hours plus start-up (v5 took 1 h 20 min; the taller roof adds a little).
 
 To print in several colours, assign filaments to the parts in Bambu Studio
 before slicing. The variant builds (12 mm button, no-solder switch) aren't in
@@ -216,8 +220,10 @@ OpenSCAD preview is drawn from the same numbers.
    60 mm from the holder, strip both ends, and join each to one of the
    quick-connect leads (either way round): solder and heat-shrink, or a
    crimped butt splice. Those two joints are the only ones in the build. The
-   switch body hangs into a closed well in the front cab, and the roof can be
-   unplugged from the switch for service.
+   roof is raised 12 mm so the button and its push-on connectors sit above
+   the cab floor (32 mm from the underside of the roof to the end of the
+   connectors); the joints and spare lead tuck into the cab around the
+   button. The roof can be unplugged from the switch for service.
 
    *Optional light:* the button glows while the loco is running if you also
    wire its LED. Join the **+** tab to the **motor side** of the switch (the
@@ -229,14 +235,17 @@ OpenSCAD preview is drawn from the same numbers.
 6. **Wiring:** plug battery holder → Bambu conversion wire → motor. Each plug
    only fits one way. Feed the holder's lead down through the front of the
    floor opening; the conversion wire, both plug pairs and the spare lengths
-   of holder and motor lead all coil flat on top of the motor, under the
-   battery. Keep wire out of the open underside in front of the motor.
+   of holder and motor lead coil flat on top of the motor, under the
+   battery, and whatever doesn't fit there lies on top of the battery under
+   the raised roof. Keep wire out of the open underside in front of and
+   behind the motor.
 7. **Batteries:** put 2×AAA in the holder and slide its own switch to **ON**.
    Lay it in the battery bay with the lead toward the **front**; the switch
    wires reach the hatch over the low fence.
 8. **Roof:** hold the hatch tilted, push its front tongue through the slot in
-   the front wall, lower the back, and fit the M3 × 10 screw at the rear. Snug,
-   not tight: it's threading into plastic.
+   the front wall, lower the back, and fit the M3 × 10 screw at the rear, at
+   the bottom of the pocket in the roof. Snug, not tight: it's threading into
+   plastic.
 9. **Test:** press the button: the motor starts. Press again: it stops.
 
 ### 12 mm button variant
@@ -356,6 +365,17 @@ preview everything, `"cutaway"` for the section view. Useful parameters:
 - `wheelbase` – 45 mm default.
 - `mag_z` – coupler height. `bore_d` / `bore_flat` – wheel press fit.
 - `groove_dp`, `tyre_t` – tyre groove depth and tyre thickness.
+
+## Changes in v6
+
+- Raised roof (16 mm button: 12 mm higher; 12 mm button: 5 mm). In v5 the
+  button hung into a closed well with no room for the push-on connectors on
+  its tabs and no gap for their wires, so the roof couldn't close. Now the
+  connectors end at the cab floor, the wires turn into the cab, and there is
+  room for spare wire above the battery. Only the hatch changed: a v5 body
+  takes the new hatch and the same M3 × 10 screw, which now sits at the
+  bottom of a pocket. The roof overhangs the ends by 1.2 mm to keep that
+  pocket closed.
 
 ## Changes in v5
 

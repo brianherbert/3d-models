@@ -2,7 +2,8 @@
 """
 Build box_cab_locomotive.3mf: a Bambu Studio project with every printed part
 of the default build on one A1 plate, the print settings from the README
-and the pause for the coupler magnets already set.
+and the pause for the coupler magnets already set.  Also writes
+box_cab_locomotive_roof.3mf with just the roof hatch, for reprinting it.
 
     python3 make_3mf.py        (from this folder, after exporting the STLs)
 
@@ -60,6 +61,14 @@ def main():
                         thumbnail_png=os.path.join(HERE, "images", "loco_iso.png"),
                         filament_colour="#2E6DB4")
     print(f"wrote {out}: magnet pause before the layer at {pause:.2f} mm (pocket top {pocket_top} mm)")
+    # the roof on its own, for reprinting just the hatch
+    out = write_project(os.path.join(HERE, "box_cab_locomotive_roof.3mf"),
+                        [Part("hatch", load("hatch"), cx, BED / 2)], PROCESS, PROCESS_CHANGES,
+                        title="Battery Box-Cab Locomotive: roof hatch",
+                        description="The roof hatch on its own, to reprint it without the body.",
+                        thumbnail_png=os.path.join(HERE, "images", "loco_iso.png"),
+                        filament_colour="#2E6DB4")
+    print(f"wrote {out}")
 
 if __name__ == "__main__":
     main()

@@ -1,5 +1,5 @@
 // =====================================================================
-//  Battery Box-Cab Locomotive  -  Brio-compatible, self-propelled  (v2)
+//  Battery Box-Cab Locomotive  -  Brio-compatible, self-propelled  (v6)
 // =====================================================================
 //  A small electric "box-cab" engine that drives itself along any
 //  Brio-style wooden track.  The motor's dual output shaft IS the drive
@@ -151,6 +151,15 @@ body_x1   = tray_x1 + rwall;                       // outer rear
 floor_z0  = batt_z0 - 2;                           // battery floor underside
 top_z     = batt_z0 + batt_h + 2.5;                // top of the walls
 hatch_t   = 2.0;
+// raised roof: a panel-mount button hangs pbs_below under the roof, plus
+// about 8 mm of push-on connector on its tabs (32 mm measured for the
+// #1442).  The roof is raised until the connectors end just inside the top
+// of the well, so their wires turn up into the cab instead of being trapped
+// in the well.  The extra height also stows the spare wire above the battery.
+clip_len   = 8;
+roof_raise = switch_type == "inline" ? 0
+           : max(0, ceil(pbs_below + clip_len - (top_z - batt_z0) - 2.5));
+roof_z     = top_z + roof_raise;                   // underside of the roof plate
 brg_z0    = 2.6;                                   // bottom of the bearing walls and can saddle
 bunk_z0   = 6;  bunk_t = 1.5;                      // cable bunker floor
 
@@ -365,9 +374,17 @@ module body() { difference() { body_solid(); body_cuts(); } }
 module hatch() {
     lip_gap = 0.3;
     lip_x0  = cab_x0 + 2.5;            // lip stops short of the tongue end
+    lid_in  = in_w/2 - lip_gap - 1.2;  // inner face of the raised walls (lip continues it)
+    eave    = roof_raise > 0 ? 1.2 : 0;   // a raised roof overhangs the ends, so the screw pocket stays closed
     difference() {
         union() {
-            rounded_box([body_x0, -out_w/2, top_z], [body_x1, out_w/2, top_z + hatch_t], 2);
+            rounded_box([body_x0 - eave, -out_w/2, roof_z], [body_x1 + eave, out_w/2, roof_z + hatch_t], 2);
+            // raised roof: sides flush with the body, thick enough inside
+            // to carry the lip, solid over the rear wall for the screw
+            if (roof_raise > 0) difference() {
+                rounded_box([body_x0 - eave, -out_w/2, top_z], [body_x1 + eave, out_w/2, roof_z + 0.01], 2);
+                translate([cab_x0, -lid_in, top_z - 1]) cube([tray_x1 - lip_gap - 1.2 - cab_x0, 2*lid_in, roof_raise + 1]);
+            }
             // locating lip just inside the walls
             difference() {
                 translate([lip_x0, -in_w/2 + lip_gap, top_z - 2]) cube([tray_x1 - lip_gap - lip_x0, in_w - 2*lip_gap, 2.01]);
@@ -377,6 +394,8 @@ module hatch() {
             // roof by a web just inside the wall
             translate([body_x0, -7.5, top_z - 2.2]) cube([cab_x0 + 0.3 - body_x0 + 0.01, 15, 1.0]);
             translate([cab_x0 + 0.3, -7.5, top_z - 2.2]) cube([lip_x0 - cab_x0 - 0.3 + 0.01, 15, 2.21]);
+            if (roof_raise > 0)
+                translate([cab_x0 - 0.01, -7.5, top_z]) cube([lip_x0 - cab_x0 + 0.01, 15, roof_raise + 0.01]);
         }
         if (switch_type == "inline") {
             // keep the lip clear of the button flange
@@ -385,19 +404,24 @@ module hatch() {
             translate([btn_x, 0, top_z - 5]) cylinder(d = btn_hole, h = 20);
             translate([btn_x, 0, top_z + hatch_t - 0.6]) cylinder(d1 = btn_hole, d2 = btn_hole + 1.2, h = 0.61);
         } else {
-            // panel hole for the PBS-11A, nut clearance below
-            translate([btn_x, 0, top_z - 5]) cylinder(d = pbs_hole, h = 20);
-            translate([btn_x, 0, top_z - 3]) cylinder(d = pbs_nut + 1.5, h = 3);
+            // panel hole for the button, nut clearance below
+            translate([btn_x, 0, top_z - 5]) cylinder(d = pbs_hole, h = roof_raise + 20);
+            translate([btn_x, 0, top_z - 3]) cylinder(d = pbs_nut + 1.5, h = roof_raise + 3);
         }
         // M3 screw hole over the rear wall: countersunk for a flat head
-        // (flush, M3 x 10) or counterbored for a socket cap head (M3 x 12)
-        translate([screw_x, 0, top_z - 5]) cylinder(d = 3.4, h = 20);
+        // (flush, M3 x 10) or counterbored for a socket cap head (M3 x 12).
+        // Under a raised roof the head sits at the bottom of a pocket, at
+        // the same height as on a flat roof, so the same screw fits.
+        seat_z = top_z + hatch_t;
+        translate([screw_x, 0, top_z - 5]) cylinder(d = 3.4, h = roof_raise + 20);
         if (screw_head == "flat")
-            translate([screw_x, 0, top_z + hatch_t - 1.7]) cylinder(d1 = 3.4, d2 = 6.8, h = 1.71);
+            translate([screw_x, 0, seat_z - 1.7]) cylinder(d1 = 3.4, d2 = 6.8, h = 1.71);
         else
-            translate([screw_x, 0, top_z + hatch_t - 1.2]) cylinder(d = 6.2, h = 1.21);
+            translate([screw_x, 0, seat_z - 1.2]) cylinder(d = 6.2, h = 1.21);
+        if (roof_raise > 0)
+            translate([screw_x, 0, seat_z]) cylinder(d = 7.2, h = roof_raise + hatch_t);
         // engraved roof panel lines
-        for (x = [tray_x0 + 6, tray_x1 - 10]) translate([x, -out_w/2 + 3, top_z + hatch_t - 0.5]) cube([0.8, out_w - 6, 1]);
+        for (x = [tray_x0 + 6, tray_x1 - 10]) translate([x, -out_w/2 + 3, roof_z + hatch_t - 0.5]) cube([0.8, out_w - 6, 1]);
     }
 }
 
@@ -441,7 +465,7 @@ module dummy_battery() {
 module dummy_switch() {
     if (switch_type == "inline")
         color("Black") translate([btn_x - sw_len_x/2, -sw_len_y/2, shelf_z]) cube([sw_len_x, sw_len_y, sw_h_nom]);
-    else translate([btn_x, 0, top_z + hatch_t]) {
+    else translate([btn_x, 0, roof_z + hatch_t]) {
         color("Red")   cylinder(d = pbs_cap_d, h = pbs_cap_h);
         color("Black") translate([0, 0, -0.01]) cylinder(d = pbs_flange, h = 1.5);
         color("Black") translate([0, 0, -hatch_t - 4]) cylinder(d = pbs_nut, h = 4, $fn = 6);        // nut
@@ -462,7 +486,8 @@ module dummy_track() {
 mag_pause = top_z - (mag_z - mag_d/2);
 echo(str("BODY: add a pause at layer height ", mag_pause, " mm to drop in the magnets"));
 echo(str("Overall: length ", body_x1 + cpl_len - (body_x0 - cpl_len), " mm, width ",
-         max(out_w, 2*(wheel_y0 + wheel_w)), " mm, height above table ", btn_top_z + 12, " mm"));
+         max(out_w, 2*(wheel_y0 + wheel_w)), " mm, height above table ",
+         (switch_type == "inline" ? btn_top_z : roof_z + hatch_t + 1.5 + pbs_cap_h) + 12, " mm"));
 echo(str("Overhang beyond the axles: front ", front_x - (body_x0 - cpl_len), " mm, rear ", body_x1 + cpl_len, " mm"));
 
 module wheels(drive = false) {
@@ -482,7 +507,7 @@ module assembly() {
 }
 
 if (part == "body") translate([0, 0, top_z]) rotate([180, 0, 0]) body();
-else if (part == "hatch") translate([0, 0, top_z + hatch_t]) rotate([180, 0, 0]) hatch();
+else if (part == "hatch") translate([0, 0, roof_z + hatch_t]) rotate([180, 0, 0]) hatch();
 else if (part == "button") translate([-btn_x, 0, -btn_rest_z]) button();
 else if (part == "wheel") wheel_flat(false);
 else if (part == "wheel_drive") wheel_flat(true);
