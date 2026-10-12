@@ -1,4 +1,4 @@
-# Battery Box-Cab Locomotive (Brio-compatible) — v7
+# Battery Box-Cab Locomotive (Brio-compatible) — v8
 
 A small electric engine that drives itself on any Brio-style wooden track. A
 toddler presses the big red button on top of the smoke stack and it goes;
@@ -102,12 +102,12 @@ same settings, no pause. The body hasn't changed since v5.
 | Wall loops | 3 | Stiff walls and bearing frames. |
 | Sparse infill | 20 % | Body and hatch. |
 | Infill on wheels and axle | 100 % (per object) | Small parts that are pressed onto the shaft, so they need to be stiff. |
-| Brim | Body and roof, 5 mm (per object) | The body stands on the thin rim of its walls, the roof on its thin locating rails. |
-| Supports | Off | Every overhang is a short bridge. Bambu Studio may still warn about a "floating cantilever" on the roof (its deck bridges 23 mm from rail to rail); print anyway. |
+| Brim | Body only, 5 mm (per object) | The body stands on the thin rim of its walls. |
+| Supports | Off, except the roof: normal, from the build plate only (per object) | The roof's deck sits 2.2 mm above the plate on its locating rails; the supports under it are 2 mm tall and peel off. Everything else is a short bridge. |
 
 Slice, then print. When the printer pauses, drop in the magnets as described
 in "Sealing the coupler magnets" below, and resume. Everything prints in one go,
-about 1 h 45 min plus start-up.
+about 1 h 50 min plus start-up.
 
 To print in several colours, assign filaments to the parts in Bambu Studio
 before slicing. The variant builds (12 mm button, no-solder switch) aren't in
@@ -119,7 +119,7 @@ the project; load their STLs from the folders below instead.
 | File | Qty | Orientation | Notes |
 |---|---|---|---|
 | `body.stl` | 1 | As exported (upside down) | **Pause for magnets** (below) |
-| `hatch.stl` | 1 | As exported (the right way up, on its rails) | Steam roof: smoke stack, boiler, cab. Brim. |
+| `hatch.stl` | 1 | As exported (the right way up, on its rails) | Steam roof: smoke stack, boiler, cab. Supports from the build plate under the deck. |
 | `stl/12mm-switch-variant/` | — | — | Body and hatch for a 12 mm PBS-11A button instead of the 16 mm one |
 | `stl/inline-switch-variant/` | — | — | Body, hatch, button and shim for the no-solder Adafruit #3064 variant |
 | `wheel.stl` | 2 | As exported | Front wheels |
@@ -133,13 +133,18 @@ Wheels are 26 mm (Brio's are 22–24 mm) so the motor body clears the track by
 Print settings for the Bambu Lab A1, PLA, 0.4 mm nozzle:
 
 - **Layer height:** 0.2 mm. **Walls:** 3. **Infill:** 20 %.
-- **Supports:** none. The body prints upside down so every floor, shelf and
-  fence is a short bridge between walls. The roof prints the right way up,
-  standing on its locating rails, front apron and back skirt; its deck and
-  the boiler and cab ceilings are bridges.
+- **Supports:** none on the body: it prints upside down so every floor, shelf
+  and fence is a short bridge between walls. The roof prints the right way
+  up, standing on its locating rails, front apron and back skirt; turn on
+  **normal supports, on build plate only** for the roof (the project file
+  already does). They fill the 2.2 mm under its deck and the inside of the
+  stack and cab; pull them out with pliers. Clean any stray strands off the
+  rails and the tongue before fitting.
 - **Wheels, axle and button:** 100 % infill. They're tiny, and stiff wheels
   press on more securely.
-- A brim on the body and the roof helps, because they stand on thin walls and rails.
+- A brim on the body helps, because it stands on the thin rim of its walls.
+  No brim on the roof: its rails locate it in the body, and brim remnants
+  make them too wide.
 - **Tyres (TPU 95A HF):** print from the external spool holder (not the AMS
   Lite), slow (30–40 mm/s), 100 % infill.
 
@@ -151,10 +156,10 @@ accelerations, settings as above). Add the A1's ~5–6 min start routine per pla
 | Plate | Time | Filament |
 |---|---|---|
 | Body (20 % infill, brim) | ~47 min | 22 g |
-| Roof | ~34 min | 16 g |
+| Roof (with supports) | ~42 min | 20 g |
 | 2 front wheels + 2 drive wheels + axle (100 % infill) | ~22 min | 9 g |
 | 2 TPU tyres (optional) | ~3 min | 1 g |
-| **Total** | **~1 h 45 min** (~1 h 55 min with start-up and the magnet pause) | **~50 g** |
+| **Total** | **~1 h 50 min** (~2 h with start-up and the magnet pause) | **~55 g** |
 
 ### Sealing the coupler magnets (body print)
 
@@ -382,6 +387,18 @@ preview everything, `"cutaway"` for the section view. Useful parameters:
 - `wheelbase` – 45 mm default.
 - `mag_z` – coupler height. `bore_d` / `bore_flat` – wheel press fit.
 - `groove_dp`, `tyre_t` – tyre groove depth and tyre thickness.
+
+## Changes in v8
+
+- Roof fit and print quality. The v7 roof printed with a brim and no
+  supports: its deck sagged and strung across the 23 mm between the rails,
+  and the rails (the first layers, with the brim on them) came out too wide
+  to drop inside the body. Now the roof prints with supports from the plate
+  under the deck and no brim; the rails have 0.6 mm clearance (was 0.3), a
+  chamfered first layer and are 0.8 mm thick; the apron and back skirt
+  stand 0.5–0.6 mm off the body; the tongue is 0.9 mm thick in its 1.2 mm
+  slot. Window tops and cab eaves are bevelled so no support lands on the
+  outside.
 
 ## Changes in v7
 

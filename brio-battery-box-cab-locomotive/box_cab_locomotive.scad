@@ -421,12 +421,15 @@ module hatch_flat() {
 
 module hatch_steam() {
     // Printed the right way up, standing on its locating rails, tongue and
-    // back skirt.  The deck bridges rail to rail, the boiler and cab
-    // ceilings are straight bridges, and every other overhang is under 2 mm.
-    lip_gap = 0.3;
-    lid_in  = in_w/2 - lip_gap - 1.0;     // inner face of the rails
+    // back skirt, with the slicer's supports (build plate only) under the
+    // deck.  The parts that touch the body all start on the bed, so they get
+    // generous clearances and a chamfered first layer.  Outside faces have
+    // no flat overhangs, so no support lands on them.
+    lip_gap = 0.6;                        // rails to the body's inner walls
+    rail_t  = 0.8;
+    lid_in  = in_w/2 - lip_gap - rail_t;  // inner face of the rails
     rail_x0 = cab_x0 + 0.3;
-    apr_x0  = body_x0 - 1.5;              // front apron: carries the tongue from outside
+    apr_x0  = body_x0 - 1.7;              // front apron: carries the tongue from outside
     deck1   = top_z + hatch_t;            // top of the running boards
     rear    = body_x1 + 2;                // cab back wall overhangs the body
     cab_c0  = rear - cab_len_s;           // cab front face
@@ -443,19 +446,23 @@ module hatch_steam() {
         union() {
             // deck / running boards, out to the cab back
             rounded_box([body_x0, -out_w/2, top_z], [rear, out_w/2, deck1], 2);
-            // locating rails just inside the side walls and across the back
+            // locating rails just inside the side walls and across the back,
+            // first layers chamfered against elephant's foot
             difference() {
-                translate([rail_x0, -in_w/2 + lip_gap, top_z - 2.2]) cube([tray_x1 - lip_gap - rail_x0, in_w - 2*lip_gap, 2.21]);
-                translate([rail_x0 - 1, -lid_in, top_z - 3]) cube([tray_x1 - lip_gap - 1.2 - rail_x0 + 1, 2*lid_in, 4]);
+                hull() {
+                    translate([rail_x0, -in_w/2 + lip_gap + 0.4, top_z - 2.2]) cube([tray_x1 - lip_gap - rail_x0 - 0.4, in_w - 2*lip_gap - 0.8, 0.01]);
+                    translate([rail_x0, -in_w/2 + lip_gap, top_z - 1.8]) cube([tray_x1 - lip_gap - rail_x0, in_w - 2*lip_gap, 1.81]);
+                }
+                translate([rail_x0 - 1, -lid_in, top_z - 3]) cube([tray_x1 - lip_gap - rail_t - rail_x0 + 1, 2*lid_in, 4]);
             }
             // front apron over the top of the front wall, hiding the slot;
             // the tongue runs from it through the slot
             translate([apr_x0, -9.5, top_z - 2.2]) cube([1.2, 19, 2.21]);
             translate([apr_x0, -9.5, top_z]) cube([body_x0 - apr_x0 + 0.01, 19, hatch_t]);
-            translate([apr_x0 + 1.19, -7.5, top_z - 2.2]) cube([cab_x0 + 0.3 - apr_x0 - 1.19, 15, 1.0]);
+            translate([apr_x0 + 1.19, -7.5, top_z - 2.2]) cube([cab_x0 + 0.3 - apr_x0 - 1.19, 15, 0.9]);
             // cab back wall carries on down outside the body's rear face
             intersection() {
-                translate([body_x1 + 0.4, -out_w/2, top_z - 2.2]) cube([rear - body_x1 - 0.4, out_w, 2.21]);
+                translate([body_x1 + 0.6, -out_w/2, top_z - 2.2]) cube([rear - body_x1 - 0.6, out_w, 2.21]);
                 rounded_box([body_x0, -out_w/2, top_z - 2.2], [rear, out_w/2, top_z + 0.01], 2);
             }
             // smoke stack with a capped top and a flared foot
@@ -479,17 +486,27 @@ module hatch_steam() {
                 cylinder(r = 4, h = 2.5);
                 translate([0, 0, 2.5]) scale([1, 1, 0.6]) sphere(r = 4);
             }
-            // cab: walls with recessed windows, cambered roof with eaves
+            // cab: walls with recessed windows (tops bevelled 45 degrees so
+            // they print), cambered roof with bevelled eaves
             difference() {
                 rounded_box([cab_c0, -out_w/2, deck1 - 0.01], [rear, out_w/2, cab_r + 0.01], 2);
                 translate([cab_c0 + 1.6, -out_w/2 + 1.6, deck1 - 1]) cube([cab_len_s - 3.2, out_w - 3.2, cab_h + 1]);
-                for (s = [-1, 1]) {
-                    translate([cab_c0 + 4, s > 0 ? out_w/2 - 0.8 : -out_w/2 - 0.01, deck1 + 6]) cube([10, 0.81, 7]);
-                    translate([cab_c0 - 0.01, s > 0 ? 8 : -12, deck1 + 8]) cube([0.81, 4, 5]);
+                mirror_y() {
+                    hull() {
+                        translate([cab_c0 + 4, out_w/2 - 0.8, deck1 + 6]) cube([10, 0.81, 6.2]);
+                        translate([cab_c0 + 4, out_w/2 - 0.02, deck1 + 6]) cube([10, 0.03, 7]);
+                    }
+                    hull() {
+                        translate([cab_c0 - 0.01, 8, deck1 + 8]) cube([0.81, 4, 4.2]);
+                        translate([cab_c0 - 0.01, 8, deck1 + 8]) cube([0.03, 4, 5]);
+                    }
                 }
             }
             intersection() {
-                rounded_box([cab_c0 - 1, -out_w/2 - 1, cab_r], [rear + 1, out_w/2 + 1, cab_r + 3], 2);
+                hull() {
+                    rounded_box([cab_c0, -out_w/2, cab_r], [rear, out_w/2, cab_r + 0.01], 2);
+                    rounded_box([cab_c0 - 1, -out_w/2 - 1, cab_r + 1], [rear + 1, out_w/2 + 1, cab_r + 3], 2);
+                }
                 translate([cab_c0 - 2, 0, cab_r + 3 - Rr]) rotate([0, 90, 0]) cylinder(r = Rr, h = cab_len_s + 4, $fn = 360);
             }
             // tube round the screw, so the cab stays closed
@@ -505,7 +522,7 @@ module hatch_steam() {
             translate([btn_x, -bri, deck1]) cube([bx1 - btn_x + 2, 2*bri, bceil - deck1]);
         }
         // cab floor open to the battery bay
-        translate([cab_c0 + 1.6, -lid_in, top_z - 3]) cube([tray_x1 - lip_gap - 1.2 - (cab_c0 + 1.6), 2*lid_in, 5.02]);
+        translate([cab_c0 + 1.6, -lid_in, top_z - 3]) cube([tray_x1 - lip_gap - rail_t - (cab_c0 + 1.6), 2*lid_in, 5.02]);
         // M3 screw: countersunk (or counterbored) at deck height, as on the
         // flat roof, at the bottom of a pocket through the cab roof
         translate([screw_x, 0, top_z - 5]) cylinder(d = 3.4, h = 10);

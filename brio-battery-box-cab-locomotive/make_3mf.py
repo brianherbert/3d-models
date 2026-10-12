@@ -26,7 +26,9 @@ PROCESS_CHANGES = {
 }
 SOLID = {"sparse_infill_density": "100%"}          # wheels and axle: small, stiff, press-fit
 BODY = {"brim_type": "outer_only", "brim_width": "5"}   # the body stands on the thin rim of its walls
-ROOF = BODY                                             # the roof stands on its thin locating rails
+# the roof prints the right way up: slicer supports from the plate under its
+# deck (2 mm tall, they peel off), no brim to leave burrs on the locating rails
+ROOF = {"enable_support": "1", "support_type": "normal(auto)", "support_on_build_plate_only": "1"}
 
 def scad_value(name):
     """read a value the model echoes, so the pause follows the design"""
