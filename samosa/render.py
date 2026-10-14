@@ -7,13 +7,20 @@ Writes:
     samosa.png          three-quarter view, the seam side
     samosa_back.png     from the other side
     samosa_scale.png    next to a credit card (85.6 x 54 mm) for size
+    dip.png             the dipping cup with the sauce in it
+    dip_parts.png       the cup and the sauce apart, as they print
+    samosa_dip.png      the samosa with its dipping cup
 """
 import os, sys
 import vtk
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from build_dip import FLOOR
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 PASTRY = (0.86, 0.62, 0.30)
 CARD = (0.30, 0.45, 0.75)
+CUP = (0.95, 0.94, 0.90)
+SAUCE = (0.75, 0.12, 0.10)
 
 def actor(src, colour, move=(0, 0, 0), spec=0.25):
     if isinstance(src, str):
@@ -55,11 +62,20 @@ def render(d, out_dir):
     os.makedirs(out_dir, exist_ok=True)
     s = os.path.join(d, "samosa.stl")
     o = lambda name: os.path.join(out_dir, name + ".png")
-    mid = (0, 0, 28)
+    mid = (0, 0, 22)
     shot([actor(s, PASTRY)], o("samosa"), mid, 150, 18, 1.15)
     shot([actor(s, PASTRY)], o("samosa_back"), mid, -30, 18, 1.15)
     shot([actor(s, PASTRY), actor(card(), CARD, (100, -5, 0.4), 0.1)], o("samosa_scale"),
          (50, 0, 20), 160, 25, 1.25, size=(1400, 900))
+    cup, sauce = os.path.join(d, "dip_cup.stl"), os.path.join(d, "dip_sauce.stl")
+    in_cup = (0, 0, FLOOR + 0.05)
+    shot([actor(cup, CUP), actor(sauce, SAUCE, in_cup, 0.6)], o("dip"), (0, 0, 15), 20, 40, 1.2,
+         size=(1000, 900))
+    shot([actor(cup, CUP, (-40, 0, 0)), actor(sauce, SAUCE, (40, 0, 0), 0.6)], o("dip_parts"),
+         (0, 0, 15), 10, 22, 1.15, size=(1400, 800))
+    shot([actor(s, PASTRY, (-35, 0, 0)), actor(cup, CUP, (55, 10, 0)),
+          actor(sauce, SAUCE, (55, 10, FLOOR + 0.05), 0.6)], o("samosa_dip"),
+         (10, 5, 18), 160, 28, 1.2, size=(1400, 900))
 
 if __name__ == "__main__":
     render(sys.argv[1] if len(sys.argv) > 1 else os.path.join(HERE, "stl"),
