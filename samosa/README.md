@@ -1,8 +1,10 @@
 # Samosa
 
 A life-size samosa, standing on its flat triangular bottom the way it sits
-on a plate. It's about the size of a large Punjabi samosa: 93 mm across the
-bottom corners and 65 mm tall. It prints in one piece, in one colour, with
+on a plate. It's the size of a real Punjabi samosa: 86 mm across the
+bottom corners and 55 mm tall, so it fits easily in a cereal box. Lay it on
+its side, with the tip pointing to the front or back of the box. A standard
+box is about 65–75 mm deep. It prints in one piece, in one colour, with
 no supports.
 
 | | | |
@@ -14,7 +16,7 @@ The last picture shows it next to a credit card (85.6 × 54 mm) for size.
 ## What it is
 
 - **Shape:** a plump three-sided pastry cone. The bottom is a triangle with
-  rounded corners, about 100 mm on each side if the corners were sharp. The
+  rounded corners, about 92 mm on each side if the corners were sharp. The
   faces bulge out where the filling pushes the pastry, and the top comes to
   a rounded point.
 - **Seam:** one face has the overlapping flap where the pastry was folded
@@ -40,7 +42,7 @@ top of **0.20mm Standard @BBL A1**:
   pastry. A matte PLA looks better still, because it hides the layer lines.
   The project uses the **Bambu PLA Basic** profile, so switch it to your
   filament's profile if it's different.
-- **How much:** roughly 55–60 g of filament (my estimate from the model's
+- **How much:** roughly 40–45 g of filament (my estimate from the model's
   volume and surface; Bambu Studio will show the exact amount and time when
   you slice).
 - Or import `stl/samosa.stl` and use the settings above.
@@ -53,7 +55,8 @@ makes it look fried.
 
 The parameters at the top of `build_samosa.py` set:
 
-- `SIDE` and `HEIGHT`, the size (100 mm and 65 mm)
+- `SIDE` and `HEIGHT`, the size (92 mm and 55 mm; keep `HEIGHT` under
+  about 60 mm if it has to fit in a cereal box)
 - `FACE_BULGE` and `BELLY`, how plump it is
 - `SEAM_STEP` and `SEAM_AT`, the folded flap
 - `LUMP_AMP`, `BLISTERS`, `BLISTER_AMP` and `BLISTER_SIZE`, the surface
