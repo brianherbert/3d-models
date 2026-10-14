@@ -24,7 +24,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 
 # ---------------------------------------------------------------- size (a real Punjabi samosa)
 SIDE = 92.0                 # length of each side of the triangular bottom, corner to corner
-HEIGHT = 55.0               # bottom to tip
+HEIGHT = 44.0               # bottom to tip
 CORNER_R = 0.16             # corner rounding, as a fraction of the bottom's inradius
 FACE_BULGE = 0.20           # how far the faces bulge out between the corners (fraction of the radius)
 BELLY = 0.85                # how much fuller the middle is than a plain pyramid
