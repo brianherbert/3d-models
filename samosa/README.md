@@ -1,10 +1,9 @@
 # Samosa
 
 A life-size samosa, standing on its flat triangular bottom the way it sits
-on a plate. It's the size of a real Punjabi samosa: 86 mm across the
-bottom corners and 55 mm tall, so it fits easily in a cereal box. Lay it on
-its side, with the tip pointing to the front or back of the box. A standard
-box is about 65–75 mm deep. It prints in one piece, in one colour, with
+on a plate. It's the size of a real Punjabi samosa: 86 × 78 mm across the
+bottom and 44 mm tall, so it fits in a box with a 45 mm gap. Lay it on its
+side, with the tip pointing to the front or back of the box. It prints in one piece, in one colour, with
 no supports.
 
 | | | |
@@ -42,7 +41,7 @@ top of **0.20mm Standard @BBL A1**:
   pastry. A matte PLA looks better still, because it hides the layer lines.
   The project uses the **Bambu PLA Basic** profile, so switch it to your
   filament's profile if it's different.
-- **How much:** roughly 40–45 g of filament (my estimate from the model's
+- **How much:** roughly 35 g of filament (my estimate from the model's
   volume and surface; Bambu Studio will show the exact amount and time when
   you slice).
 - Or import `stl/samosa.stl` and use the settings above.
@@ -55,8 +54,8 @@ makes it look fried.
 
 The parameters at the top of `build_samosa.py` set:
 
-- `SIDE` and `HEIGHT`, the size (92 mm and 55 mm; keep `HEIGHT` under
-  about 60 mm if it has to fit in a cereal box)
+- `SIDE` and `HEIGHT`, the size (92 mm and 44 mm; `HEIGHT` is its
+  thinnest measurement, so keep it under 45 mm for the box)
 - `FACE_BULGE` and `BELLY`, how plump it is
 - `SEAM_STEP` and `SEAM_AT`, the folded flap
 - `LUMP_AMP`, `BLISTERS`, `BLISTER_AMP` and `BLISTER_SIZE`, the surface
