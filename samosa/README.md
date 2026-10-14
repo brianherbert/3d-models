@@ -19,8 +19,8 @@ The last picture shows it next to a credit card (85.6 × 54 mm) for size.
   a rounded point.
 - **Seam:** one face has the overlapping flap where the pastry was folded
   and sealed, with a slightly wavy edge, the way a hand-folded one looks.
-- **Surface:** gentle lumps plus about 900 small blisters, like fried
-  pastry. The bottom 2 mm are smooth and flat so it sits flat on the bed and
+- **Surface:** smooth pastry with a very slight hand-made unevenness and a
+  few soft bubbles. The bottom 2 mm are smooth and flat so it sits flat on the bed and
   on a plate.
 
 ## Printing
@@ -34,7 +34,7 @@ top of **0.20mm Standard @BBL A1**:
 | Brim | off | it stands on a wide flat triangle |
 | Walls | 3 | |
 | Infill | 15% | |
-| Seam | random | the scattered seam spots disappear into the blistered surface |
+| Seam | aligned | keeps the seam to one line on the smooth surface |
 
 - **Filament:** a tan, golden or light-brown PLA looks most like fried
   pastry. A matte PLA looks better still, because it hides the layer lines.
@@ -46,7 +46,7 @@ top of **0.20mm Standard @BBL A1**:
 - Or import `stl/samosa.stl` and use the settings above.
 
 **Making it look cooked:** for a school project, a quick dry-brush of darker
-brown acrylic paint over the bumps picks out the blisters and the seam, and
+brown acrylic paint over the bumps picks out the seam and the soft bumps, and
 makes it look fried.
 
 ## Changing it
@@ -57,7 +57,8 @@ The parameters at the top of `build_samosa.py` set:
 - `FACE_BULGE` and `BELLY`, how plump it is
 - `SEAM_STEP` and `SEAM_AT`, the folded flap
 - `LUMP_AMP`, `BLISTERS`, `BLISTER_AMP` and `BLISTER_SIZE`, the surface
-- `SEED`, for a differently blistered samosa (useful for printing a plateful)
+  (raise them for a bumpier, more blistered pastry)
+- `SEED`, for a slightly different samosa each time (useful for printing a plateful)
 
 The script stops with an error if a change makes any part overhang more than
 40° (it would need supports) or breaks the mesh.

@@ -35,10 +35,10 @@ CHAMFER = 1.0               # 45 degree chamfer round the bottom edge (stops ele
 SEAM_STEP = 1.3             # thickness of the overlapping flap's edge
 SEAM_AT = 0.42              # where the seam runs, as a fraction of the way across one face
 SEAM_WOBBLE = 1.2           # mm; a hand-folded seam isn't quite straight
-LUMP_AMP = 0.7              # mm; low, broad unevenness
-BLISTERS = 900              # how many small bubbles
-BLISTER_AMP = (0.25, 0.75)  # mm high
-BLISTER_SIZE = (1.2, 3.0)   # mm, the bubble's radius (gaussian sigma)
+LUMP_AMP = 0.3              # mm; low, broad unevenness
+BLISTERS = 250              # how many small bubbles
+BLISTER_AMP = (0.1, 0.3)    # mm high
+BLISTER_SIZE = (2.5, 4.5)   # mm, the bubble's radius (gaussian sigma)
 SMOOTH_FOOT = 2.0           # mm; no texture below this height
 SEED = 7                    # change for a differently blistered samosa
 

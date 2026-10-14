@@ -21,7 +21,7 @@ SAMOSA = {
     "enable_support": "0",              # nothing overhangs more than 40 degrees
     "wall_loops": "3",
     "sparse_infill_density": "15%",
-    "seam_position": "random",          # scattered seam blobs disappear into the blistered pastry
+    "seam_position": "aligned",         # one tidy seam line on the smooth pastry
 }
 
 def main():
