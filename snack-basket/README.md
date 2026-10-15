@@ -1,9 +1,9 @@
 # Snack basket
 
-A little brown wicker basket with a handle, and three treats to put in it: a
-pear, a chocolate-chip cookie and a bag of snacks. The basket is 83 × 69 mm
+A little brown wicker basket with a handle, and treats to put in it: two
+pears, a chocolate-chip cookie and a bag of snacks. The basket is 83 × 69 mm
 across the rim (a bit narrower than the [samosa](../samosa/), which is 86 mm)
-and 30 mm deep, or 71 mm tall to the top of the handle. All three treats fit
+and 30 mm deep, or 71 mm tall to the top of the handle. All the treats fit
 inside together. The build script places them in the basket and checks they
 don't poke through the basket, the handle or each other.
 
@@ -20,12 +20,13 @@ The last picture shows it next to the samosa.
 |---|---|---|
 | **Basket** | 83 × 69 × 30 mm | Eight woven rows going over and under 36 stakes, a twisted rope rim, and a faint weave inside. Its outline is a rounded rectangle and it flares out slightly towards the top. A thick stake inside the rim on each long side has a socket for the handle. |
 | **Handle** | 58 × 51 mm, 5 mm wide and 4 mm thick | An arch with slanted grooves, like a wrapped wicker handle. It prints flat. Its two pegs push down into the sockets, and its shoulders rest on top of the stakes. |
-| **Pear** | 24 mm across, 34 mm tall | A round bottom with a narrower top that leans slightly to one side, and a curved stem in a little dimple. It stands on a small flat spot on its bottom. |
+| **Pear** (×2) | 24 mm across, 34 mm tall | A round bottom with a narrower top that leans slightly to one side, and a curved stem in a little dimple. It stands on a small flat spot on its bottom. |
 | **Cookie** | 28 mm across, 6 mm thick | Slightly domed, with an uneven edge and eleven chocolate chips on top. |
 | **Bag of snacks** | 30 × 42 × 10 mm | A puffy bag with crimped seals and zigzag-cut ends at the top and bottom, with SNACKS raised on an oval label. It's flat on the back, like a bag lying on a table. |
 
-In the pictures the bag stands at one end leaning on the wall, and the pear
-and the cookie sit at the other end, either side of the handle. The handle
+In the pictures the bag stands at one end leaning on the wall with a pear
+beside it, and the other pear and the cookie sit at the other end. The
+handle runs between them. The handle
 is narrow, so you can put them in any way you like.
 
 - **Fit:** the handle's pegs have a 0.2 mm gap all round in their sockets.
@@ -40,7 +41,7 @@ build script checks that nothing overhangs more than 45°.
 | Project | Parts | Filament | Walls | Filament used (my estimate) |
 |---|---|---|---|---|
 | `basket.3mf` | basket and handle, on one plate | brown PLA | 4 (the wall prints solid) | about 40 g |
-| `pear.3mf` | pear | green or yellow PLA | 3 | about 6 g |
+| `pear.3mf` | two pears, on one plate | green or yellow PLA | 3 | about 12 g |
 | `cookie.3mf` | cookie | tan or light-brown PLA | 3 | about 3 g |
 | `snack_bag.3mf` | bag of snacks | any bright PLA (orange in the pictures) | 3 | about 6 g |
 
@@ -51,8 +52,8 @@ when you slice.
   flat and the bag lies on its flat back. The handle prints flat with its
   grooved side up.
 - **Pear stem:** the stem is small (2.6 mm across). If it comes out droopy,
-  slow the printer down for the last few layers, or print two pears at once
-  so each layer has longer to cool.
+  slow the printer down for the last few layers. Printing both pears at once
+  already helps, because each layer has longer to cool.
 - Or import the STLs from `stl/` and use the settings above
   (`assembled.stl` is for viewing only).
 
@@ -75,7 +76,8 @@ The parameters at the top of `build_basket.py` set:
 
 The script stops with an error if a change makes anything overhang more than
 45°, makes the basket wider than the samosa (86 mm), or stops the treats
-fitting in the basket. If you make a treat bigger, move it in `arrange()`.
+fitting in the basket. If you make a treat bigger, move it in `arrange()`
+(`PEAR2_AT` places the second pear).
 
 ```
 pip install trimesh numpy scipy manifold3d vtk pillow matplotlib
@@ -88,7 +90,7 @@ python3 make_3mf.py            # -> basket.3mf, pear.3mf, cookie.3mf, snack_bag.
 
 | File | What |
 |---|---|
-| `build_basket.py` | Builds every part, places the treats in the basket and checks they fit. |
+| `build_basket.py` | Builds every part, places the treats (both pears) in the basket and checks they fit. |
 | `render.py` | Preview renders (VTK). |
 | `make_3mf.py` | Builds the Bambu Studio projects with `../tools/bambu3mf.py`. |
 | `basket.3mf`, `pear.3mf`, `cookie.3mf`, `snack_bag.3mf` | Bambu Studio projects, ready to slice. |
