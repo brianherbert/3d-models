@@ -21,6 +21,7 @@ where needed, and assembly notes.
 | ![lighthouse](tealight-lighthouse-lamp/images/lighthouse_lit.png) | [Tea light lighthouse](tealight-lighthouse-lamp/) | A small desk lighthouse lamp lit by one LED tea light. The tower and roof print in an opaque colour and the lantern room in translucent blue, so the flicker glows like a beacon. Three parts with no supports or glue. Lift the lantern off to reach the tea light's switch. |
 | ![crystal](tealight-crystal-lamp/images/crystal_lit.png) | [Tea light crystal](tealight-crystal-lamp/) | A 6-inch hexagonal blue crystal lit from inside by one LED tea light. The crystal prints in translucent blue as a two-line shell and lifts off a white hexagonal base to reach the tea light's switch. |
 | ![samosa](samosa/images/samosa.png) | [Samosa](samosa/) | A life-size samosa (86 × 78 × 44 mm, so it fits in a 45 mm box) for a school project. A plump pastry cone with a folded seam and smooth pastry. One piece, one colour, no supports. A white dipping cup and a red sauce insert go with it, each printed separately in one colour. |
+| ![basket](snack-basket/images/basket.png) | [Snack basket](snack-basket/) | A little brown wicker basket with a handle, 83 mm across (just narrower than the samosa), with a pear, a chocolate-chip cookie and a bag of snacks that all fit inside. Five parts, each in one colour, with no supports. The handle prints flat and pushes into sockets in the rim. |
 
 ## What's in each folder
 
@@ -40,7 +41,7 @@ Each model folder follows the same layout:
 - **OpenSCAD models** (the signal and the locomotive): open the `.scad` file in
   [OpenSCAD](https://openscad.org) and export an STL, or run it from the
   command line.
-- **Python models** (the horse head, the cheese wedge, the cheese wheel, the lighthouse, the crystal and the samosa):
+- **Python models** (the horse head, the cheese wedge, the cheese wheel, the lighthouse, the crystal, the samosa and the snack basket):
   install the packages listed in that model's README and run its build
   script.
 
