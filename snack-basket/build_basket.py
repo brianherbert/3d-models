@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 A little brown wicker basket with a handle, and the three things that go in
-it: a pear, a chocolate-chip cookie and a bag of snacks.  Each part prints on
+it: two pears, a chocolate-chip cookie and a bag of snacks.  Each part prints on
 its own in one colour, so no AMS is needed, and none needs supports.
 
     basket      brown.  A woven basket with a twisted rim, 84 mm across at
@@ -9,13 +9,13 @@ its own in one colour, so no AMS is needed, and none needs supports.
                 rim on each side for the handle
     handle      brown.  An arch with wrapped grooves.  It prints flat and its
                 two pegs push into the sockets
-    pear        green or yellow.  Stands on a flat spot on its bottom, with a
+    pear        green or yellow (print two).  Stands on a flat spot on its bottom, with a
                 stem in a dimple on top
     cookie      tan.  Domed, slightly uneven, with chocolate chips on top
     snack_bag   any bright colour.  A puffy bag with crimped, zigzag-cut
                 seals and SNACKS on the front.  It prints lying on its back
 
-The script places the three treats in the basket the way they're shown in
+The script places the treats (both pears) in the basket the way they're shown in
 the pictures and stops with an error if any of them pokes through the basket
 or the handle, or into each other.
 
@@ -444,6 +444,10 @@ def place(t, rot_y=0.0, rot_z=0.0, rot_x=0.0, at=(0, 0, 0)):
     return t
 
 
+PEAR2_AT = (-14.0, -9.0)
+PEAR2_TURN = 80
+
+
 def arrange(pear_m, cookie_m, bag_m):
     floor = FLOOR + 0.05
     # the bag stands on its bottom seal, front facing the middle, leaning on the left end wall
@@ -458,7 +462,10 @@ def arrange(pear_m, cookie_m, bag_m):
     # the cookie leans against the right end wall
     c = place(cookie_m, rot_y=-28, at=(0, 0, floor))
     c.apply_translation((20.5 - c.centroid[0], 13.5 - c.centroid[1], 0))
-    return {"pear": p, "cookie": c, "snack_bag": b}
+    # a second pear, turned the other way, between the bag and the handle
+    p2 = place(pear_m, rot_z=PEAR2_TURN, at=(0, 0, floor))
+    p2.apply_translation((PEAR2_AT[0] - p2.centroid[0], PEAR2_AT[1] - p2.centroid[1], 0))
+    return {"pear": p, "pear_2": p2, "cookie": c, "snack_bag": b}
 
 
 def check_fit(items, bskt, hndl):

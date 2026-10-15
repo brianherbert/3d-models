@@ -3,7 +3,7 @@
 Build the Bambu Studio projects, one plate and one filament each (no AMS):
 
     basket.3mf          the basket and its handle, brown PLA
-    pear.3mf            the pear, green or yellow PLA
+    pear.3mf            two pears, green or yellow PLA
     cookie.3mf          the cookie, tan PLA
     snack_bag.3mf       the bag of snacks, any bright colour
 
@@ -41,8 +41,8 @@ def main():
          "The basket and its handle. Print in brown PLA, then push the handle's pegs into the sockets.",
          [Part("basket", load("basket"), c - 25, c), Part("handle", load("handle"), c + 55, c, rot_z=90)],
          "basket_empty"),
-        ("pear", "Snack basket: pear", COMMON, "#9DBB3F", "The pear. Print in green or yellow PLA.",
-         [Part("pear", load("pear"), c, c)], "treats"),
+        ("pear", "Snack basket: pears", COMMON, "#9DBB3F", "Two pears. Print in green or yellow PLA.",
+         [Part("pear", load("pear"), c - 20, c), Part("pear_2", load("pear"), c + 20, c)], "treats"),
         ("cookie", "Snack basket: cookie", COMMON, "#D9A460", "The cookie. Print in tan PLA.",
          [Part("cookie", load("cookie"), c, c)], "treats"),
         ("snack_bag", "Snack basket: bag of snacks", COMMON, "#EE731F",
