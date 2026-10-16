@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 A little brown wicker basket with a handle, and the three things that go in
-it: two pears, a chocolate-chip cookie and a bag of snacks.  Each part prints on
+it: two apples, a chocolate-chip cookie and a bag of snacks.  Each part prints on
 its own in one colour, so no AMS is needed, and none needs supports.
 
     basket      brown.  A woven basket with a twisted rim, 84 mm across at
@@ -9,17 +9,17 @@ its own in one colour, so no AMS is needed, and none needs supports.
                 rim on each side for the handle
     handle      brown.  An arch with wrapped grooves.  It prints flat and its
                 two pegs push into the sockets
-    pear        green or yellow (print two).  Stands on a flat spot on its bottom, with a
-                stem in a dimple on top
+    apple       red (print two).  Stands on a flat spot on its bottom, with a
+                short stem in a dimple on top
     cookie      tan.  Domed, slightly uneven, with chocolate chips on top
     snack_bag   any bright colour.  A puffy bag with crimped, zigzag-cut
                 seals and SNACKS on the front.  It prints lying on its back
 
-The script places the treats (both pears) in the basket the way they're shown in
+The script places the treats (both apples) in the basket the way they're shown in
 the pictures and stops with an error if any of them pokes through the basket
 or the handle, or into each other.
 
-    python3 build_basket.py     -> stl/basket.stl, handle.stl, pear.stl, cookie.stl,
+    python3 build_basket.py     -> stl/basket.stl, handle.stl, apple.stl, cookie.stl,
                                    snack_bag.stl, and assembled.stl (for viewing)
 """
 import math, os
@@ -57,12 +57,12 @@ PEG_W, PEG_L = 3.6, 10.0    # the pegs on the ends of the handle
 FIT = 0.2                   # gap all round the pegs in their sockets
 GROOVE_PITCH = 3.2          # the wrapped grooves along the handle
 
-# ---------------------------------------------------------------- pear
-PEAR_BULB = 12.0            # radius of the bottom of the pear (24 mm across)
-PEAR_TOP = 7.2              # radius of the top
-PEAR_NECK = 12.5            # height between the centres of the two
-PEAR_LEAN = 1.6             # mm; the top leans over a little
-STEM_L, STEM_R = 6.5, 1.3
+# ---------------------------------------------------------------- apple
+APPLE_R = 13.0              # radius (about 25 mm across at the shoulders)
+APPLE_SHOULDER = 0.06       # how much fuller the top is than the bottom
+APPLE_CUT = -44.0           # degrees; the flat spot it stands on, where the side is at 45 degrees
+APPLE_DIMPLE = 3.0          # mm; the dip round the stem
+STEM_L, STEM_R = 4.5, 1.1
 
 # ---------------------------------------------------------------- cookie
 COOKIE_R = 14.0             # 28 mm across
@@ -276,51 +276,36 @@ def handle_in_basket(h):
     return h
 
 
-# ================================================================ pear
-def pear():
-    c1, c2 = PEAR_BULB, PEAR_BULB + PEAR_NECK
-    k = 4.0
-    def sdf(r, z):
-        """the pear's outline in (radius, height): two balls blended together smoothly"""
-        d1 = np.hypot(r, z - c1) - PEAR_BULB
-        d2 = np.hypot(r, z - c2) - PEAR_TOP
-        h = np.clip(0.5 + 0.5 * (d2 - d1) / k, 0, 1)
-        return d2 * (1 - h) + d1 * h - k * h * (1 - h)
-    def r_at(z):
-        lo, hi = np.zeros_like(z), np.full_like(z, PEAR_BULB + k)
-        inside = sdf(lo, z) < 0
-        for _ in range(60):
-            mid = (lo + hi) / 2
-            neg = sdf(mid, z) < 0
-            lo, hi = np.where(neg, mid, lo), np.where(neg, hi, mid)
-        return np.where(inside, lo, 0.0)
-    z_cut = c1 - PEAR_BULB / math.sqrt(2) + 0.15                # flat bottom where the bulb is at 45 degrees
-    zz = np.linspace(c2, c2 + PEAR_TOP + k, 4000)
-    z_top = zz[np.nonzero(r_at(zz) > 0)[0][-1]]
-    zs = z_cut + (z_top - z_cut) * (1 - np.cos(np.linspace(0, math.pi, 600))) / 2
-    rs = r_at(zs); rs[-1] = 0
-    # resample by length along the profile, then sink a dimple round the stem
+# ================================================================ apple
+def apple():
+    # the outline in (radius, height), going round from the flat bottom to the top: a ball
+    # that's fuller at the shoulders and narrower at the bottom
+    phi = np.linspace(math.radians(APPLE_CUT), math.pi / 2, 160)
+    rho = APPLE_R * (1 + APPLE_SHOULDER * np.sin(phi) - 0.04 * np.cos(2 * phi))
+    rs, zs = rho * np.cos(phi), rho * np.sin(phi)
+    rs[-1] = 0
+    # resample by length along the outline, then sink the dimple the stem grows out of
     seg = np.r_[0, np.cumsum(np.hypot(np.diff(rs), np.diff(zs)))]
     t = np.linspace(0, seg[-1], 140)
     rs, zs = np.interp(t, seg, rs), np.interp(t, seg, zs)
-    zs = zs - 1.0 * np.clip(1 - rs / 3.0, 0, 1) ** 2
-    zs -= z_cut
+    zs = zs - APPLE_DIMPLE * np.exp(-(rs / (0.38 * APPLE_R)) ** 2)
+    zs -= zs[0]
     H = zs.max()
     n = 160
     th = np.linspace(0, 2 * math.pi, n, endpoint=False)
     rings = [np.array([0, 0, 0.0])]
     for r, z in zip(rs[:-1], zs[:-1]):
-        lump = 1 + 0.025 * np.sin(2 * th + 0.7) * math.sin(math.pi * z / H) + 0.015 * np.sin(3 * th + 2.0 + z / 5)
-        lean = PEAR_LEAN * max(0.0, (z - 0.45 * H) / (0.55 * H)) ** 2
-        rings.append(np.c_[r * lump * np.cos(th) + lean, r * lump * np.sin(th), np.full(n, z)])
-    rings.append(np.array([PEAR_LEAN, 0, zs[-1]]))
+        low = max(0.0, 1 - z / (0.6 * H))                        # five soft lobes round the bottom
+        lump = 1 + 0.035 * low * np.cos(5 * th) + 0.02 * np.sin(2 * th + 0.7) * math.sin(math.pi * z / H)
+        rings.append(np.c_[r * lump * np.cos(th), r * lump * np.sin(th), np.full(n, z)])
+    rings.append(np.array([0, 0, zs[-1]]))
     body = to_manifold(loft(rings))
-    # the stem: a tapered, slightly curved stalk rising out of the dimple
-    base = np.array([PEAR_LEAN, 0, zs[-1] - 1.5])
+    # the stem: short, thin and slightly curved, rising out of the dimple
+    base = np.array([0, 0, zs[-1] - 1.0])
     srings = []
-    for i, f in enumerate(np.linspace(0, 1, 16)):
-        cen = base + np.array([1.4 * f * f, 0, (STEM_L + 1.5) * f])
-        r = STEM_R * (1 - 0.3 * f)
+    for f in np.linspace(0, 1, 16):
+        cen = base + np.array([1.2 * f * f, 0, (STEM_L + 1.0) * f])
+        r = STEM_R * (1 - 0.25 * f)
         srings.append(np.c_[cen[0] + r * np.cos(th[::8]), cen[1] + r * np.sin(th[::8]), np.full(n // 8, cen[2])])
     srings = [srings[0].mean(0)] + srings + [srings[-1].mean(0) + (0, 0, 0.3)]
     return to_trimesh(body + to_manifold(loft(srings)))
@@ -444,11 +429,11 @@ def place(t, rot_y=0.0, rot_z=0.0, rot_x=0.0, at=(0, 0, 0)):
     return t
 
 
-PEAR2_AT = (-14.0, -9.0)
-PEAR2_TURN = 80
+APPLE2_AT = (-14.0, -9.0)
+APPLE2_TURN = 80
 
 
-def arrange(pear_m, cookie_m, bag_m):
+def arrange(apple_m, cookie_m, bag_m):
     floor = FLOOR + 0.05
     # the bag stands on its bottom seal, front facing the middle, leaning on the left end wall
     b = bag_m.copy()
@@ -457,15 +442,15 @@ def arrange(pear_m, cookie_m, bag_m):
     b = place(b, rot_y=-9, at=(0, 0, floor))
     lo = b.vertices[b.vertices[:, 2] < floor + 0.5][:, 0].min()
     b.apply_translation((-33.0 - lo, 0, 0))
-    p = place(pear_m, rot_z=200, at=(0, 0, floor))
+    p = place(apple_m, rot_z=200, at=(0, 0, floor))
     p.apply_translation((19.0 - p.centroid[0], -13.5 - p.centroid[1], 0))
     # the cookie leans against the right end wall
     c = place(cookie_m, rot_y=-28, at=(0, 0, floor))
     c.apply_translation((20.5 - c.centroid[0], 13.5 - c.centroid[1], 0))
-    # a second pear, turned the other way, between the bag and the handle
-    p2 = place(pear_m, rot_z=PEAR2_TURN, at=(0, 0, floor))
-    p2.apply_translation((PEAR2_AT[0] - p2.centroid[0], PEAR2_AT[1] - p2.centroid[1], 0))
-    return {"pear": p, "pear_2": p2, "cookie": c, "snack_bag": b}
+    # a second apple, turned the other way, between the bag and the handle
+    p2 = place(apple_m, rot_z=APPLE2_TURN, at=(0, 0, floor))
+    p2.apply_translation((APPLE2_AT[0] - p2.centroid[0], APPLE2_AT[1] - p2.centroid[1], 0))
+    return {"apple": p, "apple_2": p2, "cookie": c, "snack_bag": b}
 
 
 def check_fit(items, bskt, hndl):
@@ -492,7 +477,7 @@ def build():
     parts = {}
     parts["basket"] = basket()
     parts["handle"] = handle()
-    parts["pear"] = pear()
+    parts["apple"] = apple()
     parts["cookie"] = cookie()
     parts["snack_bag"] = snack_bag()
     report = {}
@@ -502,7 +487,7 @@ def build():
     lo, hi = parts["basket"].bounds
     assert max(hi - lo) <= 86.0, "the basket is wider than the samosa"
     h_in = handle_in_basket(parts["handle"])
-    items = arrange(parts["pear"], parts["cookie"], parts["snack_bag"])
+    items = arrange(parts["apple"], parts["cookie"], parts["snack_bag"])
     check_fit(items, parts["basket"], h_in)
     scene = trimesh.util.concatenate([parts["basket"], h_in] + list(items.values()))
     return parts, scene, report, items, h_in
