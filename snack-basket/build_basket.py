@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
-A little brown wicker basket with a handle, and the three things that go in
-it: two apples, a chocolate-chip cookie and a bag of snacks.  Each part prints on
-its own in one colour, so no AMS is needed, and none needs supports.
+A little brown wicker basket with a handle, and the things that go in
+it: two apples, a chocolate-chip cookie, a bag of snacks and a thank-you card.  Each part prints on
+its own, all but the card in one colour, and none needs supports.
 
     basket      brown.  A woven basket with a twisted rim, 84 mm across at
                 its widest (the samosa is 86 mm), with a socket inside the
@@ -14,13 +14,18 @@ its own in one colour, so no AMS is needed, and none needs supports.
     cookie      tan.  Domed, slightly uneven, with chocolate chips on top
     snack_bag   any bright colour.  A puffy bag with crimped, zigzag-cut
                 seals and SNACKS on the front.  It prints lying on its back
+    brownie     brown and black (AMS).  A cut square with a cracked crust, fudge
+                in the cracks and chocolate chunks in the top and the sides
+    card        white with 感謝 in black (AMS).  A flat thank-you card; the
+                characters are inlaid flush in its top two layers
 
-The script places the treats (both apples) in the basket the way they're shown in
-the pictures and stops with an error if any of them pokes through the basket
+The script places the treats (both apples) and the card in the basket the way they're shown in
+the pictures (the brownie is an extra: it's checked to fit in the basket on its own) and stops with an error if any of them pokes through the basket
 or the handle, or into each other.
 
     python3 build_basket.py     -> stl/basket.stl, handle.stl, apple.stl, cookie.stl,
-                                   snack_bag.stl, and assembled.stl (for viewing)
+                                   snack_bag.stl, card.stl, card_ink.stl, brownie.stl, brownie_choc.stl,
+                                   and assembled.stl (for viewing)
 """
 import math, os
 import numpy as np, trimesh
@@ -70,12 +75,47 @@ COOKIE_H = 5.0              # thickness in the middle (4 mm at the edge)
 CHIPS = 11
 SEED = 3
 
+# ---------------------------------------------------------------- brownie
+BROWNIE_W = 22.0            # a square cut from the pan
+BROWNIE_H = 12.0            # height to the top of the crust
+BROWNIE_CORNER = 0.8        # knife-cut corners, barely rounded
+CRUST_CELLS = 11            # plates of the crackly crust
+CRACK_W = (0.5, 0.9)        # mm; how wide the cracks are (they show the dark fudge)
+CRACK_DEEP = 0.5            # mm; how far the cracks sink into the crust
+FUDGE = 1.0                 # mm; how deep the black fudge goes under the cracks
+PUFF = 0.35                 # mm; each crust plate puffs up in the middle
+TOP_CHUNKS = 5              # chocolate chunks melting out of the top
+SIDE_CHUNKS = 10            # chunks showing in the cut sides (each adds colour changes on its layers)
+CRUMB = 0.22                # mm; the crumbly texture of the cut sides
+BROWNIE_SEED = 5
+
 # ---------------------------------------------------------------- snack bag
 BAG_W, BAG_L = 30.0, 42.0   # flat size, including the seals
 BAG_PUFF = 9.0              # how far the front puffs up from the flat back
 SEAL = 4.0                  # the crimped seals at each end
 SEAL_T = 1.6                # their thickness
 LABEL = "SNACKS"
+
+# ---------------------------------------------------------------- thank-you card
+CARD_W, CARD_H = 26.0, 42.0 # a portrait card: the characters run top to bottom
+CARD_T = 1.2                # thickness (six layers at 0.2 mm)
+CARD_CORNER = 1.0           # corner rounding
+INK = 0.4                   # the characters are inlaid this deep, flush with the face (two layers)
+CARD_TEXT = "感謝"          # "gratitude": 感 above 謝
+CHAR_SIZE = 17.0            # height of each character
+CARD_LEAN = 12.0            # degrees; it leans back against the basket wall
+CARD_AT = (-19.0, 18.5)     # where the bottom edge of the card stands, middle of its front face
+# a font with Japanese characters; the first one found is used
+CJK_FONTS = [
+    "/usr/share/fonts/opentype/ipafont-gothic/ipag.ttf",               # Linux: fonts-ipafont-gothic
+    "/usr/share/fonts/truetype/fonts-japanese-gothic.ttf",
+    "/usr/share/fonts/opentype/noto/NotoSansCJK-Bold.ttc",              # Linux: fonts-noto-cjk
+    "/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc",
+    "/System/Library/Fonts/ヒラギノ角ゴシック W6.ttc",                   # macOS
+    "/System/Library/Fonts/Hiragino Sans GB.ttc",
+    "C:/Windows/Fonts/YuGothB.ttc",                                     # Windows
+    "C:/Windows/Fonts/msgothic.ttc",
+]
 
 MAX_OVERHANG = 45.0         # degrees from vertical
 N = 432                     # points round the basket
@@ -346,6 +386,144 @@ def cookie():
     return loft(rings)
 
 
+# ================================================================ brownie
+def crust_cracks(rng):
+    """the crack network on top: Voronoi cells, each edge a crack of its own width.
+    Returns a function giving E(x, y), the distance into the nearest plate (negative in a
+    crack), and the cracks as a CrossSection."""
+    half = BROWNIE_W / 2
+    seeds = rng.uniform(-half, half, (CRUST_CELLS, 2))
+    for _ in range(30):                                          # spread them out a little
+        d = seeds[:, None] - seeds[None]
+        r2 = (d ** 2).sum(-1) + np.eye(len(seeds)) * 1e9
+        push = (d / r2[..., None] ** 1.5).sum(1)
+        seeds = np.clip(seeds + 6.0 * push, -half * 0.9, half * 0.9)
+    # mirror the seeds over each edge so the cracks run out to the sides
+    pts = [seeds] + [seeds * m + o for m, o in (((-1, 1), (-2 * half, 0)), ((-1, 1), (2 * half, 0)),
+                                                  ((1, -1), (0, -2 * half)), ((1, -1), (0, 2 * half)))]
+    allp = np.concatenate(pts)
+    n = len(allp)
+    width = rng.uniform(*CRACK_W, (n, n)); width = (width + width.T) / 2
+    own = np.arange(n) % len(seeds)
+    width[own[:, None] == own[None]] = -10.0                     # a seed and its own mirror image: that's the side, not a crack
+    def E(x, y):
+        p = np.stack([x, y], -1)[..., None, :]
+        d2 = ((p - allp) ** 2).sum(-1)
+        i = np.argsort(d2, -1)
+        a, b = np.take_along_axis(d2, i[..., :1], -1)[..., 0], np.take_along_axis(d2, i[..., 1:2], -1)[..., 0]
+        sep = np.linalg.norm(allp[i[..., 0]] - allp[i[..., 1]], axis=-1)
+        edge = (b - a) / (2 * sep)                               # distance to the edge between the two nearest
+        w = width[i[..., 0], i[..., 1]]
+        # a crack wanders a little, the way a real one does
+        wob = 0.12 * np.sin(2.3 * x + 1.7 * y) + 0.08 * np.sin(4.1 * y - 3.3 * x)
+        return edge + wob - w / 2
+    import contourpy
+    g = np.linspace(-half - 1, half + 1, 700)
+    X, Y = np.meshgrid(g, g)
+    pts_list, offs_list = contourpy.contour_generator(g, g, E(X, Y), fill_type="OuterOffset").filled(-10.0, 0.0)
+    polys = []
+    for pts, offs in zip(pts_list, offs_list):
+        polys += [pts[a:b] for a, b in zip(offs[:-1], offs[1:]) if b - a > 2]
+    cs = mf.CrossSection(polys, mf.FillRule.EvenOdd)
+    return E, cs ^ mf.CrossSection.square((BROWNIE_W,) * 2, center=True)
+
+
+def brownie():
+    """a cut square of brownie: brown cake with a crackly crust; black fudge in the cracks
+    and black chocolate chunks.  Returns (cake, chocolate) in the same coordinates."""
+    rng = np.random.default_rng(BROWNIE_SEED)
+    E, cracks = crust_cracks(rng)
+    half, H = BROWNIE_W / 2, BROWNIE_H - PUFF
+    # the outline: a square with barely rounded corners, sampled evenly round it
+    sq = mf.CrossSection.square((BROWNIE_W - 2 * BROWNIE_CORNER,) * 2, center=True).offset(BROWNIE_CORNER, mf.JoinType.Round, circular_segments=32)
+    ring0 = np.asarray(sq.to_polygons()[0], float)
+    seg = np.r_[0, np.cumsum(np.linalg.norm(np.diff(np.vstack([ring0, ring0[:1]]), axis=0), axis=1))]
+    n = 4 * 120
+    s = np.linspace(0, seg[-1], n, endpoint=False)
+    loop = np.vstack([ring0, ring0[:1]])
+    ox, oy = np.interp(s, seg, loop[:, 0]), np.interp(s, seg, loop[:, 1])
+    nx, ny = np.gradient(oy), -np.gradient(ox)                   # outward normals (the loop runs anticlockwise)
+    nl = np.hypot(nx, ny); nx, ny = nx / nl, ny / nl
+    if (ox * nx + oy * ny).mean() < 0:
+        nx, ny = -nx, -ny
+    P = seg[-1]
+    waves = []                                                   # random little waves in every direction make crumbly lumps
+    for _ in range(16):
+        f = rng.uniform(0.5, 1.8)
+        a = rng.uniform(0, 2 * math.pi)
+        waves.append((round(f * math.cos(a) * P / (2 * math.pi)) * 2 * math.pi / P, f * math.sin(a),
+                      rng.uniform(0, 2 * math.pi), 1 / f))
+    norm = sum(w[3] for w in waves)
+    def crumb(z):                                                # knife-cut crumb: small pits and lumps
+        c = sum(amp * np.sin(kx * s + kz * z + ph) for kx, kz, ph, amp in waves) / norm
+        return CRUMB * 1.6 * c
+    def top_z(x, y):
+        e = E(x, y)
+        plate = PUFF * (1 - np.exp(-np.maximum(e, 0) / 1.2))
+        groove = CRACK_DEEP * np.clip(1 - (e + 0.15) / 0.3, 0, 1)   # sinks over the crack
+        dome = 0.4 * (1 - (x / half) ** 2) * (1 - (y / half) ** 2)
+        return H + dome + plate - groove
+    rings = [np.array([0, 0, 0.0])]
+    rings.append(np.c_[ox - 0.4 * nx, oy - 0.4 * ny, np.zeros(n)])          # 45 degree foot chamfer
+    for z in np.linspace(0.4, H - 1.0, 60):
+        d = crumb(z) * min(1.0, (z - 0.4) / 1.0)
+        rings.append(np.c_[ox + d * nx, oy + d * ny, np.full(n, z)])
+    # round over the top edge into the crust
+    d_top = crumb(H - 1.0)
+    z_edge = top_z(ox, oy)
+    for a in np.linspace(0, math.pi / 2, 6)[1:]:
+        k = 0.6 * (1 - math.cos(a))
+        x, y = ox + d_top * nx * math.cos(a) - k * nx, oy + d_top * ny * math.cos(a) - k * ny
+        rings.append(np.c_[x, y, (H - 1.0) + (z_edge - (H - 1.0)) * math.sin(a)])
+    for f in np.linspace(1, 0, 110)[1:-1]:
+        x, y = (ox - 0.6 * nx) * f, (oy - 0.6 * ny) * f
+        rings.append(np.c_[x, y, top_z(x, y)])
+    rings.append(np.array([0, 0, float(top_z(np.array(0.0), np.array(0.0)))]))
+    shell = loft(rings)
+    # the outside must print without support (ignoring slivers far smaller than a nozzle's line)
+    fn, cz = shell.face_normals, shell.triangles_center[:, 2]
+    steep = (cz > 0.6) & (fn[:, 2] < -math.sin(math.radians(MAX_OVERHANG))) & (shell.area_faces > 0.01)
+    assert not steep.any(), "the brownie overhangs more than 45 deg; it would need support"
+    cake = to_manifold(shell)
+    # the black: fudge under the cracks, and chocolate chunks
+    fudge = mf.Manifold.extrude(cracks.offset(0.1, mf.JoinType.Round).simplify(0.02), FUDGE + CRACK_DEEP + 1.0).translate((0, 0, H - FUDGE - CRACK_DEEP))
+    chunks = []
+    def chunk(c, r, squash=(1.0, 1.0, 0.7)):
+        # a broken chunk: a lumpy blob with a few flat faces where it snapped
+        blob = mf.Manifold.sphere(1.0, 24).scale(tuple(r * q for q in squash))
+        ph = rng.uniform(0, 6.3, 3)
+        blob = blob.warp(lambda v: (v[0] * (1 + 0.25 * math.sin(2.5 * v[1] + ph[0])),
+                                    v[1] * (1 + 0.25 * math.sin(2.5 * v[2] + ph[1])),
+                                    v[2] * (1 + 0.2 * math.sin(2.5 * v[0] + ph[2]))))
+        blob = blob.rotate(tuple(rng.uniform(0, 360, 3)))
+        for _ in range(3):
+            nrm = rng.normal(size=3); nrm /= np.linalg.norm(nrm)
+            blob = blob.trim_by_plane(tuple(nrm), -0.55 * r)
+        return blob.translate(tuple(c))
+    placed = 0
+    while placed < TOP_CHUNKS:                                   # melting out of the crust, on the plates
+        x, y = rng.uniform(-half + 2.5, half - 2.5, 2)
+        r = rng.uniform(1.3, 1.9)
+        if E(np.array(x), np.array(y)) < 1.35 * r + 0.3:
+            continue
+        placed += 1
+        z = float(top_z(np.array(x), np.array(y)))
+        blob = mf.Manifold.sphere(1.0, 32).scale((r * 1.25, r, r * 0.55))
+        ph = rng.uniform(0, 6.3)
+        blob = blob.warp(lambda v: (v[0] * (1 + 0.22 * math.sin(3 * math.atan2(v[1], v[0]) + ph)),
+                                    v[1] * (1 + 0.22 * math.sin(3 * math.atan2(v[1], v[0]) + ph)), v[2]))
+        chunks.append(blob.rotate((0, 0, rng.uniform(0, 180))).translate((x, y, z - 0.1 * r)))
+    for k in range(SIDE_CHUNKS):                                 # showing in the cut sides
+        i = rng.integers(n)
+        z = rng.uniform(1.6, H - 2.2)
+        r = rng.uniform(0.9, 1.6)
+        c = np.array([ox[i], oy[i], z]) - 0.35 * r * np.array([nx[i], ny[i], 0])
+        chunks.append(chunk(c, r, (1.0, 1.0, 0.75)))
+    black = fudge + mf.Manifold.batch_boolean(chunks, mf.OpType.Add)
+    choc, body = cake ^ black, cake - black
+    return to_trimesh(body), to_trimesh(choc)
+
+
 # ================================================================ snack bag
 def bag_height(x, y, ye):
     """top surface of the bag lying on its flat back"""
@@ -419,6 +597,61 @@ def snack_bag():
     return to_trimesh(m)
 
 
+# ================================================================ thank-you card
+def cjk_font():
+    for f in CJK_FONTS:
+        if os.path.exists(f):
+            return f
+    raise SystemExit("no Japanese font found for the card: install one (e.g. fonts-ipafont-gothic) "
+                     "or add its path to CJK_FONTS")
+
+
+def glyph(ch, size):
+    """one character's outline as a CrossSection, scaled to `size` tall and centred on the origin"""
+    from matplotlib.textpath import TextPath
+    from matplotlib.font_manager import FontProperties
+    tp = TextPath((0, 0), ch, size=100, prop=FontProperties(fname=cjk_font()))
+    polys = [np.asarray(p) for p in tp.to_polygons(closed_only=True) if len(p) > 2]
+    cs = mf.CrossSection(polys, mf.FillRule.EvenOdd)
+    x0, y0, x1, y1 = cs.bounds()
+    k = size / max(x1 - x0, y1 - y0)
+    return cs.translate((-(x0 + x1) / 2, -(y0 + y1) / 2)).scale((k, k))
+
+
+def card():
+    """the card lying face up: a white body and the black characters inlaid in its face.
+    Returns (body, ink), both in the same coordinates."""
+    r = CARD_CORNER
+    outline = mf.CrossSection.square((CARD_W - 2 * r, CARD_H - 2 * r), center=True).offset(r, mf.JoinType.Round)
+    text = mf.CrossSection()
+    gap = (CARD_H - len(CARD_TEXT) * CHAR_SIZE) / (len(CARD_TEXT) + 1)
+    for i, ch in enumerate(CARD_TEXT):                           # top to bottom
+        y = CARD_H / 2 - gap * (i + 1) - CHAR_SIZE * (i + 0.5)
+        text = text + glyph(ch, CHAR_SIZE).translate((0, y))
+    # strokes and gaps thinner than the nozzle wouldn't print; check none get lost
+    thin = text.area() - text.offset(-0.2).offset(0.2).area()
+    assert thin < 0.02 * text.area(), "the characters have strokes too thin to print; make CHAR_SIZE bigger"
+    plate = mf.Manifold.extrude(outline, CARD_T)
+    ink = mf.Manifold.extrude(text, INK + 0.01).translate((0, 0, CARD_T - INK))
+    ink = ink ^ plate                                            # flush with the face
+    body = plate - ink
+    return to_trimesh(body), to_trimesh(ink)
+
+
+def card_in_basket(body, ink):
+    """stand the card on its bottom edge, face to the front, leaning back on the wall"""
+    out = []
+    for t in (body, ink):
+        t = t.copy()
+        t.apply_translation((0, CARD_H / 2, -CARD_T))            # bottom edge, front face at the origin
+        t.apply_transform(trimesh.transformations.rotation_matrix(math.radians(90 - CARD_LEAN), (1, 0, 0)))
+        out.append(t)
+    lo = np.concatenate([t.vertices for t in out]).min(0)
+    for t in out:
+        t.apply_translation((CARD_AT[0], CARD_AT[1], FLOOR + 0.05 - lo[2]))
+    return out
+
+
 # ================================================================ in the basket
 def place(t, rot_y=0.0, rot_z=0.0, rot_x=0.0, at=(0, 0, 0)):
     t = t.copy()
@@ -484,11 +717,27 @@ def build():
     for name, t in parts.items():
         t.apply_translation((0, 0, -t.bounds[0][2]))
         report[name] = check(name, t, 0.8 if name != "basket" else FOOT_CHAMFER + 0.2)
+    # the card's two parts stay together: the ink sits in the top of the body
+    parts["card"], parts["card_ink"] = card()
+    report["card"] = check("card", parts["card"])
+    assert parts["card_ink"].is_watertight, "the card's characters aren't a closed solid"
+    report["card_ink"] = 0.0
+    parts["brownie"], parts["brownie_choc"] = brownie()
+    for name in ("brownie", "brownie_choc"):
+        assert parts[name].is_watertight and parts[name].volume > 0, f"the {name} isn't a closed solid"
+        report[name] = 45.0                                      # brownie() checks its outside
     lo, hi = parts["basket"].bounds
     assert max(hi - lo) <= 86.0, "the basket is wider than the samosa"
     h_in = handle_in_basket(parts["handle"])
     items = arrange(parts["apple"], parts["cookie"], parts["snack_bag"])
-    check_fit(items, parts["basket"], h_in)
+    card_body, card_ink = card_in_basket(parts["card"], parts["card_ink"])
+    whole_card = to_trimesh(to_manifold(card_body) + to_manifold(card_ink))
+    check_fit(dict(items, card=whole_card), parts["basket"], h_in)
+    items["card"], items["card_ink"] = card_body, card_ink
+    # the brownie is an extra: it isn't in the pictures' arrangement, but check it fits on its own
+    lone = place(to_trimesh(to_manifold(parts["brownie"]) + to_manifold(parts["brownie_choc"])), at=(0, 0, FLOOR + 0.05))
+    lone.apply_translation((-lone.centroid[0], -lone.centroid[1], 0))
+    check_fit({"brownie": lone}, parts["basket"], h_in)
     scene = trimesh.util.concatenate([parts["basket"], h_in] + list(items.values()))
     return parts, scene, report, items, h_in
 
