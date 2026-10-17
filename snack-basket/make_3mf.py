@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
 """
-Build the Bambu Studio projects, one plate each.  All but the card use one
-filament, so they need no AMS:
+Build the Bambu Studio projects, one plate each.  All but the card and the
+brownie use one filament, so they need no AMS:
 
     basket.3mf          the basket and its handle, brown PLA
     apple.3mf           two apples, red PLA
     cookie.3mf          the cookie, tan PLA
     snack_bag.3mf       the bag of snacks, any bright colour
     card.3mf            the thank-you card, white with the characters in black (AMS)
+    brownie.3mf         the brownie, brown with black chocolate (AMS)
 
     python3 make_3mf.py      (from this folder, after build_basket.py and render.py)
 
@@ -29,6 +30,7 @@ COMMON = {
     "seam_position": "aligned",
 }
 BASKET = dict(COMMON, wall_loops="4")   # the 2.2 mm wall prints solid
+BROWNIE = dict(COMMON, sparse_infill_density="20%")   # room in the infill for the purge
 
 
 def load(name):
@@ -58,6 +60,14 @@ def main():
         ("card", "Snack basket: thank-you card", COMMON, ["#F4F4F0", "#1A1A1A"],
          "The thank-you card. Load white PLA as filament 1 and black PLA as filament 2.",
          [Part("card", load("card"), c, c, extra=[("card_ink", load("card_ink"), 2)])], "card"))
+    # the brownie: brown cake on filament 1, the black chocolate (fudge in the
+    # cracks, chunks in the top and the cut sides) on filament 2.  The purge
+    # between colours goes into the brownie's own infill, where it's hidden.
+    projects.append(
+        ("brownie", "Snack basket: brownie", BROWNIE, ["#5C3A21", "#1A1A1A"],
+         "The brownie. Load brown PLA as filament 1 and black PLA as filament 2.",
+         [Part("brownie", load("brownie"), c, c, settings={"flush_into_infill": "1"},
+               extra=[("brownie_choc", load("brownie_choc"), 2)])], "brownie"))
     for name, title, settings, colour, what, parts, thumb in projects:
         out = write_project(os.path.join(HERE, name + ".3mf"), parts, PROCESS, settings, title=title,
                             description=what, thumbnail_png=img(thumb), filament_colour=colour)

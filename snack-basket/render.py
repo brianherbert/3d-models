@@ -11,6 +11,7 @@ Writes:
     treats.png          an apple, the cookie and the snack bag on their own
     samosa_compare.png  next to the samosa, for size
     card.png            the thank-you card
+    brownie.png         the brownie, and brownie_top.png looking down on its crust
 """
 import os, sys
 import vtk, trimesh
@@ -24,6 +25,8 @@ COOKIE = (0.85, 0.64, 0.38)
 BAG = (0.93, 0.45, 0.12)
 CARD = (0.97, 0.97, 0.95)
 INK = (0.08, 0.08, 0.08)
+BROWNIE = (0.40, 0.24, 0.14)
+CHOC = (0.07, 0.06, 0.06)
 PASTRY = (0.86, 0.62, 0.30)
 
 
@@ -87,14 +90,19 @@ def main(out_dir):
            actor(parts["apple"], APPLE, (-45, -65, 0)), actor(parts["apple"], APPLE, (-15, -65, 0)),
            actor(parts["cookie"], COOKIE, (20, -65, 0)),
            actor(parts["snack_bag"], BAG, (55, -60, 0), 0.45),
-           actor(parts["card"], CARD, (90, -60, 0), 0.1), actor(parts["card_ink"], INK, (90, -60, 0), 0.1)]
-    shot(lay, o("parts"), (30, -25, 10), 0, 50, 1.2, size=(1500, 1000))
+           actor(parts["card"], CARD, (90, -60, 0), 0.1), actor(parts["card_ink"], INK, (90, -60, 0), 0.1),
+           actor(parts["brownie"], BROWNIE, (125, -62, 0), 0.15), actor(parts["brownie_choc"], CHOC, (125, -62, 0), 0.5)]
+    shot(lay, o("parts"), (45, -25, 10), 0, 50, 1.2, size=(1700, 1000))
     tr = [actor(parts["apple"], APPLE, (-35, 0, 0)), actor(parts["cookie"], COOKIE, (0, 0, 0)),
           actor(parts["snack_bag"], BAG, (40, 0, 0), 0.45),
-          actor(parts["card"], CARD, (75, 0, 0), 0.1), actor(parts["card_ink"], INK, (75, 0, 0), 0.1)]
-    shot(tr, o("treats"), (20, 0, 8), 0, 35, 1.2, size=(1600, 800))
+          actor(parts["card"], CARD, (75, 0, 0), 0.1), actor(parts["card_ink"], INK, (75, 0, 0), 0.1),
+          actor(parts["brownie"], BROWNIE, (110, 0, 0), 0.15), actor(parts["brownie_choc"], CHOC, (110, 0, 0), 0.5)]
+    shot(tr, o("treats"), (37, 0, 8), 0, 35, 1.7, size=(1800, 800))
     shot([actor(parts["card"], CARD, spec=0.1), actor(parts["card_ink"], INK, spec=0.1)], o("card"),
          (0, 0, 0.6), 0, 60, 1.3, size=(800, 1000))
+    brw = [actor(parts["brownie"], BROWNIE, spec=0.15), actor(parts["brownie_choc"], CHOC, spec=0.5)]
+    shot(brw, o("brownie"), (0, 0, 6), 25, 30, 1.2, size=(900, 800))
+    shot(brw, o("brownie_top"), (0, 0, 6), 0, 90, 1.2, size=(800, 800))
     samosa = os.path.join(HERE, "..", "samosa", "stl", "samosa.stl")
     if os.path.exists(samosa):
         cmp = full + [actor(samosa, PASTRY, (100, 0, 0))]
