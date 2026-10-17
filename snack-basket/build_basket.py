@@ -16,15 +16,20 @@ its own, all but the card in one colour, and none needs supports.
                 seals and SNACKS on the front.  It prints lying on its back
     brownie     brown and black (AMS).  A cut square with a cracked crust, fudge
                 in the cracks and chocolate chunks in the top and the sides
+    pretzel     brown, black and white (AMS).  A knotted pretzel, half dipped in
+                chocolate with a white drizzle, and coarse salt on the other half
+    cheese      yellow and black (AMS).  A wedge of aged gouda in black wax,
+                with a few small holes in the cut faces
     card        white with 感謝 in black (AMS).  A flat thank-you card; the
                 characters are inlaid flush in its top two layers
 
 The script places the treats (both apples) and the card in the basket the way they're shown in
-the pictures (the brownie is an extra: it's checked to fit in the basket on its own) and stops with an error if any of them pokes through the basket
+the pictures (the brownie, the pretzel and the cheese are extras: each is checked to fit in the basket on its own) and stops with an error if any of them pokes through the basket
 or the handle, or into each other.
 
     python3 build_basket.py     -> stl/basket.stl, handle.stl, apple.stl, cookie.stl,
                                    snack_bag.stl, card.stl, card_ink.stl, brownie.stl, brownie_choc.stl,
+                                   pretzel.stl, pretzel_choc.stl, pretzel_white.stl, cheese.stl, cheese_wax.stl,
                                    and assembled.stl (for viewing)
 """
 import math, os
@@ -88,6 +93,25 @@ TOP_CHUNKS = 5              # chocolate chunks melting out of the top
 SIDE_CHUNKS = 10            # chunks showing in the cut sides (each adds colour changes on its layers)
 CRUMB = 0.22                # mm; the crumbly texture of the cut sides
 BROWNIE_SEED = 5
+
+# ---------------------------------------------------------------- chocolate-dipped pretzel
+PRETZEL_W = 32.0            # across the two lobes
+STRAND = 4.6                # strand width at its fattest (the ends taper)
+STRAND_H = 3.4              # strand height; it's flat underneath so it prints lying down
+COATING = 0.45              # how thick the chocolate is
+DIP_AT = -0.12              # where the dip line crosses, as a fraction of the width below the middle
+DRIZZLE_W = 0.6             # the white drizzle lines
+SALT = 16                   # salt crystals on the undipped half
+PRETZEL_SEED = 2
+
+# ---------------------------------------------------------------- cheese wedge
+WHEEL_R = 40.0              # the wheel the wedge was cut from
+WHEEL_H = 16.0
+WEDGE_ANGLE = 42.0          # degrees
+WHEEL_BULGE = 1.6           # mm; the wheel's sides bulge out a little
+WAX = 0.8                   # the black wax on the rind, top and bottom
+EYES = 7                    # small holes in the cut faces
+CHEESE_SEED = 4
 
 # ---------------------------------------------------------------- snack bag
 BAG_W, BAG_L = 30.0, 42.0   # flat size, including the seals
@@ -524,6 +548,151 @@ def brownie():
     return to_trimesh(body), to_trimesh(choc)
 
 
+# ================================================================ outside check for multi-colour parts
+def check_outside(name, solid):
+    """the outside of a part made of several colours must print without support,
+    ignoring slivers far smaller than a nozzle's line"""
+    t = to_trimesh(solid)
+    fn, cz = t.face_normals, t.triangles_center[:, 2]
+    steep = (cz > 0.6) & (fn[:, 2] < -math.sin(math.radians(MAX_OVERHANG + 0.5))) & (t.area_faces > 0.01)
+    assert not steep.any(), f"the {name} overhangs more than {MAX_OVERHANG:.0f} deg; it would need support"
+
+
+# ================================================================ chocolate-dipped pretzel
+PRETZEL_PATH = [                # the strand's centre line, in units of half the width; one end to the other
+    (-1.07, 0.04), (-0.62, -0.20), (-0.22, -0.40), (0.0, -0.50), (0.25, -0.62), (0.62, -0.74),
+    (0.98, -0.52), (1.12, -0.05), (1.0, 0.42), (0.62, 0.68), (0.24, 0.58), (0.0, 0.36),
+    (-0.24, 0.58), (-0.62, 0.68), (-1.0, 0.42), (-1.12, -0.05), (-0.98, -0.52), (-0.62, -0.74),
+    (-0.25, -0.62), (0.0, -0.50), (0.22, -0.40), (0.62, -0.20), (1.07, 0.04)]
+
+
+def pretzel_strand(grow=0.0, n=260):
+    """the knotted strand: a chain of flat-bottomed half-ellipsoids hulled together.
+    grow makes it fatter all round (for the chocolate coating and the drizzle)."""
+    from scipy.interpolate import CubicSpline
+    k = PRETZEL_W / 2 / 1.12 * (1 - STRAND / PRETZEL_W)
+    pts = np.array(PRETZEL_PATH) * k
+    t = np.r_[0, np.cumsum(np.linalg.norm(np.diff(pts, axis=0), axis=1))]
+    spl = CubicSpline(t, pts)
+    ts = np.linspace(0, t[-1], n)
+    c = spl(ts)
+    L = t[-1]
+    cross = t[3]                                                  # the first pass over the crossing goes on top
+    blobs = []
+    for ti, (x, y) in zip(ts, c):
+        end = min(ti, L - ti) / L
+        r = STRAND / 2 * (0.62 + 0.38 * min(1.0, end / 0.18)) + grow
+        # the first pass over the crossing rides on top, and each end sits up on the loop it's pressed onto
+        lift = 0.32 * math.exp(-((ti - cross) / 3.0) ** 2) + 0.35 * math.exp(-(min(ti, L - ti) / 2.2) ** 2)
+        h = STRAND_H * (0.7 + 0.3 * min(1.0, end / 0.18)) * (1 + lift) + grow
+        blobs.append(mf.Manifold.sphere(1.0, 20).scale((r, r, h)).translate((x, y, 0)))
+    segs = [mf.Manifold.batch_hull([a, b]) for a, b in zip(blobs[:-1], blobs[1:])]
+    m = mf.Manifold.batch_boolean(segs, mf.OpType.Add)
+    return m.trim_by_plane((0, 0, 1), 0.0), c
+
+
+def pretzel():
+    """returns (dough, chocolate, white): the brown dough with its salt-free half, the black
+    chocolate coating on the dipped half, and the white drizzle and salt"""
+    rng = np.random.default_rng(PRETZEL_SEED)
+    dough, path = pretzel_strand()
+    coat, _ = pretzel_strand(COATING)
+    over, _ = pretzel_strand(COATING + 0.45)
+    half = PRETZEL_W / 2
+    # the dip: everything below a wavy line
+    xs = np.linspace(-half - 2, half + 2, 80)
+    y_dip = DIP_AT * PRETZEL_W + 0.5 * np.sin(xs / 3.1 + 0.4) + 0.3 * np.sin(xs / 1.7)
+    poly = np.r_[np.c_[xs, y_dip], [[half + 2, -half - 5], [-half - 2, -half - 5]]]
+    dip_cs = mf.CrossSection([poly], mf.FillRule.NonZero)
+    dipped = mf.Manifold.extrude(dip_cs, 20).translate((0, 0, -1))
+    choc = coat ^ dipped
+    dough = dough - dipped
+    # white drizzle: a loose zigzag across the chocolate
+    y0, y1 = -half * 0.95, DIP_AT * PRETZEL_W - 0.6
+    zig, x = [], -half - 1
+    while x < half + 1:                                          # flicked on by hand: uneven spacing and length
+        lo, hi = y0 + rng.uniform(0, 2.5), y1 - rng.uniform(0, 1.5)
+        zig.append((x, hi if len(zig) % 2 == 0 else lo))
+        x += rng.uniform(1.6, 3.4)
+    strokes = []
+    for a, b in zip(zig[:-1], zig[1:]):
+        wob = rng.uniform(-0.6, 0.6)
+        mid = ((a[0] + b[0]) / 2 + wob, (a[1] + b[1]) / 2)
+        for p, q in ((a, mid), (mid, b)):
+            strokes.append(mf.CrossSection.batch_hull([mf.CrossSection.circle(DRIZZLE_W / 2, 12).translate(p),
+                                                       mf.CrossSection.circle(DRIZZLE_W / 2, 12).translate(q)]))
+    drizzle_cs = mf.CrossSection.batch_boolean(strokes, mf.OpType.Add)
+    drizzle_raw = mf.Manifold.extrude(drizzle_cs, 20).translate((0, 0, 0.2)) ^ over ^ dipped   # stops just above the bed
+    # coarse salt on the plain half: little white crystals sitting in the top of the dough
+    salt = []
+    tries = 0
+    while len(salt) < SALT and tries < 2000:
+        tries += 1
+        i = rng.integers(len(path))
+        x, y = path[i] + rng.normal(0, STRAND * 0.07, 2)
+        if y < DIP_AT * PRETZEL_W + 2.5:
+            continue
+        if any(math.hypot(x - a, y - b) < 2.0 for a, b in salt):
+            continue
+        salt.append((x, y))
+    crystals = []
+    for x, y in salt:
+        r = rng.uniform(0.55, 0.75)
+        # a crystal: a little square post sunk deep into the dough, standing 0.45 mm proud of
+        # its top, so nothing hangs over the dough's curve
+        cube = mf.Manifold.cube((2 * r, 2 * r, 4.0), center=True).rotate((0, 0, rng.uniform(0, 90)))
+        hit = dough ^ mf.Manifold.cylinder(20, 0.05).translate((x, y, -1))
+        zt = hit.bounding_box()[5] if not hit.is_empty() else 0.0
+        if zt < 0.8 * STRAND_H:                                  # only on the crown of the strand
+            continue
+        crystals.append(cube.translate((x, y, zt + rng.uniform(0.35, 0.45) - 2.0)))
+    skin, _ = pretzel_strand(0.5)
+    salt_raw = mf.Manifold.batch_boolean(crystals, mf.OpType.Add) ^ skin    # only where they sit in the top of the dough
+    white = (drizzle_raw + salt_raw) - (dough + coat)
+    check_outside("pretzel", dough + choc + drizzle_raw + salt_raw)        # the whole, before it's split by colour
+    return to_trimesh(dough), to_trimesh(choc), to_trimesh(white)
+
+
+# ================================================================ cheese wedge
+def cheese():
+    """an aged gouda wedge: returns (paste, wax), yellow and black"""
+    rng = np.random.default_rng(CHEESE_SEED)
+    # the wheel's profile through its middle, both sides of the axis, so the wax offset is even
+    zs = np.linspace(0, WHEEL_H, 40)
+    def r_side(z):
+        return WHEEL_R + WHEEL_BULGE * np.sin(math.pi * z / WHEEL_H)
+    out = [(r_side(z), z) for z in zs]
+    # round the top edge and chamfer the bottom one (45 degrees, so it needs no support)
+    prof = [(0, 0), (r_side(1.0) - 1.0, 0), (r_side(1.0), 1.0)] + [p for p in out if 1.0 < p[1] < WHEEL_H - 2.0]
+    for a in np.linspace(0, math.pi / 2, 10):
+        prof.append((r_side(WHEEL_H - 2) - 2 + 2 * math.cos(a), WHEEL_H - 2 + 2 * math.sin(a)))
+    prof.append((0, WHEEL_H))
+    right = np.array(prof)
+    full = np.r_[right, (right * [-1, 1])[::-1]]
+    outer = mf.CrossSection([full])
+    inner = outer.offset(-WAX, mf.JoinType.Round)
+    keep = mf.CrossSection.square((WHEEL_R * 2, WHEEL_H * 2)).translate((0, -WHEEL_H / 2))
+    wedge = mf.Manifold.revolve(outer ^ keep, 256, WEDGE_ANGLE)
+    # the paste is revolved a little past both cut faces and trimmed by the wedge, so the
+    # two parts don't share faces that would leave slivers
+    inside = mf.Manifold.revolve(inner ^ keep, 256, WEDGE_ANGLE + 2).rotate((0, 0, -1))
+    paste, wax = wedge ^ inside, wedge - inside
+    # small eyes in the cut faces: teardrop-shaped, so their tops slope at 45 degrees and print cleanly
+    eyes = []
+    for k in range(EYES):
+        ang = 0.0 if k % 2 == 0 else WEDGE_ANGLE
+        r = rng.uniform(0.6, 1.3)
+        d = rng.uniform(6, WHEEL_R - 6)
+        z = rng.uniform(WAX + r + 1.5, WHEEL_H - WAX - r * 2.5 - 1.5)
+        drop = mf.Manifold.batch_hull([mf.Manifold.sphere(r, 32),
+                                       mf.Manifold.sphere(0.05, 6).translate((0, 0, r * 1.45))])
+        a = math.radians(ang)
+        eyes.append(drop.translate((d * math.cos(a), d * math.sin(a), z)))
+    paste = paste - mf.Manifold.batch_boolean(eyes, mf.OpType.Add)
+    check_outside("cheese", wedge - mf.Manifold.batch_boolean(eyes, mf.OpType.Add))
+    return to_trimesh(paste), to_trimesh(wax)
+
+
 # ================================================================ snack bag
 def bag_height(x, y, ye):
     """top surface of the bag lying on its flat back"""
@@ -706,6 +875,13 @@ def check_fit(items, bskt, hndl):
 
 
 # ================================================================ build
+EXTRAS = {                      # treats that go in instead of (or as well as) the ones in the pictures
+    "brownie": ("brownie", "brownie_choc"),
+    "pretzel": ("pretzel", "pretzel_choc", "pretzel_white"),
+    "cheese wedge": ("cheese", "cheese_wax"),
+}
+
+
 def build():
     parts = {}
     parts["basket"] = basket()
@@ -723,9 +899,11 @@ def build():
     assert parts["card_ink"].is_watertight, "the card's characters aren't a closed solid"
     report["card_ink"] = 0.0
     parts["brownie"], parts["brownie_choc"] = brownie()
-    for name in ("brownie", "brownie_choc"):
+    parts["pretzel"], parts["pretzel_choc"], parts["pretzel_white"] = pretzel()
+    parts["cheese"], parts["cheese_wax"] = cheese()
+    for name in ("brownie", "brownie_choc", "pretzel", "pretzel_choc", "pretzel_white", "cheese", "cheese_wax"):
         assert parts[name].is_watertight and parts[name].volume > 0, f"the {name} isn't a closed solid"
-        report[name] = 45.0                                      # brownie() checks its outside
+        report[name] = 45.0                                      # each one checks its outside as a whole
     lo, hi = parts["basket"].bounds
     assert max(hi - lo) <= 86.0, "the basket is wider than the samosa"
     h_in = handle_in_basket(parts["handle"])
@@ -734,10 +912,12 @@ def build():
     whole_card = to_trimesh(to_manifold(card_body) + to_manifold(card_ink))
     check_fit(dict(items, card=whole_card), parts["basket"], h_in)
     items["card"], items["card_ink"] = card_body, card_ink
-    # the brownie is an extra: it isn't in the pictures' arrangement, but check it fits on its own
-    lone = place(to_trimesh(to_manifold(parts["brownie"]) + to_manifold(parts["brownie_choc"])), at=(0, 0, FLOOR + 0.05))
-    lone.apply_translation((-lone.centroid[0], -lone.centroid[1], 0))
-    check_fit({"brownie": lone}, parts["basket"], h_in)
+    # the extras aren't in the pictures' arrangement, but check each fits in the basket on its own
+    for name, pieces in EXTRAS.items():
+        whole = mf.Manifold.batch_boolean([to_manifold(parts[p]) for p in pieces], mf.OpType.Add)
+        lone = place(to_trimesh(whole), at=(0, 0, FLOOR + 0.05))
+        lone.apply_translation((-lone.centroid[0], -lone.centroid[1], 0))
+        check_fit({name: lone}, parts["basket"], h_in)
     scene = trimesh.util.concatenate([parts["basket"], h_in] + list(items.values()))
     return parts, scene, report, items, h_in
 

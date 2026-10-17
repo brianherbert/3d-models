@@ -12,6 +12,9 @@ Writes:
     samosa_compare.png  next to the samosa, for size
     card.png            the thank-you card
     brownie.png         the brownie, and brownie_top.png looking down on its crust
+    pretzel.png         the chocolate-dipped pretzel
+    cheese.png          the cheese wedge
+    extras.png          the extras together: the brownie, a pretzel and the cheese
 """
 import os, sys
 import vtk, trimesh
@@ -27,6 +30,9 @@ CARD = (0.97, 0.97, 0.95)
 INK = (0.08, 0.08, 0.08)
 BROWNIE = (0.40, 0.24, 0.14)
 CHOC = (0.07, 0.06, 0.06)
+DOUGH = (0.55, 0.32, 0.15)
+SALT = (0.96, 0.96, 0.94)
+GOUDA = (0.98, 0.78, 0.25)
 PASTRY = (0.86, 0.62, 0.30)
 
 
@@ -103,6 +109,16 @@ def main(out_dir):
     brw = [actor(parts["brownie"], BROWNIE, spec=0.15), actor(parts["brownie_choc"], CHOC, spec=0.5)]
     shot(brw, o("brownie"), (0, 0, 6), 25, 30, 1.2, size=(900, 800))
     shot(brw, o("brownie_top"), (0, 0, 6), 0, 90, 1.2, size=(800, 800))
+    prz = [actor(parts["pretzel"], DOUGH, spec=0.3), actor(parts["pretzel_choc"], CHOC, spec=0.5),
+           actor(parts["pretzel_white"], SALT, spec=0.2)]
+    shot(prz, o("pretzel"), (0, 0, 2), 0, 55, 1.2, size=(900, 800))
+    chz = [actor(parts["cheese"], GOUDA, spec=0.15), actor(parts["cheese_wax"], CHOC, spec=0.6)]
+    shot(chz, o("cheese"), (20, 10, 8), -55, 25, 1.1, size=(900, 800))
+    ext = [actor(parts["brownie"], BROWNIE, (-45, 0, 0), 0.15), actor(parts["brownie_choc"], CHOC, (-45, 0, 0), 0.5),
+           actor(parts["pretzel"], DOUGH, (-5, -5, 0), 0.3), actor(parts["pretzel_choc"], CHOC, (-5, -5, 0), 0.5),
+           actor(parts["pretzel_white"], SALT, (-5, -5, 0), 0.2),
+           actor(parts["cheese"], GOUDA, (20, -12, 0), 0.15), actor(parts["cheese_wax"], CHOC, (20, -12, 0), 0.6)]
+    shot(ext, o("extras"), (5, 0, 5), 0, 40, 1.3, size=(1500, 800))
     samosa = os.path.join(HERE, "..", "samosa", "stl", "samosa.stl")
     if os.path.exists(samosa):
         cmp = full + [actor(samosa, PASTRY, (100, 0, 0))]

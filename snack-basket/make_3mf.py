@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-Build the Bambu Studio projects, one plate each.  All but the card and the
-brownie use one filament, so they need no AMS:
+Build the Bambu Studio projects, one plate each.  The basket, the apples,
+the cookie and the snack bag use one filament each, so they need no AMS:
 
     basket.3mf          the basket and its handle, brown PLA
     apple.3mf           two apples, red PLA
@@ -9,6 +9,8 @@ brownie use one filament, so they need no AMS:
     snack_bag.3mf       the bag of snacks, any bright colour
     card.3mf            the thank-you card, white with the characters in black (AMS)
     brownie.3mf         the brownie, brown with black chocolate (AMS)
+    pretzels.3mf        three chocolate-dipped pretzels: brown, black and white (AMS)
+    cheese.3mf          the cheese wedge, yellow with black wax (AMS)
 
     python3 make_3mf.py      (from this folder, after build_basket.py and render.py)
 
@@ -68,6 +70,19 @@ def main():
          "The brownie. Load brown PLA as filament 1 and black PLA as filament 2.",
          [Part("brownie", load("brownie"), c, c, settings={"flush_into_infill": "1"},
                extra=[("brownie_choc", load("brownie_choc"), 2)])], "brownie"))
+    # the pretzels: brown dough, black chocolate, white drizzle and salt.  Three to a plate.
+    pz = [Part(f"pretzel_{i + 1}", load("pretzel"), c - 40 + 40 * i, c, settings={"flush_into_infill": "1"},
+               extra=[("pretzel_choc", load("pretzel_choc"), 2), ("pretzel_white", load("pretzel_white"), 3)])
+          for i in range(3)]
+    projects.append(
+        ("pretzels", "Snack basket: chocolate-dipped pretzels", COMMON, ["#7A4A26", "#1A1A1A", "#F4F4F0"],
+         "Three chocolate-dipped pretzels. Load brown PLA as filament 1, black as 2 and white as 3.", pz, "pretzel"))
+    # the cheese: yellow paste and black wax
+    projects.append(
+        ("cheese", "Snack basket: cheese wedge", BROWNIE, ["#F2B632", "#1A1A1A"],
+         "A wedge of aged gouda. Load yellow PLA as filament 1 and black PLA as filament 2.",
+         [Part("cheese", load("cheese"), c, c, settings={"flush_into_infill": "1"},
+               extra=[("cheese_wax", load("cheese_wax"), 2)])], "cheese"))
     for name, title, settings, colour, what, parts, thumb in projects:
         out = write_project(os.path.join(HERE, name + ".3mf"), parts, PROCESS, settings, title=title,
                             description=what, thumbnail_png=img(thumb), filament_colour=colour)
