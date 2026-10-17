@@ -16,7 +16,8 @@ written as well, because Bambu Studio expects a complete configuration.
 bambu_profiles/*.json are Bambu's A1 presets with their inheritance resolved,
 taken from the Bambu Studio repository (resources/profiles/BBL).
 
-Usage (see the model folders for real examples):
+Usage (see the model folders for real examples; snack-basket/make_3mf.py puts
+one object on two AMS filaments with Part(..., extra=[(name, mesh, 2)])):
 
     from bambu3mf import Part, write_project
     write_project("thing.3mf", [Part("thing", mesh, x=128, y=128)],
@@ -49,10 +50,15 @@ class Part:
     y: float
     rot_z: float = 0.0           # turn on the plate (degrees)
     settings: dict = field(default_factory=dict)   # per-object overrides, e.g. {"sparse_infill_density": "100%"}
+    extra: list = field(default_factory=list)      # more volumes in the same object, on other filaments (AMS):
+                                                   # [(name, mesh, filament number)], in the mesh's coordinates
+
+def _volumes(p):
+    return [(p.name, p.mesh, 1)] + list(p.extra)
 
 def _transform(p):
     a = np.radians(p.rot_z); c, s = np.cos(a), np.sin(a)
-    v = p.mesh.vertices @ np.array([[c, s, 0], [-s, c, 0], [0, 0, 1]])
+    v = np.concatenate([m.vertices for _, m, _ in _volumes(p)]) @ np.array([[c, s, 0], [-s, c, 0], [0, 0, 1]])
     lo, hi = v.min(0), v.max(0)
     t = np.array([p.x - (lo[0] + hi[0]) / 2, p.y - (lo[1] + hi[1]) / 2, -lo[2]])
     # 3MF row-vector convention: m00 m01 m02 m10 m11 m12 m20 m21 m22 tx ty tz
@@ -75,30 +81,38 @@ NS = ('xmlns="http://schemas.microsoft.com/3dmanufacturing/core/2015/02" '
       'xmlns:p="http://schemas.microsoft.com/3dmanufacturing/production/2015/06" requiredextensions="p"')
 
 def project_settings(process, process_changes, filament_colour):
+    """filament_colour: one colour, or a list with one per filament (AMS slot)"""
+    colours = [filament_colour] if isinstance(filament_colour, str) else list(filament_colour)
+    n = len(colours)
     printer, proc, filament = _profile(PRINTER), _profile(process), _profile(FILAMENT)
     cfg = {}
-    for part in (printer, proc, filament):
+    for part in (printer, proc):
         for k, v in part.items():
             if k not in META: cfg[k] = v
+    for k, v in filament.items():         # filament settings are per-filament lists: one entry per slot
+        if k not in META: cfg[k] = v * n if isinstance(v, list) and len(v) == 1 else v
     cfg.update(process_changes)
     changed = sorted(k for k, v in process_changes.items() if proc.get(k) != v)
     cfg.update({
         "version": APP_VERSION, "name": "project_settings", "from": "project",
         "print_settings_id": process,
         "printer_settings_id": PRINTER,
-        "filament_settings_id": [FILAMENT],
-        "filament_ids": [filament["filament_id"]],
-        "filament_colour": [filament_colour],
-        "filament_map": ["1"],
-        "filament_self_index": ["1"],
+        "filament_settings_id": [FILAMENT] * n,
+        "filament_ids": [filament["filament_id"]] * n,
+        "filament_colour": colours,
+        "filament_map": ["1"] * n,
+        "filament_self_index": [str(i + 1) for i in range(n)],
         "print_compatible_printers": proc.get("compatible_printers", [PRINTER]),
         "curr_bed_type": "Textured PEI Plate",
         # one entry per preset: print, each filament, printer.  The filament
         # and printer entries name a key whose value is unchanged, so those
         # presets are refreshed from the installed system presets and load
         # unmodified.
-        "different_settings_to_system": [";".join(changed), "filament_type", "printable_height"],
+        "different_settings_to_system": [";".join(changed)] + ["filament_type"] * n + ["printable_height"],
     })
+    if n > 1:                             # purge generously between colours (dark into light needs the most)
+        cfg["flush_volumes_matrix"] = ["0" if i == j else "280" for i in range(n) for j in range(n)]
+        cfg["flush_volumes_vector"] = ["140"] * (2 * n)
     return cfg
 
 def write_project(out, parts, process, process_changes, pauses=(), title="", description="",
@@ -107,14 +121,18 @@ def write_project(out, parts, process, process_changes, pauses=(), title="", des
     the first layer at or above."""
     today = datetime.date.today().isoformat()
     resources, items, settings_objs, instances, subs = [], [], [], [], {}
+    next_id = 1
     for k, p in enumerate(parts):
-        vol_id, obj_id = 2 * k + 1, 2 * k + 2          # Bambu numbers each part, then its object
+        vols = _volumes(p)
+        vol_ids = list(range(next_id, next_id + len(vols)))   # Bambu numbers each volume, then its object
+        obj_id = next_id + len(vols)
+        next_id = obj_id + 1
         path = f"3D/Objects/object_{k + 1}.model"
         tr, lo, hi = _transform(p)
         assert lo[0] >= 0 and lo[1] >= 0 and hi[0] <= BED and hi[1] <= BED, f"{p.name} is off the plate: {lo}, {hi}"
         resources.append(f'''  <object id="{obj_id}" p:UUID="{obj_id:08x}-61cb-4c03-9d28-80fed5dfa1dc" type="model">
    <components>
-    <component p:path="/{path}" objectid="{vol_id}" p:UUID="{vol_id:04x}0000-b206-40ff-9872-83e8017abed1" transform="1 0 0 0 1 0 0 0 1 0 0 0"/>
+{chr(10).join(f'    <component p:path="/{path}" objectid="{v}" p:UUID="{v:04x}0000-b206-40ff-9872-83e8017abed1" transform="1 0 0 0 1 0 0 0 1 0 0 0"/>' for v in vol_ids)}
    </components>
   </object>''')
         items.append(f'  <item objectid="{obj_id}" p:UUID="{obj_id:08x}-b1ec-4553-aec9-835e5b724bb4" transform="{tr}" printable="1"/>')
@@ -122,26 +140,30 @@ def write_project(out, parts, process, process_changes, pauses=(), title="", des
 <model unit="millimeter" xml:lang="en-US" {NS}>
  <metadata name="BambuStudio:3mfVersion">1</metadata>
  <resources>
-  <object id="{vol_id}" p:UUID="{vol_id:04x}0000-81cb-4c03-9d28-80fed5dfa1dc" type="model">
-{_mesh_xml(p.mesh)}  </object>
- </resources>
+{"".join(f"""  <object id="{v}" p:UUID="{v:04x}0000-81cb-4c03-9d28-80fed5dfa1dc" type="model">
+{_mesh_xml(m)}  </object>
+""" for v, (_, m, _) in zip(vol_ids, vols))} </resources>
  <build/>
 </model>
 '''
         extra = "".join(f'    <metadata key="{key}" value="{val}"/>\n' for key, val in p.settings.items())
+        part_xml = ""
+        for i, (v, (vname, m, fil)) in enumerate(zip(vol_ids, vols)):
+            ext = f'      <metadata key="extruder" value="{fil}"/>\n' if len(vols) > 1 else ""
+            part_xml += f'''    <part id="{v}" subtype="normal_part">
+      <metadata key="name" value="{vname}"/>
+      <metadata key="matrix" value="1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1"/>
+{ext}      <metadata key="source_file" value="{vname}.stl"/>
+      <metadata key="source_object_id" value="0"/>
+      <metadata key="source_volume_id" value="{i}"/>
+      <mesh_stat face_count="{len(m.faces)}" edges_fixed="0" degenerate_facets="0" facets_removed="0" facets_reversed="0" backwards_edges="0"/>
+    </part>
+'''
         settings_objs.append(f'''  <object id="{obj_id}">
     <metadata key="name" value="{p.name}"/>
     <metadata key="extruder" value="1"/>
-{extra}    <metadata face_count="{len(p.mesh.faces)}"/>
-    <part id="{vol_id}" subtype="normal_part">
-      <metadata key="name" value="{p.name}"/>
-      <metadata key="matrix" value="1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1"/>
-      <metadata key="source_file" value="{p.name}.stl"/>
-      <metadata key="source_object_id" value="0"/>
-      <metadata key="source_volume_id" value="0"/>
-      <mesh_stat face_count="{len(p.mesh.faces)}" edges_fixed="0" degenerate_facets="0" facets_removed="0" facets_reversed="0" backwards_edges="0"/>
-    </part>
-  </object>''')
+{extra}    <metadata face_count="{sum(len(m.faces) for _, m, _ in vols)}"/>
+{part_xml}  </object>''')
         instances.append(f'''    <model_instance>
       <metadata key="object_id" value="{k}"/>
       <metadata key="instance_id" value="0"/>

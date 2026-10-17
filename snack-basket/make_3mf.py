@@ -1,11 +1,13 @@
 #!/usr/bin/env python3
 """
-Build the Bambu Studio projects, one plate and one filament each (no AMS):
+Build the Bambu Studio projects, one plate each.  All but the card use one
+filament, so they need no AMS:
 
     basket.3mf          the basket and its handle, brown PLA
     apple.3mf           two apples, red PLA
     cookie.3mf          the cookie, tan PLA
     snack_bag.3mf       the bag of snacks, any bright colour
+    card.3mf            the thank-you card, white with the characters in black (AMS)
 
     python3 make_3mf.py      (from this folder, after build_basket.py and render.py)
 
@@ -49,6 +51,13 @@ def main():
          "The bag of snacks. Print in any bright PLA, lying on its flat back.",
          [Part("snack_bag", load("snack_bag"), c, c)], "treats"),
     ]
+    # the card: one object with two parts, the white body on filament 1 and the
+    # black characters on filament 2.  The characters are only in the top two
+    # layers, so the AMS changes colour on those layers and no others.
+    projects.append(
+        ("card", "Snack basket: thank-you card", COMMON, ["#F4F4F0", "#1A1A1A"],
+         "The thank-you card. Load white PLA as filament 1 and black PLA as filament 2.",
+         [Part("card", load("card"), c, c, extra=[("card_ink", load("card_ink"), 2)])], "card"))
     for name, title, settings, colour, what, parts, thumb in projects:
         out = write_project(os.path.join(HERE, name + ".3mf"), parts, PROCESS, settings, title=title,
                             description=what, thumbnail_png=img(thumb), filament_colour=colour)

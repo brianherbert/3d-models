@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
-A little brown wicker basket with a handle, and the three things that go in
-it: two apples, a chocolate-chip cookie and a bag of snacks.  Each part prints on
-its own in one colour, so no AMS is needed, and none needs supports.
+A little brown wicker basket with a handle, and the things that go in
+it: two apples, a chocolate-chip cookie, a bag of snacks and a thank-you card.  Each part prints on
+its own, all but the card in one colour, and none needs supports.
 
     basket      brown.  A woven basket with a twisted rim, 84 mm across at
                 its widest (the samosa is 86 mm), with a socket inside the
@@ -14,13 +14,16 @@ its own in one colour, so no AMS is needed, and none needs supports.
     cookie      tan.  Domed, slightly uneven, with chocolate chips on top
     snack_bag   any bright colour.  A puffy bag with crimped, zigzag-cut
                 seals and SNACKS on the front.  It prints lying on its back
+    card        white with 感謝 in black (AMS).  A flat thank-you card; the
+                characters are inlaid flush in its top two layers
 
-The script places the treats (both apples) in the basket the way they're shown in
+The script places the treats (both apples) and the card in the basket the way they're shown in
 the pictures and stops with an error if any of them pokes through the basket
 or the handle, or into each other.
 
     python3 build_basket.py     -> stl/basket.stl, handle.stl, apple.stl, cookie.stl,
-                                   snack_bag.stl, and assembled.stl (for viewing)
+                                   snack_bag.stl, card.stl, card_ink.stl,
+                                   and assembled.stl (for viewing)
 """
 import math, os
 import numpy as np, trimesh
@@ -76,6 +79,27 @@ BAG_PUFF = 9.0              # how far the front puffs up from the flat back
 SEAL = 4.0                  # the crimped seals at each end
 SEAL_T = 1.6                # their thickness
 LABEL = "SNACKS"
+
+# ---------------------------------------------------------------- thank-you card
+CARD_W, CARD_H = 26.0, 42.0 # a portrait card: the characters run top to bottom
+CARD_T = 1.2                # thickness (six layers at 0.2 mm)
+CARD_CORNER = 1.0           # corner rounding
+INK = 0.4                   # the characters are inlaid this deep, flush with the face (two layers)
+CARD_TEXT = "感謝"          # "gratitude": 感 above 謝
+CHAR_SIZE = 17.0            # height of each character
+CARD_LEAN = 12.0            # degrees; it leans back against the basket wall
+CARD_AT = (-19.0, 18.5)     # where the bottom edge of the card stands, middle of its front face
+# a font with Japanese characters; the first one found is used
+CJK_FONTS = [
+    "/usr/share/fonts/opentype/ipafont-gothic/ipag.ttf",               # Linux: fonts-ipafont-gothic
+    "/usr/share/fonts/truetype/fonts-japanese-gothic.ttf",
+    "/usr/share/fonts/opentype/noto/NotoSansCJK-Bold.ttc",              # Linux: fonts-noto-cjk
+    "/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc",
+    "/System/Library/Fonts/ヒラギノ角ゴシック W6.ttc",                   # macOS
+    "/System/Library/Fonts/Hiragino Sans GB.ttc",
+    "C:/Windows/Fonts/YuGothB.ttc",                                     # Windows
+    "C:/Windows/Fonts/msgothic.ttc",
+]
 
 MAX_OVERHANG = 45.0         # degrees from vertical
 N = 432                     # points round the basket
@@ -419,6 +443,61 @@ def snack_bag():
     return to_trimesh(m)
 
 
+# ================================================================ thank-you card
+def cjk_font():
+    for f in CJK_FONTS:
+        if os.path.exists(f):
+            return f
+    raise SystemExit("no Japanese font found for the card: install one (e.g. fonts-ipafont-gothic) "
+                     "or add its path to CJK_FONTS")
+
+
+def glyph(ch, size):
+    """one character's outline as a CrossSection, scaled to `size` tall and centred on the origin"""
+    from matplotlib.textpath import TextPath
+    from matplotlib.font_manager import FontProperties
+    tp = TextPath((0, 0), ch, size=100, prop=FontProperties(fname=cjk_font()))
+    polys = [np.asarray(p) for p in tp.to_polygons(closed_only=True) if len(p) > 2]
+    cs = mf.CrossSection(polys, mf.FillRule.EvenOdd)
+    x0, y0, x1, y1 = cs.bounds()
+    k = size / max(x1 - x0, y1 - y0)
+    return cs.translate((-(x0 + x1) / 2, -(y0 + y1) / 2)).scale((k, k))
+
+
+def card():
+    """the card lying face up: a white body and the black characters inlaid in its face.
+    Returns (body, ink), both in the same coordinates."""
+    r = CARD_CORNER
+    outline = mf.CrossSection.square((CARD_W - 2 * r, CARD_H - 2 * r), center=True).offset(r, mf.JoinType.Round)
+    text = mf.CrossSection()
+    gap = (CARD_H - len(CARD_TEXT) * CHAR_SIZE) / (len(CARD_TEXT) + 1)
+    for i, ch in enumerate(CARD_TEXT):                           # top to bottom
+        y = CARD_H / 2 - gap * (i + 1) - CHAR_SIZE * (i + 0.5)
+        text = text + glyph(ch, CHAR_SIZE).translate((0, y))
+    # strokes and gaps thinner than the nozzle wouldn't print; check none get lost
+    thin = text.area() - text.offset(-0.2).offset(0.2).area()
+    assert thin < 0.02 * text.area(), "the characters have strokes too thin to print; make CHAR_SIZE bigger"
+    plate = mf.Manifold.extrude(outline, CARD_T)
+    ink = mf.Manifold.extrude(text, INK + 0.01).translate((0, 0, CARD_T - INK))
+    ink = ink ^ plate                                            # flush with the face
+    body = plate - ink
+    return to_trimesh(body), to_trimesh(ink)
+
+
+def card_in_basket(body, ink):
+    """stand the card on its bottom edge, face to the front, leaning back on the wall"""
+    out = []
+    for t in (body, ink):
+        t = t.copy()
+        t.apply_translation((0, CARD_H / 2, -CARD_T))            # bottom edge, front face at the origin
+        t.apply_transform(trimesh.transformations.rotation_matrix(math.radians(90 - CARD_LEAN), (1, 0, 0)))
+        out.append(t)
+    lo = np.concatenate([t.vertices for t in out]).min(0)
+    for t in out:
+        t.apply_translation((CARD_AT[0], CARD_AT[1], FLOOR + 0.05 - lo[2]))
+    return out
+
+
 # ================================================================ in the basket
 def place(t, rot_y=0.0, rot_z=0.0, rot_x=0.0, at=(0, 0, 0)):
     t = t.copy()
@@ -484,11 +563,19 @@ def build():
     for name, t in parts.items():
         t.apply_translation((0, 0, -t.bounds[0][2]))
         report[name] = check(name, t, 0.8 if name != "basket" else FOOT_CHAMFER + 0.2)
+    # the card's two parts stay together: the ink sits in the top of the body
+    parts["card"], parts["card_ink"] = card()
+    report["card"] = check("card", parts["card"])
+    assert parts["card_ink"].is_watertight, "the card's characters aren't a closed solid"
+    report["card_ink"] = 0.0
     lo, hi = parts["basket"].bounds
     assert max(hi - lo) <= 86.0, "the basket is wider than the samosa"
     h_in = handle_in_basket(parts["handle"])
     items = arrange(parts["apple"], parts["cookie"], parts["snack_bag"])
-    check_fit(items, parts["basket"], h_in)
+    card_body, card_ink = card_in_basket(parts["card"], parts["card_ink"])
+    whole_card = to_trimesh(to_manifold(card_body) + to_manifold(card_ink))
+    check_fit(dict(items, card=whole_card), parts["basket"], h_in)
+    items["card"], items["card_ink"] = card_body, card_ink
     scene = trimesh.util.concatenate([parts["basket"], h_in] + list(items.values()))
     return parts, scene, report, items, h_in
 
