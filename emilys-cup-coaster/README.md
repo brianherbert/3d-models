@@ -15,6 +15,40 @@ print in a second colour.
 
 The colours are only suggestions: change them in Bambu Studio.
 
+## Portrait version
+
+A take on the arch design (2) with no hearts: a line drawing of the person's
+face sits in the floor of the pocket, so when the cup's not there she's
+smiling up at you. The drawing and the name are on the same second filament,
+so it's still two colours on the AMS (the project uses lilac and dark
+purple).
+
+- **The drawing** is made from a selfie by `portrait.py`. It finds the face
+  and the outlines of the hair, face, neck and clothes, then draws the
+  borders between them, the hair's flow round the face, the eyebrows,
+  smiling eyes, nose, smile and a few freckles. It fills a 68 mm circle with
+  a ring round it.
+- **Flush:** the lines are inlaid 0.6 mm (3 layers) into the pocket floor
+  and come up level with it, so the cup still sits flat. Every line is at
+  least 0.8 mm wide.
+- **Private:** the photo, the drawing and the build made from it are a real
+  person's likeness, so `portrait.py` writes them to `private/`, which git
+  ignores. Only the script is in the repo.
+
+```
+pip install mediapipe opencv-python-headless   # plus the packages below
+xvfb-run -a python3 portrait.py photo.jpg      # -> private/
+```
+
+That writes `private/portrait.png` (the drawing, to check), renders in
+`private/images/`, the STLs in `private/stl/` and the Bambu Studio project
+`private/emilys_cup_portrait.3mf`, set up like the other projects below.
+Look at `portrait.png` before printing: a busy background or a hand near
+the face can add stray lines. `HEAD_ZOOM` and `HEAD_UP` frame the face,
+`FRECKLES` and `STRANDS` set the details, and `LINE` sets the line width.
+MediaPipe needs `libegl1` on Linux, and its two models download into
+`private/models/` the first time.
+
 ## Fit
 
 - **Pocket:** 73 mm across and 3 mm deep, with a 1 mm chamfer round the top
@@ -77,6 +111,7 @@ python3 make_3mf.py            # -> emilys_cup_*.3mf
 |---|---|
 | `build.py` | Builds all three designs. Its key dimensions are parameters at the top. |
 | `render.py` | Preview renders (VTK), with a 70 mm cup for scale. |
+| `portrait.py` | Builds the portrait version from a photo, into `private/`. |
 | `make_3mf.py` | Builds the Bambu Studio projects with `../tools/bambu3mf.py`. |
 | `emilys_cup_*.3mf` | The three Bambu Studio projects, ready to slice. |
 | `stl/` | `<design>.stl` (the base) and `<design>_text.stl` (the letters) for each design. |

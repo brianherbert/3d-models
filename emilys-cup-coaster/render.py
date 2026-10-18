@@ -64,8 +64,11 @@ def shot(actors, path, focus, az, el, zoom=1.0, size=(1200, 1000), dist=500):
         l = vtk.vtkLight(); l.SetLightTypeToCameraLight(); l.SetPosition(*pos); l.SetFocalPoint(0, 0, 0)
         l.SetIntensity(inten); ren.AddLight(l)
     cam = ren.GetActiveCamera(); cam.SetFocalPoint(*focus)
-    cam.SetPosition(focus[0], focus[1] - dist, focus[2]); cam.SetViewUp(0, 0, 1)
-    cam.Azimuth(az); cam.Elevation(el)
+    if el >= 89:                                          # straight down, front at the bottom
+        cam.SetPosition(focus[0], focus[1], focus[2] + dist); cam.SetViewUp(0, 1, 0)
+    else:
+        cam.SetPosition(focus[0], focus[1] - dist, focus[2]); cam.SetViewUp(0, 0, 1)
+        cam.Azimuth(az); cam.Elevation(el)
     cam.OrthogonalizeViewUp(); cam.SetViewAngle(20)
     ren.ResetCamera(); cam.Zoom(zoom)
     win.Render()

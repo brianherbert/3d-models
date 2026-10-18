@@ -187,8 +187,10 @@ def tab():
     return base, letters_on_top(name, BASE_H)
 
 
-def arch():
-    """a wide round coaster with the name curving round the front of the rim, a heart at each end"""
+def arch(hearts=True, floor_art=None, inlay=0.6):
+    """a wide round coaster with the name curving round the front of the rim, a heart at each end.
+    floor_art: a CrossSection (mm, centred) inlaid `inlay` deep and flush in the pocket floor,
+    in the letters' colour (portrait.py puts a face there)"""
     R = ARCH_D / 2
     base = slab(mf.CrossSection.circle(R, SEG * 2), BASE_H) - pocket(0, 0, BASE_H)
     straight = text_outline(NAME, ROUND_FONT)
@@ -199,13 +201,20 @@ def arch():
     check_strokes(straight, "arch")
     half = (x1 - x0) * k / 2
     name = bend(straight, R, ARCH_TEXT_R)
-    for side in (-1, 1):
+    for side in ((-1, 1) if hearts else ()):
         a = -np.pi / 2 + side * (half + 9.0) / ARCH_TEXT_R
         h = heart(9.0).rotate(np.degrees(a) + 90)
         name = name + h.translate((ARCH_TEXT_R * np.cos(a), ARCH_TEXT_R * np.sin(a)))
     rim = mf.CrossSection.circle(R - EDGE - 1.0, SEG * 2) - mf.CrossSection.circle(POCKET_D / 2 + POCKET_CHAMFER + 1.0, SEG * 2)
     assert (name - rim).area() < 1e-6, "the name doesn't fit on the rim"
-    return base, letters_on_top(name, BASE_H)
+    letters = letters_on_top(name, BASE_H)
+    if floor_art is not None:
+        assert (floor_art - mf.CrossSection.circle(POCKET_D / 2 - 0.5, SEG * 2)).area() < 1e-6, \
+            "the floor art is bigger than the pocket"
+        inlaid = mf.Manifold.extrude(floor_art, inlay).translate((0, 0, FLOOR - inlay))
+        base = base - inlaid
+        letters = letters + inlaid
+    return base, letters
 
 
 def nameplate():
