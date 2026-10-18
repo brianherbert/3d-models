@@ -187,10 +187,12 @@ def project(name, style):
     load = lambda n: trimesh.load(os.path.join(PRIVATE, "stl", n + ".stl"))
     c = BED / 2
     out = write_project(os.path.join(PRIVATE, f"emilys_cup_{name}.3mf"),
-                        [Part(name, load(name), c, c, extra=[(name + "_ink", load(name + "_ink"), 2)])],
+                        [Part(f"Emily's Cup ({style})", load(name), c, c,
+                              extra=[(f"{style} and name", load(name + "_ink"), 2)])],
                         PROCESS, SETTINGS, title=f"Emily's Cup: halftone {style}",
-                        description="Load lilac PLA as filament 1 and dark purple as filament 2.",
-                        thumbnail_png=os.path.join(PRIVATE, "images", name + ".png"), filament_colour=COLOURS)
+                        description="Load lilac PLA as filament 1 and dark purple as filament 2. "
+                                    f"The {style} are inlaid flush in the pocket floor; the name stands 1.2 mm proud.",
+                        thumbnail_png=os.path.join(PRIVATE, "images", name + "_top.png"), filament_colour=COLOURS)
     print("wrote", out)
 
 
