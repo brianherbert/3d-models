@@ -52,15 +52,16 @@ COLOURS = ["#BDA8E2", "#F4F4F0"]        # lilac base, white letters (and print t
 HEIGHT = LEDGE + T_MAX + B.POCKET_DEPTH  # the base: ledge, disc, then the cup's 3 mm
 
 
-def picture(photo):
-    """the photo's lightness (0 black .. 1 white) on a STEP grid over the disc, centred, y up"""
+def picture(photo, frame_r=PICTURE_R, half=DISC_R, step=STEP):
+    """the photo's lightness (0 black .. 1 white) on a `step` grid over a square 2*half across,
+    centred, y up; the face is framed to fill a circle of radius frame_r"""
     pts, classes = P.detect(photo)
     gray = cv2.cvtColor(cv2.imread(photo), cv2.COLOR_BGR2GRAY)
     face_h = np.linalg.norm(pts[152] - pts[10])
     centre = (pts[152] + pts[10]) / 2 - [0, P.HEAD_UP * face_h]
-    px_per_mm = P.HEAD_ZOOM * face_h / PICTURE_R
-    n = int(np.ceil(2 * DISC_R / STEP)) + 1
-    k = 1 / (px_per_mm * STEP)
+    px_per_mm = P.HEAD_ZOOM * face_h / frame_r
+    n = int(np.ceil(2 * half / step)) + 1
+    k = 1 / (px_per_mm * step)
     to_grid = np.array([[k, 0, (n - 1) / 2 - k * centre[0]], [0, k, (n - 1) / 2 - k * centre[1]]])
     img = cv2.warpAffine(gray, to_grid, (n, n), flags=cv2.INTER_AREA, borderValue=255)
     person = cv2.warpAffine(((classes != P.BG) & (classes != 5)).astype(np.float32), to_grid, (n, n),
@@ -68,9 +69,9 @@ def picture(photo):
     # local contrast, so the face doesn't go flat
     img = cv2.createCLAHE(clipLimit=1.3, tileGridSize=(4, 4)).apply(img).astype(np.float32) / 255
     img = img ** (1 / GAMMA)
-    person = cv2.GaussianBlur(person, (0, 0), FEATHER / STEP)
+    person = cv2.GaussianBlur(person, (0, 0), FEATHER / step)
     light = person * img + (1 - person) * BACKGROUND
-    light = cv2.GaussianBlur(light, (0, 0), 0.18 / STEP)   # soften skin texture and noise
+    light = cv2.GaussianBlur(light, (0, 0), 0.18 / step)   # soften skin texture and noise
     return np.flipud(light)                     # image rows run down; y runs up
 
 

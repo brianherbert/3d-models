@@ -49,6 +49,38 @@ the face can add stray lines. `HEAD_ZOOM` and `HEAD_UP` frame the face,
 MediaPipe needs `libegl1` on Linux, and its two models download into
 `private/models/` the first time.
 
+## Halftone version
+
+The arch design again, with no hearts, with the photo drawn in a halftone
+pattern in the pocket floor, like a newspaper picture. It shows in any
+light, with no backlight needed. There are two styles:
+
+- **Dots:** a hexagonal grid of round dots, 1.4 mm apart, that grow where
+  the photo is darker and merge into solid colour in the darkest parts.
+- **Dashes:** wavy rows 1.3 mm apart that get thicker where it's darker and
+  break into dashes where it's light, like an engraving. It keeps more
+  detail along each row than the dots do.
+
+The pattern is inlaid 0.6 mm deep and comes up level with the pocket floor,
+so the cup sits flat. It's in the same colour as the name, so it's two
+colours on the AMS (lilac and dark purple in the projects). No mark is
+smaller than 0.8 mm. Marks the photo would make smaller than 0.55 mm are
+left out, and ones between 0.55 and 0.8 mm print at 0.8 mm. The background
+is faded out, and the picture is sharpened a little so the eyes, brows and
+smile stand out.
+
+```
+xvfb-run -a python3 halftone.py photo.jpg          # both styles -> private/
+xvfb-run -a python3 halftone.py photo.jpg dashes   # or just one
+```
+
+That writes `private/halftone_<style>.png` (the pattern, to check), renders,
+the STLs and `private/emilys_cup_halftone_<style>.3mf`. `GAMMA`, `STRETCH`
+and `SHARPEN` set the tones, `DOT_PITCH` and `DASH_PITCH` set how fine the
+pattern is, and `DASH_WAVE` sets the rows' wave (`(0, 1)` makes them
+straight). As with the others, the photo and everything built from it stay
+in the git-ignored `private/` folder.
+
 ## Lithophane version
 
 Another take on the arch design, with no hearts: the photo itself, as a
@@ -147,6 +179,7 @@ python3 make_3mf.py            # -> emilys_cup_*.3mf
 | `render.py` | Preview renders (VTK), with a 70 mm cup for scale. |
 | `portrait.py` | Builds the portrait version from a photo, into `private/`. |
 | `lithophane.py` | Builds the lithophane version from a photo, into `private/`. |
+| `halftone.py` | Builds the halftone versions (dots and dashes) from a photo, into `private/`. |
 | `make_3mf.py` | Builds the Bambu Studio projects with `../tools/bambu3mf.py`. |
 | `emilys_cup_*.3mf` | The three Bambu Studio projects, ready to slice. |
 | `stl/` | `<design>.stl` (the base) and `<design>_text.stl` (the letters) for each design. |
