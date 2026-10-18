@@ -22,6 +22,7 @@ where needed, and assembly notes.
 | ![crystal](tealight-crystal-lamp/images/crystal_lit.png) | [Tea light crystal](tealight-crystal-lamp/) | A 6-inch hexagonal blue crystal lit from inside by one LED tea light. The crystal prints in translucent blue as a two-line shell and lifts off a white hexagonal base to reach the tea light's switch. |
 | ![samosa](samosa/images/samosa.png) | [Samosa](samosa/) | A life-size samosa (86 × 78 × 44 mm, so it fits in a 45 mm box) for a school project. A plump pastry cone with a folded seam and smooth pastry. One piece, one colour, no supports. A white dipping cup and a red sauce insert go with it, each printed separately in one colour. |
 | ![basket](snack-basket/images/basket.png) | [Snack basket](snack-basket/) | A little brown wicker basket with a handle, 83 mm across (just narrower than the samosa), with two apples, a chocolate-chip cookie, a bag of snacks and a white thank-you card with 感謝 in black, plus extras to swap in like a gift basket: a brownie, chocolate-dipped pretzels and a wedge of waxed gouda. No supports. The card and the extras use the AMS. The handle prints flat and pushes into sockets in the rim. |
+| ![emily](emilys-cup-coaster/images/arch.png) | [Emily's Cup](emilys-cup-coaster/) | A little stand for a 70 mm cup with "Emily's Cup" on it, in three designs: a coaster with a name tab, a round one with the name curving round the rim, and one with a sloped nameplate in front. A pocket holds the cup in place and the raised letters print in a second colour. No supports. |
 
 ## What's in each folder
 
@@ -41,7 +42,7 @@ Each model folder follows the same layout:
 - **OpenSCAD models** (the signal and the locomotive): open the `.scad` file in
   [OpenSCAD](https://openscad.org) and export an STL, or run it from the
   command line.
-- **Python models** (the horse head, the cheese wedge, the cheese wheel, the lighthouse, the crystal, the samosa and the snack basket):
+- **Python models** (the horse head, the cheese wedge, the cheese wheel, the lighthouse, the crystal, the samosa, the snack basket and Emily's Cup):
   install the packages listed in that model's README and run its build
   script.
 
@@ -51,7 +52,7 @@ Each model folder follows the same layout:
 on an A1 plate and selects Bambu's own A1, PLA Basic and process presets
 (saved in `tools/bambu_profiles/`). It also records per-object settings and
 pauses, and can put parts of one object on different AMS filaments (the snack
-basket's card, brownie, pretzels and cheese). The locomotive's, the lighthouse's, the crystal's, the samosa's and the snack basket's `make_3mf.py` use it; the horse head and the
+basket's card, brownie, pretzels and cheese). The locomotive's, the lighthouse's, the crystal's, the samosa's, the snack basket's and Emily's Cup's `make_3mf.py` use it; the horse head and the
 cheese models have their own builders with the same approach.
 
 ## A note on AI-generated designs
