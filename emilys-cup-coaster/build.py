@@ -112,10 +112,10 @@ def slab(outline, h, top_round=EDGE, foot=FOOT):
     return mf.Manifold.batch_boolean(parts, mf.OpType.Add)
 
 
-def pocket(cx, cy, top):
+def pocket(cx, cy, top, depth=POCKET_DEPTH):
     """the cup's pocket, cut down from z=top, with a chamfered top edge"""
     r = POCKET_D / 2
-    cut = mf.Manifold.cylinder(POCKET_DEPTH + 1, r, r, SEG).translate((cx, cy, top - POCKET_DEPTH))
+    cut = mf.Manifold.cylinder(depth + 1, r, r, SEG).translate((cx, cy, top - depth))
     cham = mf.Manifold.cylinder(POCKET_CHAMFER + 0.01, r, r + POCKET_CHAMFER + 0.01, SEG) \
         .translate((cx, cy, top - POCKET_CHAMFER))
     return cut + cham
@@ -187,12 +187,16 @@ def tab():
     return base, letters_on_top(name, BASE_H)
 
 
-def arch(hearts=True, floor_art=None, inlay=0.6):
+def arch(hearts=True, floor_art=None, inlay=0.6, height=BASE_H, pocket_depth=POCKET_DEPTH, window_r=None):
     """a wide round coaster with the name curving round the front of the rim, a heart at each end.
     floor_art: a CrossSection (mm, centred) inlaid `inlay` deep and flush in the pocket floor,
-    in the letters' colour (portrait.py puts a face there)"""
+    in the letters' colour (portrait.py puts a face there).
+    window_r: a hole this big right through the pocket floor, leaving a ledge round it
+    (lithophane.py sets its picture on the ledge)"""
     R = ARCH_D / 2
-    base = slab(mf.CrossSection.circle(R, SEG * 2), BASE_H) - pocket(0, 0, BASE_H)
+    base = slab(mf.CrossSection.circle(R, SEG * 2), height) - pocket(0, 0, height, pocket_depth)
+    if window_r:
+        base = base - mf.Manifold.cylinder(height * 3, window_r, window_r, SEG * 2).translate((0, 0, -height))
     straight = text_outline(NAME, ROUND_FONT)
     k = ARCH_TEXT_CAP / cap_height(ROUND_FONT)
     x0, y0, x1, y1 = straight.bounds()
@@ -207,7 +211,7 @@ def arch(hearts=True, floor_art=None, inlay=0.6):
         name = name + h.translate((ARCH_TEXT_R * np.cos(a), ARCH_TEXT_R * np.sin(a)))
     rim = mf.CrossSection.circle(R - EDGE - 1.0, SEG * 2) - mf.CrossSection.circle(POCKET_D / 2 + POCKET_CHAMFER + 1.0, SEG * 2)
     assert (name - rim).area() < 1e-6, "the name doesn't fit on the rim"
-    letters = letters_on_top(name, BASE_H)
+    letters = letters_on_top(name, height)
     if floor_art is not None:
         assert (floor_art - mf.CrossSection.circle(POCKET_D / 2 - 0.5, SEG * 2)).area() < 1e-6, \
             "the floor art is bigger than the pocket"

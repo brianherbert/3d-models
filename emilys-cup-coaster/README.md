@@ -49,6 +49,40 @@ the face can add stray lines. `HEAD_ZOOM` and `HEAD_UP` frame the face,
 MediaPipe needs `libegl1` on Linux, and its two models download into
 `private/models/` the first time.
 
+## Lithophane version
+
+Another take on the arch design, with no hearts: the photo itself, as a
+lithophane. That's a white disc whose thickness follows the photo, thin
+where the photo is light and thick where it's dark. It looks like a plain
+white disc until light shines through it, then the photo appears.
+
+- **How it fits:** the base has a 64 mm window right through the pocket
+  floor, with a 1.4 mm ledge round it. The 72.6 mm disc drops into the
+  pocket, flat side up, and rests on the ledge. The cup stands on the flat
+  side, 3 mm down in the pocket as usual.
+- **To see it:** lift the coaster up to a lamp or a window, or stand it on
+  a phone's torch, with the cup off.
+- **The disc** is 0.8 mm thick at the lightest parts of the photo and 3 mm
+  at the darkest. The background is faded to white, so she stands out
+  against a bright glow, and a dark ring at the edge frames her.
+- **Printing:** the base is two colours (lilac with white letters) on the
+  AMS. Print the disc separately in white PLA, flat side down, with 0.16 mm
+  layers and 100% infill (its project is already set up that way). Turn the
+  disc over to drop it in. Use plain white PLA, not silk or matte, because
+  they let less light through.
+- **Private:** like the line art, it's built from a photo, so everything
+  goes in the git-ignored `private/` folder.
+
+```
+xvfb-run -a python3 lithophane.py photo.jpg    # -> private/
+```
+
+That writes `private/lithophane_preview.png` (roughly how it looks lit from
+behind), renders in `private/images/`, the STLs, and two Bambu Studio
+projects: `emilys_cup_litho_base.3mf` and `emilys_cup_litho_disc.3mf`.
+`T_MIN` and `T_MAX` set the disc's thickness range, `GAMMA` lightens or
+darkens the midtones, and the face is framed like the line art's.
+
 ## Fit
 
 - **Pocket:** 73 mm across and 3 mm deep, with a 1 mm chamfer round the top
@@ -112,6 +146,7 @@ python3 make_3mf.py            # -> emilys_cup_*.3mf
 | `build.py` | Builds all three designs. Its key dimensions are parameters at the top. |
 | `render.py` | Preview renders (VTK), with a 70 mm cup for scale. |
 | `portrait.py` | Builds the portrait version from a photo, into `private/`. |
+| `lithophane.py` | Builds the lithophane version from a photo, into `private/`. |
 | `make_3mf.py` | Builds the Bambu Studio projects with `../tools/bambu3mf.py`. |
 | `emilys_cup_*.3mf` | The three Bambu Studio projects, ready to slice. |
 | `stl/` | `<design>.stl` (the base) and `<design>_text.stl` (the letters) for each design. |
