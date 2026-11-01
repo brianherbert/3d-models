@@ -32,19 +32,33 @@ and the same groove:
 ## Printing
 
 Open `figure_skate_stand.3mf` (2 in) or `figure_skate_stand_short.3mf`
-(1 in) in Bambu Studio. Each has one plate on
-**0.20mm Standard @BBL A1**, with the stand groove up. Print in white PLA.
+(1 in) in Bambu Studio and print. Each is set up for a display finish on
+**0.12mm Fine @BBL A1**, with the stand groove up. Print in white PLA;
+matte white (such as Bambu PLA Matte Ivory White) hides layer lines best.
 
 | Setting | Value | Why |
 |---|---|---|
+| Layer height | 0.12 mm | the sides show almost no layer lines |
+| Seam position | Back | the stand is turned so the groove runs front to back, which puts the seam under the heel end of the blade |
+| Scarf joint seam | Contour | blends the seam in |
+| Walls | 4 | white PLA lets light through; thick walls stop the infill showing |
+| Top shell | 1.2 mm | same reason, for the top |
+| Ironing | Topmost surface | a smooth, even top face |
+| Outer wall | 80 mm/s, 2000 mm/s² | slower than the preset, for an even surface |
+| Infill | 15%, gyroid | |
 | Supports | off | the groove is open at the top, so nothing overhangs |
 | Brim | off | it lies on a wide flat bottom |
-| Walls | 3 | |
-| Infill | 15% | |
 
-- **Filament:** about 110 g for the tall one and 65 g for the short one (my estimates from the walls and 15% infill;
-  Bambu Studio will show the exact amount when you slice). For a heavier,
-  steadier stand, raise the infill.
+- **Display it** with the seam (the side that was at the back of the
+  plate) under the heel of the blade, facing away from people.
+- **Before printing:** white shows every speck, so if the printer last ran
+  a dark colour, run some white through first and wipe the nozzle. Use dry
+  filament and a clean plate. Felt pads underneath give a finished look and
+  protect the table.
+- **Filament:** about 120 g for the tall one and 65 g for the short one (my
+  estimates; Bambu Studio will show the exact amount and the print time
+  when you slice). The stand weighs little next to a skate, so more infill
+  won't make it noticeably steadier.
 - **Fit:** printed slots often come out a touch narrower than drawn. If the
   blade is tight, raise `GROOVE_W` to 4.2 or 4.3 and rebuild; if it's
   loose, lower it.
