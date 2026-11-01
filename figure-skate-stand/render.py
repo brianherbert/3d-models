@@ -8,6 +8,7 @@ Writes:
     stand_blade.png    with a stand-in figure skate blade slotted in
     stand_top.png      from above
     stand_section.png  cut across the groove, with the blade in
+    stand_short.png    the short (1 in) version, with the blade in
 """
 import os, sys, tempfile
 import numpy as np, trimesh, vtk
@@ -15,7 +16,7 @@ import manifold3d as mf
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
-from build import DISC_H, GROOVE_DEPTH, to_trimesh
+from build import DISC_H, SHORT_H, GROOVE_DEPTH, to_trimesh
 
 WHITE = (0.95, 0.94, 0.90)
 STEEL = (0.72, 0.74, 0.78)
@@ -89,6 +90,9 @@ def render(d, out_dir):
     shot([actor(stand, WHITE)], o("stand_top"), (0, 0, 25), 0, 90, 1.15, size=(1000, 1000))
     shot([actor(halved(stand, 0), WHITE), actor(halved(b, seat[2]), STEEL)], o("stand_section"),
          (0, 0, 45), 90, 0, 1.0, size=(1000, 1000))
+    short = os.path.join(d, "stand_short.stl")
+    shot([actor(short, WHITE), actor(b, STEEL, (0, 0, SHORT_H - GROOVE_DEPTH))], o("stand_short"),
+         (0, 0, 40), -35, 18, 1.05)
 
 if __name__ == "__main__":
     render(sys.argv[1] if len(sys.argv) > 1 else os.path.join(HERE, "stl"),
