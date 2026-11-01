@@ -4,6 +4,8 @@ Build the Bambu Studio projects, set up for a display-quality finish:
 
     figure_skate_stand.3mf          the stand, 2 in tall (white PLA), groove up
     figure_skate_stand_short.3mf    the short stand, 1 in tall
+    figure_skate_stand_3in.3mf          the same two, 3 in across
+    figure_skate_stand_3in_short.3mf
 
     python3 make_3mf.py      (from this folder, after build.py and render.py)
 
@@ -44,7 +46,10 @@ def main():
     c = BED / 2
     for stl, out_name, title, height, thumb in (
             ("stand", "figure_skate_stand", "Figure skate stand", "2 in", "stand_blade"),
-            ("stand_short", "figure_skate_stand_short", "Figure skate stand (short)", "1 in", "stand_short")):
+            ("stand_short", "figure_skate_stand_short", "Figure skate stand (short)", "1 in", "stand_short"),
+            ("stand_3in", "figure_skate_stand_3in", "Figure skate stand (3 in)", "3 in across and 2 in", "stand_3in"),
+            ("stand_3in_short", "figure_skate_stand_3in_short", "Figure skate stand (3 in, short)",
+             "3 in across and 1 in", "stand_3in_short")):
         stand = trimesh.load(os.path.join(HERE, "stl", stl + ".stl"))
         # rot_z=90 turns the groove (along X in the STL) to run front to back
         out = write_project(os.path.join(HERE, out_name + ".3mf"), [Part(stl, stand, c, c, rot_z=90)],

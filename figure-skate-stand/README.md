@@ -11,19 +11,26 @@ drops into a groove across the top and the skate stands on its own.
 
 The grey blade in the renders is a rough stand-in, just for scale.
 
-There's also a **short version**, half as tall (1 in), with the same disc
-and the same groove:
+There are four versions, all with the same groove:
 
-![the short version](images/stand_short.png)
+| | 2 in tall | 1 in tall |
+|---|---|---|
+| **4 in across** | `figure_skate_stand.3mf` | `figure_skate_stand_short.3mf` |
+| **3 in across** | `figure_skate_stand_3in.3mf` | `figure_skate_stand_3in_short.3mf` |
+
+| ![4 in, 1 in tall](images/stand_short.png) | ![3 in, 2 in tall](images/stand_3in.png) | ![3 in, 1 in tall](images/stand_3in_short.png) |
+|---|---|---|
+| 4 in across, 1 in tall | 3 in across, 2 in tall | 3 in across, 1 in tall |
 
 ## Size
 
-- **Disc:** 101.6 mm (4 in) across and 50.8 mm (2 in) tall, solid. The
-  short version is 25.4 mm (1 in) tall. Even on the short one, the blade
+- **Disc:** 101.6 mm (4 in) or 76.2 mm (3 in) across, and 50.8 mm (2 in)
+  or 25.4 mm (1 in) tall, solid. The 3 in disc tips more easily than the
+  4 in one, so try it with the real skate. Even on the short one, the blade
   stands about 15 mm clear of the table.
 - **Groove:** 4.1 mm wide and 10 mm deep, straight across the whole top and
   out both sides, so a blade of any length fits. The blade's rocker (its
-  curve) lifts its ends only about 0.6 mm over the 4 in of the disc, so a
+  curve) lifts its ends only about 0.6 mm over 4 in, so a
   straight groove holds it along its full length.
 - The groove has a 0.8 mm lead-in along both top edges to guide the blade
   in, the top edge of the disc has a 1.5 mm chamfer, and the bottom edge
@@ -31,8 +38,8 @@ and the same groove:
 
 ## Printing
 
-Open `figure_skate_stand.3mf` (2 in) or `figure_skate_stand_short.3mf`
-(1 in) in Bambu Studio and print. Each is set up for a display finish on
+Open the project for the version you want (see the table above) in Bambu
+Studio and print. Each is set up for a display finish on
 **0.12mm Fine @BBL A1**, with the stand groove up. Print in white PLA;
 matte white (such as Bambu PLA Matte Ivory White) hides layer lines best.
 
@@ -55,7 +62,8 @@ matte white (such as Bambu PLA Matte Ivory White) hides layer lines best.
   a dark colour, run some white through first and wipe the nozzle. Use dry
   filament and a clean plate. Felt pads underneath give a finished look and
   protect the table.
-- **Filament:** about 120 g for the tall one and 65 g for the short one (my
+- **Filament:** about 120 g for the 4 in tall one, 65 g for the 4 in short
+  one, 70 g for the 3 in tall one and 40 g for the 3 in short one (my
   estimates; Bambu Studio will show the exact amount and the print time
   when you slice). The stand weighs little next to a skate, so more infill
   won't make it noticeably steadier.
@@ -65,14 +73,14 @@ matte white (such as Bambu PLA Matte Ivory White) hides layer lines best.
 
 ## Changing it
 
-The parameters at the top of `build.py` set the disc (`DISC_D`, `DISC_H`, `SHORT_H`,
+The parameters at the top of `build.py` set the disc (`DISC_D`, `SMALL_D`, `DISC_H`, `SHORT_H`,
 `TOP_CHAMFER`, `FOOT_CHAMFER`) and the groove (`GROOVE_W`, `GROOVE_DEPTH`,
 `GROOVE_LEAD`). The script checks the mesh is watertight and measures the
 groove's width and depth before writing the STL.
 
 ```
 pip install trimesh numpy manifold3d vtk
-python3 build.py               # -> stl/stand.stl, stl/stand_short.stl
+python3 build.py               # -> stl/ (all four versions)
 xvfb-run -a python3 render.py  # -> images/ (drop xvfb-run on a desktop)
 python3 make_3mf.py            # -> figure_skate_stand.3mf
 ```
@@ -81,10 +89,10 @@ python3 make_3mf.py            # -> figure_skate_stand.3mf
 
 | File | What |
 |---|---|
-| `build.py` | Builds both stands. Its key dimensions are parameters at the top. |
+| `build.py` | Builds all four stands. Its key dimensions are parameters at the top. |
 | `render.py` | Preview renders (VTK), with a stand-in blade for scale. |
 | `make_3mf.py` | Builds the Bambu Studio projects with `../tools/bambu3mf.py`. |
 | `figure_skate_stand.3mf` | The Bambu Studio project for the 2 in stand, ready to slice. |
 | `figure_skate_stand_short.3mf` | The same for the 1 in stand. |
-| `stl/stand.stl` | The 2 in stand. |
-| `stl/stand_short.stl` | The 1 in stand. |
+| `figure_skate_stand_3in*.3mf` | The same two, 3 in across. |
+| `stl/` | `stand.stl`, `stand_short.stl`, `stand_3in.stl` and `stand_3in_short.stl`. |

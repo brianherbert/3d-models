@@ -9,6 +9,8 @@ Writes:
     stand_top.png      from above
     stand_section.png  cut across the groove, with the blade in
     stand_short.png    the short (1 in) version, with the blade in
+    stand_3in.png      the 3 in wide version, 2 in tall, with the blade in
+    stand_3in_short.png  the 3 in wide version, 1 in tall, with the blade in
 """
 import os, sys, tempfile
 import numpy as np, trimesh, vtk
@@ -93,6 +95,9 @@ def render(d, out_dir):
     short = os.path.join(d, "stand_short.stl")
     shot([actor(short, WHITE), actor(b, STEEL, (0, 0, SHORT_H - GROOVE_DEPTH))], o("stand_short"),
          (0, 0, 40), -35, 18, 1.05)
+    for name, h in (("stand_3in", DISC_H), ("stand_3in_short", SHORT_H)):
+        shot([actor(os.path.join(d, name + ".stl"), WHITE), actor(b, STEEL, (0, 0, h - GROOVE_DEPTH))],
+             o(name), (0, 0, 40 if h == SHORT_H else 50), -35, 18, 1.05)
 
 if __name__ == "__main__":
     render(sys.argv[1] if len(sys.argv) > 1 else os.path.join(HERE, "stl"),
