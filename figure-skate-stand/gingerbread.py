@@ -28,8 +28,8 @@ TORSO = (-11.0, 12.0, 11.0, 30.0)       # x0, y0, x1, y1 of the body, before rou
 ARM_R = 4.5                 # half the arm's thickness
 SHOULDER, HAND_Y = (6.0, 28.0), 23.0     # arms run from the shoulder down to the hand
 LEG_R = 5.0
-HIP, FOOT = (9.0, 18.0), (13.5, 3.0)     # the legs start inside the body
-CROTCH_R = 5.5              # the round top of the gap between the legs
+HIP, FOOT = (10.6, 18.0), (11.4, 3.0)    # the legs start inside the body and run nearly straight down
+CROTCH_TOP = 19.0           # height of the crotch (the top of the round arch between the legs), before the feet go to y=0
 FILLET = 1.5                # rounds the armpits, neck and hips, like a cookie cutter
 
 HEIGHTS = {"gingerbread": DISC_H, "gingerbread_short": SHORT_H}
@@ -59,12 +59,15 @@ def outline():
     d = np.subtract(FOOT, HIP); d = d / np.hypot(*d)        # down the right leg
     n = np.array([d[1], -d[0]])                              # across it, towards the middle
     p = np.add(HIP, LEG_R * n)                               # a point on its inside edge
-    cy = p[1] + (CROTCH_R + n[0] * p[0]) / n[1]              # arch centre: CROTCH_R from both edges
-    t = np.array([0, cy]) - CROTCH_R * n                     # where the arch meets the right leg
+    # arch centre (0, cy) and radius r: tangent to both legs' inside edges, top at CROTCH_TOP
+    a, b = -n @ p, n[1]                                      # distance from (0, y) to the edge is a + b*y
+    cy = (CROTCH_TOP - a) / (1 + b)
+    r = a + b * cy
+    t = np.array([0, cy]) - r * n                            # where the arch meets the right leg
     assert t[0] > GB_GROOVE_W / 2 + 1, "the legs are too close for the groove to come out between them"
     far = t + 40 * d
     gap = mf.CrossSection([[(-t[0], t[1]), (-far[0], far[1]), (far[0], far[1]), (t[0], t[1])]])   # anticlockwise
-    s = s - (gap + circle(0, cy, CROTCH_R))
+    s = s - (gap + circle(0, cy, r))
     s = s.offset(FILLET, mf.JoinType.Round).offset(-FILLET, mf.JoinType.Round)   # fillet the inside corners
     lo = s.bounds()
     return s.translate([0, -lo[1]])          # feet on y=0
