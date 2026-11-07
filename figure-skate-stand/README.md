@@ -22,7 +22,35 @@ There are four versions, all with the same groove:
 |---|---|---|
 | 4 in across, 1 in tall | 3 in across, 2 in tall | 3 in across, 1 in tall |
 
-## Size
+## Gingerbread man
+
+A small gingerbread man to hold up the back of the skate, alongside a round
+stand. He's 1.5 in (38.1 mm) across from hand to hand, half the 3 in stand,
+and 47.5 mm from head to feet, and lies flat like a cookie. He comes in the
+same two heights as the round stands, so the blade sits level across both:
+
+| | 2 in tall | 1 in tall |
+|---|---|---|
+| **Gingerbread man** | `gingerbread_skate_stand.3mf` | `gingerbread_skate_stand_short.3mf` |
+
+| ![the gingerbread man](images/gingerbread.png) | ![from above](images/gingerbread_top.png) |
+|---|---|
+| ![2 in tall, under the heel](images/gingerbread_blade.png) | ![1 in tall, under the heel](images/gingerbread_short.png) |
+
+- **Groove:** 8.2 mm wide, twice the round stands', for a blade bedazzled
+  on both sides, and the same 10 mm deep. It runs down his middle from the
+  top of his head to his crotch and comes out between his legs, with the
+  same 0.8 mm lead-in along its top edges.
+- **Walls:** the narrowest part left beside the groove is about 3.7 mm, at
+  his neck.
+- **The blade's curve:** near the heel the blade's rocker lifts it a couple
+  of millimetres, so it may sit a little above the groove floor here when
+  the round stand is the same height. It is still well down in the groove.
+- **Edges:** 1 mm chamfer round the top and 0.4 mm round the bottom.
+- **Fit:** if the bedazzled blade is tight, raise `GB_GROOVE_W` in
+  `gingerbread.py` and rebuild.
+
+## Size (round stands)
 
 - **Disc:** 101.6 mm (4 in) or 76.2 mm (3 in) across, and 50.8 mm (2 in)
   or 25.4 mm (1 in) tall, solid. The 3 in disc tips more easily than the
@@ -63,8 +91,8 @@ matte white (such as Bambu PLA Matte Ivory White) hides layer lines best.
   filament and a clean plate. Felt pads underneath give a finished look and
   protect the table.
 - **Filament:** about 120 g for the 4 in tall one, 65 g for the 4 in short
-  one, 70 g for the 3 in tall one and 40 g for the 3 in short one (my
-  estimates; Bambu Studio will show the exact amount and the print time
+  one, 70 g for the 3 in tall one, 40 g for the 3 in short one, and 30 g
+  and 15 g for the tall and short gingerbread men (my estimates; Bambu Studio will show the exact amount and the print time
   when you slice). The stand weighs little next to a skate, so more infill
   won't make it noticeably steadier.
 - **Fit:** printed slots often come out a touch narrower than drawn. If the
@@ -78,11 +106,17 @@ The parameters at the top of `build.py` set the disc (`DISC_D`, `SMALL_D`, `DISC
 `GROOVE_LEAD`). The script checks the mesh is watertight and measures the
 groove's width and depth before writing the STL.
 
+`gingerbread.py` builds the gingerbread man. Its parameters set his size
+(`WIDTH`), his head, body, arms and legs, the groove (`GB_GROOVE_W`, which is
+twice the round stands' `GROOVE_W`) and the chamfers. It checks the mesh, the
+groove and that the groove comes out between his legs.
+
 ```
 pip install trimesh numpy manifold3d vtk
-python3 build.py               # -> stl/ (all four versions)
+python3 build.py               # -> stl/ (the four round stands)
+python3 gingerbread.py         # -> stl/ (the two gingerbread men)
 xvfb-run -a python3 render.py  # -> images/ (drop xvfb-run on a desktop)
-python3 make_3mf.py            # -> figure_skate_stand.3mf
+python3 make_3mf.py            # -> the *.3mf projects
 ```
 
 ## Files
@@ -90,9 +124,11 @@ python3 make_3mf.py            # -> figure_skate_stand.3mf
 | File | What |
 |---|---|
 | `build.py` | Builds all four stands. Its key dimensions are parameters at the top. |
+| `gingerbread.py` | Builds the gingerbread men. |
 | `render.py` | Preview renders (VTK), with a stand-in blade for scale. |
 | `make_3mf.py` | Builds the Bambu Studio projects with `../tools/bambu3mf.py`. |
 | `figure_skate_stand.3mf` | The Bambu Studio project for the 2 in stand, ready to slice. |
 | `figure_skate_stand_short.3mf` | The same for the 1 in stand. |
 | `figure_skate_stand_3in*.3mf` | The same two, 3 in across. |
-| `stl/` | `stand.stl`, `stand_short.stl`, `stand_3in.stl` and `stand_3in_short.stl`. |
+| `gingerbread_skate_stand*.3mf` | The gingerbread man, 2 in and 1 in tall. |
+| `stl/` | `stand.stl`, `stand_short.stl`, `stand_3in.stl`, `stand_3in_short.stl`, `gingerbread.stl` and `gingerbread_short.stl`. |

@@ -6,8 +6,10 @@ Build the Bambu Studio projects, set up for a display-quality finish:
     figure_skate_stand_short.3mf    the short stand, 1 in tall
     figure_skate_stand_3in.3mf          the same two, 3 in across
     figure_skate_stand_3in_short.3mf
+    gingerbread_skate_stand.3mf         the gingerbread man, 2 in tall
+    gingerbread_skate_stand_short.3mf   and 1 in tall
 
-    python3 make_3mf.py      (from this folder, after build.py and render.py)
+    python3 make_3mf.py      (from this folder, after build.py, gingerbread.py and render.py)
 
 Uses ../tools/bambu3mf.py.
 """
@@ -42,19 +44,29 @@ STAND = {
     "ironing_type": "topmost",
 }
 
+ROUND = "A round stand for one figure skate, {} tall."
+GINGER = "A gingerbread man that holds up the back of a figure skate, {} tall."
+
 def main():
     c = BED / 2
-    for stl, out_name, title, height, thumb in (
-            ("stand", "figure_skate_stand", "Figure skate stand", "2 in", "stand_blade"),
-            ("stand_short", "figure_skate_stand_short", "Figure skate stand (short)", "1 in", "stand_short"),
-            ("stand_3in", "figure_skate_stand_3in", "Figure skate stand (3 in)", "3 in across and 2 in", "stand_3in"),
+    # rot_z turns the groove to run front to back: the round stands' groove
+    # is along X in the STL, the gingerbread man's along Y already (head at
+    # the back, so the seam goes up through his head, under the blade).
+    for stl, out_name, title, what, thumb, rot in (
+            ("stand", "figure_skate_stand", "Figure skate stand", ROUND.format("2 in"), "stand_blade", 90),
+            ("stand_short", "figure_skate_stand_short", "Figure skate stand (short)", ROUND.format("1 in"), "stand_short", 90),
+            ("stand_3in", "figure_skate_stand_3in", "Figure skate stand (3 in)",
+             ROUND.format("3 in across and 2 in"), "stand_3in", 90),
             ("stand_3in_short", "figure_skate_stand_3in_short", "Figure skate stand (3 in, short)",
-             "3 in across and 1 in", "stand_3in_short")):
+             ROUND.format("3 in across and 1 in"), "stand_3in_short", 90),
+            ("gingerbread", "gingerbread_skate_stand", "Gingerbread skate stand",
+             GINGER.format("2 in"), "gingerbread_blade", 0),
+            ("gingerbread_short", "gingerbread_skate_stand_short", "Gingerbread skate stand (short)",
+             GINGER.format("1 in"), "gingerbread_short", 0)):
         stand = trimesh.load(os.path.join(HERE, "stl", stl + ".stl"))
-        # rot_z=90 turns the groove (along X in the STL) to run front to back
-        out = write_project(os.path.join(HERE, out_name + ".3mf"), [Part(stl, stand, c, c, rot_z=90)],
+        out = write_project(os.path.join(HERE, out_name + ".3mf"), [Part(stl, stand, c, c, rot_z=rot)],
                             PROCESS, STAND, title=title,
-                            description=f"A round stand for one figure skate, {height} tall. Print in white PLA, groove up. "
+                            description=what + " Print in white PLA, groove up. "
                                         "Set up for a display finish: fine layers, seam hidden under the blade, ironed top.",
                             thumbnail_png=os.path.join(HERE, "images", thumb + ".png"),
                             filament_colour="#F2F0E6")

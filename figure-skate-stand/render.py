@@ -11,6 +11,10 @@ Writes:
     stand_short.png    the short (1 in) version, with the blade in
     stand_3in.png      the 3 in wide version, 2 in tall, with the blade in
     stand_3in_short.png  the 3 in wide version, 1 in tall, with the blade in
+    gingerbread.png      the gingerbread man
+    gingerbread_top.png  the gingerbread man from above
+    gingerbread_blade.png  the gingerbread man (2 in) under the back of the blade
+    gingerbread_short.png  the same, 1 in tall
 """
 import os, sys, tempfile
 import numpy as np, trimesh, vtk
@@ -58,7 +62,7 @@ def halved(path, dz):
     to_trimesh(m.trim_by_plane([-1, 0, 0], 0)).export(out)
     return out
 
-def shot(actors, path, focus, az, el, zoom=1.0, size=(1200, 900), dist=700):
+def shot(actors, path, focus, az, el, zoom=1.0, size=(1200, 900), dist=700, recentre=False):
     ren = vtk.vtkRenderer()
     for a in actors: ren.AddActor(a)
     ren.GradientBackgroundOn(); ren.SetBackground(0.93, 0.93, 0.92); ren.SetBackground2(0.99, 0.99, 0.99)
@@ -76,6 +80,9 @@ def shot(actors, path, focus, az, el, zoom=1.0, size=(1200, 900), dist=700):
         cam.Azimuth(az); cam.Elevation(el)
     cam.OrthogonalizeViewUp(); cam.SetViewAngle(20)
     ren.ResetCamera(); cam.Zoom(zoom)
+    if recentre:                        # ResetCamera aims at the middle of everything: aim at `focus` instead
+        shift = np.subtract(focus, cam.GetFocalPoint())
+        cam.SetFocalPoint(*focus); cam.SetPosition(*np.add(cam.GetPosition(), shift))
     win.Render()
     w2i = vtk.vtkWindowToImageFilter(); w2i.SetInput(win); w2i.Update()
     wr = vtk.vtkPNGWriter(); wr.SetFileName(path); wr.SetInputConnection(w2i.GetOutputPort()); wr.Write()
@@ -98,6 +105,28 @@ def render(d, out_dir):
     for name, h in (("stand_3in", DISC_H), ("stand_3in_short", SHORT_H)):
         shot([actor(os.path.join(d, name + ".stl"), WHITE), actor(b, STEEL, (0, 0, h - GROOVE_DEPTH))],
              o(name), (0, 0, 40 if h == SHORT_H else 50), -35, 18, 1.05)
+    render_gingerbread(d, out_dir, b)
+
+def turned(path, deg):
+    """A copy of an STL turned about Z, so the gingerbread man's groove (along Y) lines up with the blade (along X)."""
+    t = trimesh.load(path)
+    t.apply_transform(trimesh.transformations.rotation_matrix(np.radians(deg), [0, 0, 1]))
+    out = os.path.join(TMP, "turned_" + os.path.basename(path))
+    t.export(out)
+    return out
+
+def render_gingerbread(d, out_dir, b):
+    o = lambda name: os.path.join(out_dir, name + ".png")
+    gb = os.path.join(d, "gingerbread_short.stl")
+    shot([actor(gb, WHITE, (0, -24, 0))], o("gingerbread"), (0, 0, 12), -20, 35, 1.1)
+    shot([actor(gb, WHITE, (0, -24, 0))], o("gingerbread_top"), (0, 0, 12), 0, 65, 1.1, size=(1000, 1000))
+    # the blade's heel end over the gingerbread man: the blade is moved 100 mm
+    # forward, and lowered so its bottom (raised there by the rocker) is on the groove floor
+    rise = 100.0 ** 2 / (2 * 2200.0)
+    for name, h in (("gingerbread_blade", DISC_H), ("gingerbread_short", SHORT_H)):
+        g = turned(os.path.join(d, name.replace("_blade", "") + ".stl"), 90)
+        shot([actor(g, WHITE, (24, 0, 0)), actor(b, STEEL, (100, 0, h - GROOVE_DEPTH - rise))], o(name),
+             (10, 0, h + 10), -40, 30, 1.7, recentre=True)
 
 if __name__ == "__main__":
     render(sys.argv[1] if len(sys.argv) > 1 else os.path.join(HERE, "stl"),
