@@ -15,6 +15,9 @@ Writes:
     gingerbread_top.png  the gingerbread man from above
     gingerbread_blade.png  the gingerbread man (2 in) under the back of the blade
     gingerbread_short.png  the same, 1 in tall
+    standing.png         the standing gingerbread man
+    standing_skate.png   him holding up the back of the blade, the skate's middle in the 1 in puck
+    standing_hands.png   close up: the back tip of the blade in his hands
 """
 import os, sys, tempfile
 import numpy as np, trimesh, vtk
@@ -106,6 +109,7 @@ def render(d, out_dir):
         shot([actor(os.path.join(d, name + ".stl"), WHITE), actor(b, STEEL, (0, 0, h - GROOVE_DEPTH))],
              o(name), (0, 0, 40 if h == SHORT_H else 50), -35, 18, 1.05)
     render_gingerbread(d, out_dir, b)
+    render_standing(d, out_dir, b)
 
 def turned(path, deg):
     """A copy of an STL turned about Z, so the gingerbread man's groove (along Y) lines up with the blade (along X)."""
@@ -127,6 +131,21 @@ def render_gingerbread(d, out_dir, b):
         g = turned(os.path.join(d, name.replace("_blade", "") + ".stl"), 90)
         shot([actor(g, WHITE, (24, 0, 0)), actor(b, STEEL, (100, 0, h - GROOVE_DEPTH - rise))], o(name),
              (10, 0, h + 10), -40, 30, 1.7, recentre=True)
+
+def render_standing(d, out_dir, b):
+    from standing_gingerbread import SLOT_X0, CUP_X
+    o = lambda name: os.path.join(out_dir, name + ".png")
+    sg = os.path.join(d, "standing_gingerbread.stl")
+    shot([actor(sg, WHITE)], o("standing"), (6, 0, 33), -25, 15, 1.1, size=(900, 1000))
+    # the skate's middle (the blade's lowest point, x=0) in the 1 in puck; its back tip (x=-145)
+    # over his hands, the rocker lifting it off the groove floor by tail^2 / (2 R)
+    tail = 145.0
+    gx = -tail - (SLOT_X0 + 1.5)                        # his position: the tip just inside his hands
+    blade_z = SHORT_H - GROOVE_DEPTH
+    scene = [actor(os.path.join(d, "stand_short.stl"), WHITE), actor(sg, WHITE, (gx, 0, 0)),
+             actor(b, STEEL, (0, 0, blade_z))]
+    shot(scene, o("standing_skate"), (-40, 0, 40), -30, 18, 1.0)
+    shot(scene, o("standing_hands"), (gx + (SLOT_X0 + CUP_X[1]) / 2, 0, 25), -35, 25, 3.2, recentre=True)
 
 if __name__ == "__main__":
     render(sys.argv[1] if len(sys.argv) > 1 else os.path.join(HERE, "stl"),

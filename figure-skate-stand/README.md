@@ -50,6 +50,42 @@ same two heights as the round stands, so the blade sits level across both:
 - **Fit:** if the bedazzled blade is tight, raise `GB_GROOVE_W` in
   `gingerbread.py` and rebuild.
 
+## Standing gingerbread man
+
+The boot is heavy at the back, so a skate standing in a round stand at the
+middle of its blade wants to tip backwards. This gingerbread man stands
+behind the skate, facing the audience, and holds the back tip of the blade
+in his hands so it can't.
+
+| ![standing gingerbread man](images/standing.png) | ![holding the back of the blade](images/standing_hands.png) |
+|---|---|
+
+![the skate in the 1 in puck, with him at the back](images/standing_skate.png)
+
+- **Project:** `standing_gingerbread.3mf`, with the same display settings as
+  the others. He prints standing up, with no supports.
+- **Size:** 66 mm tall on a 3 mm base, 44.5 × 26 mm across the base. He's a
+  thick cookie, 18 mm front to back.
+- **Hands:** both arms reach down to his mittens, which sit on a little gift
+  box beside him. The box carries the skate's weight down to the base.
+- **Slot:** in his hands, 8.2 mm wide for the bedazzled blade and 10 mm
+  deep. It's open at the top and at the end facing the skate, and closed at
+  his end, so the blade's tip butts against his hands.
+- **Height:** the slot's floor is 19.4 mm above the table. That's where the
+  bottom of the blade's back tip should be with the skate's middle in the
+  **1 in** round stand: the stand's groove floor is 15.4 mm up, and the
+  blade's curve lifts its back end about 4 mm more. Blades differ, so stand
+  the skate in the round stand and measure from the table to the bottom of
+  the blade about 1 cm from its back tip. If it's not 19.4 mm, set
+  `HOLD_Z` in `standing_gingerbread.py` to your measurement and rebuild. A
+  millimetre or so either way does no harm: slightly low and the skate leans
+  back that much before he catches it; slightly high and he lifts it a
+  little.
+- **Placing him:** set the skate in the round stand, then slide him in from
+  behind so the blade's tip goes into his hands.
+- **Clearance:** he stays clear of the boot because he stands past the end of
+  the blade, and his head (66 mm) is beside the heel, not under it.
+
 ## Size (round stands)
 
 - **Disc:** 101.6 mm (4 in) or 76.2 mm (3 in) across, and 50.8 mm (2 in)
@@ -92,7 +128,8 @@ matte white (such as Bambu PLA Matte Ivory White) hides layer lines best.
   protect the table.
 - **Filament:** about 120 g for the 4 in tall one, 65 g for the 4 in short
   one, 70 g for the 3 in tall one, 40 g for the 3 in short one, and 30 g
-  and 15 g for the tall and short gingerbread men (my estimates; Bambu Studio will show the exact amount and the print time
+  and 15 g for the tall and short flat gingerbread men, and 25 g for the
+  standing one (my estimates; Bambu Studio will show the exact amount and the print time
   when you slice). The stand weighs little next to a skate, so more infill
   won't make it noticeably steadier.
 - **Fit:** printed slots often come out a touch narrower than drawn. If the
@@ -111,10 +148,19 @@ groove's width and depth before writing the STL.
 twice the round stands' `GROOVE_W`) and the chamfers. It checks the mesh, the
 groove and that the groove comes out between his legs.
 
+`standing_gingerbread.py` builds the standing gingerbread man. `HOLD_Z` sets
+the height of the slot's floor, and the parameters below it set his
+proportions, his hands and the gift box. It checks the mesh, the slot's
+width and floor height, and reports any part of his outline that overhangs
+more than 45 degrees. There are only two: the rounded undersides of his feet,
+in the first 3 mm above the base, and a 4 mm bridge under his hands between
+his leg and the gift box. Both print fine without supports.
+
 ```
 pip install trimesh numpy manifold3d vtk
 python3 build.py               # -> stl/ (the four round stands)
-python3 gingerbread.py         # -> stl/ (the two gingerbread men)
+python3 gingerbread.py         # -> stl/ (the two flat gingerbread men)
+python3 standing_gingerbread.py  # -> stl/standing_gingerbread.stl
 xvfb-run -a python3 render.py  # -> images/ (drop xvfb-run on a desktop)
 python3 make_3mf.py            # -> the *.3mf projects
 ```
@@ -125,10 +171,12 @@ python3 make_3mf.py            # -> the *.3mf projects
 |---|---|
 | `build.py` | Builds all four stands. Its key dimensions are parameters at the top. |
 | `gingerbread.py` | Builds the gingerbread men. |
+| `standing_gingerbread.py` | Builds the standing gingerbread man. |
 | `render.py` | Preview renders (VTK), with a stand-in blade for scale. |
 | `make_3mf.py` | Builds the Bambu Studio projects with `../tools/bambu3mf.py`. |
 | `figure_skate_stand.3mf` | The Bambu Studio project for the 2 in stand, ready to slice. |
 | `figure_skate_stand_short.3mf` | The same for the 1 in stand. |
 | `figure_skate_stand_3in*.3mf` | The same two, 3 in across. |
-| `gingerbread_skate_stand*.3mf` | The gingerbread man, 2 in and 1 in tall. |
-| `stl/` | `stand.stl`, `stand_short.stl`, `stand_3in.stl`, `stand_3in_short.stl`, `gingerbread.stl` and `gingerbread_short.stl`. |
+| `gingerbread_skate_stand*.3mf` | The flat gingerbread man, 2 in and 1 in tall. |
+| `standing_gingerbread.3mf` | The standing gingerbread man. |
+| `stl/` | `stand.stl`, `stand_short.stl`, `stand_3in.stl`, `stand_3in_short.stl`, `gingerbread.stl`, `gingerbread_short.stl` and `standing_gingerbread.stl`. |

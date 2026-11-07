@@ -8,8 +8,10 @@ Build the Bambu Studio projects, set up for a display-quality finish:
     figure_skate_stand_3in_short.3mf
     gingerbread_skate_stand.3mf         the gingerbread man, 2 in tall
     gingerbread_skate_stand_short.3mf   and 1 in tall
+    standing_gingerbread.3mf            the standing gingerbread man who holds the back of the blade
 
-    python3 make_3mf.py      (from this folder, after build.py, gingerbread.py and render.py)
+    python3 make_3mf.py      (from this folder, after build.py, gingerbread.py,
+                              standing_gingerbread.py and render.py)
 
 Uses ../tools/bambu3mf.py.
 """
@@ -62,7 +64,11 @@ def main():
             ("gingerbread", "gingerbread_skate_stand", "Gingerbread skate stand",
              GINGER.format("2 in"), "gingerbread_blade", 0),
             ("gingerbread_short", "gingerbread_skate_stand_short", "Gingerbread skate stand (short)",
-             GINGER.format("1 in"), "gingerbread_short", 0)):
+             GINGER.format("1 in"), "gingerbread_short", 0),
+            # his back faces +Y (the back of the plate), so the seam goes down his back
+            ("standing_gingerbread", "standing_gingerbread", "Standing gingerbread man",
+             "A gingerbread man who stands behind a figure skate and holds the back tip of its blade "
+             "(the skate's middle sits in the 1 in round stand).", "standing", 0)):
         stand = trimesh.load(os.path.join(HERE, "stl", stl + ".stl"))
         out = write_project(os.path.join(HERE, out_name + ".3mf"), [Part(stl, stand, c, c, rot_z=rot)],
                             PROCESS, STAND, title=title,
